@@ -8,7 +8,7 @@ import { ThemeToggle } from "../ThemeToggle";
 import { UserProfileButton } from "../UserProfileButton";
 
 const Header = () => {
-  const { toggleSidebar } = useSidebar();
+  const { toggle } = useSidebar();
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
@@ -18,7 +18,7 @@ const Header = () => {
             variant="ghost"
             size="icon"
             className="md:hidden"
-            onClick={toggleSidebar}
+            onClick={toggle}
           >
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
