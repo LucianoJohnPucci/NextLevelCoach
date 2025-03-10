@@ -192,7 +192,7 @@ const DailyInputPage = () => {
         .eq('date', dateString);
       
       // If no rows were affected by update, insert a new entry
-      if (updateError || (updateData && updateData.length === 0)) {
+      if (updateError || (updateData === null)) {
         const { error: insertError } = await supabase
           .from('daily_entries')
           .insert([entryData]);
