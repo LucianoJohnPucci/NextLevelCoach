@@ -1,9 +1,10 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Brain, Heart, Sparkles, Target, BarChart2, Calendar } from "lucide-react";
+import { ArrowRight, Brain, Heart, Sparkles, Target, BarChart2, Calendar, LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "@/components/AuthProvider";
 
 const FeatureCard = ({ 
   title, 
@@ -43,6 +44,7 @@ const FeatureCard = ({
 };
 
 const Index = () => {
+  const { user } = useAuth();
   const features = [
     {
       title: "Mind",
@@ -113,9 +115,18 @@ const Index = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="flex flex-wrap justify-center gap-4"
       >
-        <Button asChild size="lg">
-          <Link to="/daily">Start Today's Input</Link>
-        </Button>
+        {user ? (
+          <Button asChild size="lg">
+            <Link to="/daily">Start Today's Input</Link>
+          </Button>
+        ) : (
+          <Button asChild size="lg">
+            <Link to="/auth">
+              <LogIn className="mr-2 h-4 w-4" />
+              Sign In / Register
+            </Link>
+          </Button>
+        )}
         <Button asChild variant="outline" size="lg">
           <Link to="/wisdom">Seek Wisdom</Link>
         </Button>

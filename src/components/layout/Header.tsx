@@ -1,63 +1,35 @@
 
-import { useSidebar } from "./SidebarProvider";
-import { Menu, X } from "lucide-react";
+import React from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useLocation } from "react-router-dom";
-import { ThemeToggle } from "@/components/ThemeToggle";
-
-const getPageTitle = (pathname: string): string => {
-  switch (pathname) {
-    case "/":
-      return "Home";
-    case "/mind":
-      return "Mind";
-    case "/body":
-      return "Body";
-    case "/soul":
-      return "Soul";
-    case "/daily":
-      return "Daily Input";
-    case "/dashboard":
-      return "Dashboard";
-    case "/goals":
-      return "Goals & Habits";
-    case "/wisdom":
-      return "Wisdom";
-    default:
-      return "Mindful";
-  }
-};
+import { useSidebar } from "./SidebarProvider";
+import { Menu } from "lucide-react";
+import { ThemeToggle } from "../ThemeToggle";
+import { UserProfileButton } from "../UserProfileButton";
 
 const Header = () => {
-  const { isOpen, toggle } = useSidebar();
-  const location = useLocation();
-  const pageTitle = getPageTitle(location.pathname);
+  const { toggleSidebar } = useSidebar();
 
   return (
-    <header className="border-b bg-card/80 backdrop-blur-md">
-      <div className="flex h-16 items-center justify-between px-4 md:px-6">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggle} 
-            className="text-foreground hover:bg-accent hover:text-accent-foreground"
-            aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
+    <header className="sticky top-0 z-40 border-b bg-background">
+      <div className="container flex h-16 items-center justify-between py-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={toggleSidebar}
           >
-            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle Menu</span>
           </Button>
-          
-          <h1 className="text-xl font-medium">{pageTitle}</h1>
+          <Link to="/" className="flex items-center gap-2">
+            <span className="text-xl font-bold">Mindful</span>
+          </Link>
         </div>
-        
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <ThemeToggle />
-          
-          <div className="h-8 w-8 rounded-full bg-primary/10 p-1">
-            <span className="flex h-full w-full items-center justify-center text-xs font-medium text-primary">
-              ME
-            </span>
-          </div>
+          <UserProfileButton />
         </div>
       </div>
     </header>
