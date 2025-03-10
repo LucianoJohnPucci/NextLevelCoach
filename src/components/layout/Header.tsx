@@ -3,6 +3,7 @@ import { useSidebar } from "./SidebarProvider";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const getPageTitle = (pathname: string): string => {
   switch (pathname) {
@@ -49,7 +50,9 @@ const Header = () => {
           <h1 className="text-xl font-medium">{pageTitle}</h1>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+          
           <div className="h-8 w-8 rounded-full bg-primary/10 p-1">
             <span className="flex h-full w-full items-center justify-center text-xs font-medium text-primary">
               ME
