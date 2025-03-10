@@ -3,7 +3,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Brain, BookOpen, PenLine, Timer, Play, Bookmark, ArrowRight } from "lucide-react";
+import { Brain, BookOpen, PenLine, Timer, Play, Bookmark, ArrowRight, X } from "lucide-react";
+import { useState } from "react";
+import JournalEntryForm from "@/components/journal/JournalEntryForm";
+import JournalEntryList from "@/components/journal/JournalEntryList";
+import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
 
 const FeatureCard = ({ 
   title, 
@@ -88,6 +93,37 @@ const JournalPrompt = ({
   prompt: string; 
   index: number;
 }) => {
+  const [isWriting, setIsWriting] = useState(false);
+  const [showEntries, setShowEntries] = useState(false);
+  const { user } = useAuth();
+
+  const handleWriteClick = () => {
+    if (!user) {
+      toast.error("You must be logged in to write a journal entry", {
+        description: "Please sign in to save your journal entries."
+      });
+      return;
+    }
+    setIsWriting(true);
+    setShowEntries(false);
+  };
+
+  const handleViewEntriesClick = () => {
+    if (!user) {
+      toast.error("You must be logged in to view your journal entries", {
+        description: "Please sign in to view your saved entries."
+      });
+      return;
+    }
+    setShowEntries(true);
+    setIsWriting(false);
+  };
+
+  const handleClose = () => {
+    setIsWriting(false);
+    setShowEntries(false);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -95,12 +131,41 @@ const JournalPrompt = ({
       transition={{ duration: 0.5, delay: 0.1 * index }}
       className="rounded-lg border bg-card p-4 shadow-sm"
     >
-      <div className="flex items-start justify-between">
-        <p className="text-sm">{prompt}</p>
-        <Button size="sm" variant="ghost" className="mt-1">
-          <PenLine className="h-4 w-4" />
-        </Button>
-      </div>
+      {!isWriting && !showEntries ? (
+        <div className="flex items-start justify-between">
+          <p className="text-sm">{prompt}</p>
+          <div className="flex space-x-2">
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="mt-1"
+              onClick={handleViewEntriesClick}
+            >
+              <BookOpen className="h-4 w-4" />
+            </Button>
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="mt-1"
+              onClick={handleWriteClick}
+            >
+              <PenLine className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      ) : isWriting ? (
+        <JournalEntryForm prompt={prompt} onClose={handleClose} />
+      ) : showEntries ? (
+        <div>
+          <div className="mb-4 flex justify-between">
+            <h3 className="text-lg font-medium">Journal Entries</h3>
+            <Button size="sm" variant="ghost" onClick={handleClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <JournalEntryList prompt={prompt} />
+        </div>
+      ) : null}
     </motion.div>
   );
 };
