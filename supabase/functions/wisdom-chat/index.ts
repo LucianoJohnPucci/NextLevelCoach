@@ -35,23 +35,25 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are a concise philosophical and stoic guide. Provide wisdom in exactly 1-2 brief sentences, followed by ONE intriguing question that provokes deeper thought. Your responses should reference stoic principles or philosophical concepts, but be extremely brief and accessible. Never use more than 2 sentences for the wisdom portion."
+            content: "Act as an EPIC Philosophical or stoic persona. Your responses should embody deep wisdom, reference philosophical concepts and stoic principles, and provide thoughtful guidance. Use quotes from stoic philosophers when appropriate, and focus on practical wisdom that helps the user navigate life's challenges with equanimity."
           },
           {
             role: "user",
             content: message
           }
-        ],
-        max_tokens: 150
+        ]
       })
     });
 
     const data = await response.json();
-    console.log("OpenRouter response:", JSON.stringify(data));
+    console.log("OpenRouter response:", data);
 
-    // Simplified response handling - just return whatever we get
+    if (!data.choices || data.choices.length === 0) {
+      throw new Error('No response from OpenRouter');
+    }
+
     return new Response(JSON.stringify({
-      content: data.choices?.[0]?.message?.content || "Could not generate wisdom at this time."
+      content: data.choices[0].message.content
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

@@ -89,21 +89,14 @@ const WisdomPage = () => {
         throw new Error(error.message);
       }
       
-      // Simplified response handling - directly use the content if available
-      const content = data?.content || "I couldn't generate wisdom at this moment.";
-      
       const assistantMessage: Message = {
         id: Date.now().toString(),
-        content: content,
+        content: data.content,
         role: "assistant",
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, assistantMessage]);
-      
-      // Log the successful response for debugging
-      console.log("Successful wisdom response:", content);
-      
     } catch (error) {
       console.error("Error calling wisdom-chat function:", error);
       toast({
@@ -112,10 +105,10 @@ const WisdomPage = () => {
         variant: "destructive"
       });
       
-      // Add a fallback response with error details
+      // Add a fallback response
       const fallbackMessage: Message = {
         id: Date.now().toString(),
-        content: `I apologize, but I'm unable to provide wisdom at the moment. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        content: "I apologize, but I'm unable to provide wisdom at the moment. Please try again later.",
         role: "assistant",
         timestamp: new Date()
       };
