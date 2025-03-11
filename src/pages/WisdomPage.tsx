@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, MessageSquare, Sparkles, User, RefreshCw } from "lucide-react";
+import { Send, MessageSquare, Sparkles, User, RefreshCw, ListPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { addGoalToLocalStorage } from "./GoalsPage";
 
 interface Message {
   id: string;
@@ -125,6 +126,20 @@ const WisdomPage = () => {
       handleSend();
     }
   };
+
+  const addMessageToGoals = (message: Message) => {
+    if (message.role === "assistant") {
+      // Extract actionable items from the message
+      // For simplicity, we're using the entire message, but you could parse it
+      // to extract specific action items in a more complex implementation
+      addGoalToLocalStorage(message.content);
+      
+      toast({
+        title: "Added to Goals",
+        description: "The wisdom has been added to your goals.",
+      });
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -164,31 +179,47 @@ const WisdomPage = () => {
                       message.role === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
-                    <div className={`flex max-w-[80%] items-start gap-3 rounded-lg p-4 ${
+                    <div className={`flex max-w-[80%] flex-col items-start gap-3 rounded-lg p-4 ${
                       message.role === "user" 
                         ? "bg-primary text-primary-foreground" 
                         : "bg-secondary text-secondary-foreground"
                     }`}>
-                      <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                        message.role === "user"
-                          ? "bg-primary-foreground/20 text-primary-foreground"
-                          : "bg-primary text-primary-foreground"
-                      }`}>
-                        {message.role === "user" ? (
-                          <User className="h-5 w-5" />
-                        ) : (
-                          <Sparkles className="h-5 w-5" />
-                        )}
+                      <div className="flex items-start gap-3">
+                        <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                          message.role === "user"
+                            ? "bg-primary-foreground/20 text-primary-foreground"
+                            : "bg-primary text-primary-foreground"
+                        }`}>
+                          {message.role === "user" ? (
+                            <User className="h-5 w-5" />
+                          ) : (
+                            <Sparkles className="h-5 w-5" />
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                          <p className="text-xs opacity-70">
+                            {message.timestamp.toLocaleTimeString([], { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </p>
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                        <p className="text-xs opacity-70">
-                          {message.timestamp.toLocaleTimeString([], { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </p>
-                      </div>
+                      
+                      {message.role === "assistant" && (
+                        <div className="mt-2 self-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-1"
+                            onClick={() => addMessageToGoals(message)}
+                          >
+                            <ListPlus className="h-4 w-4" />
+                            Add to Goals
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 ))}

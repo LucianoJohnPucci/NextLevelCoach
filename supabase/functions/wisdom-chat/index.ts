@@ -22,12 +22,14 @@ serve(async (req) => {
       throw new Error('Message is required');
     }
 
+    console.log("Sending request to OpenRouter with message:", message);
+
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://lovable.dev", // replace with your site URL
+        "HTTP-Referer": "https://lovable.dev",
         "X-Title": "Wisdom Chat"
       },
       body: JSON.stringify({
@@ -35,7 +37,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "Act as an EPIC Philosophical or stoic persona. Your responses should embody deep wisdom, reference philosophical concepts and stoic principles, and provide thoughtful guidance. Use quotes from stoic philosophers when appropriate, and focus on practical wisdom that helps the user navigate life's challenges with equanimity."
+            content: "Act as an EPIC Philosophical or stoic persona. Your responses should embody deep wisdom, reference philosophical concepts and stoic principles, and provide thoughtful guidance. Use quotes from stoic philosophers when appropriate, and focus on practical wisdom that helps the user navigate life's challenges with equanimity. Always ensure your responses include actionable advice that could be added to a to-do list."
           },
           {
             role: "user",
@@ -46,21 +48,29 @@ serve(async (req) => {
     });
 
     const data = await response.json();
-    console.log("OpenRouter response:", data);
+    console.log("OpenRouter response:", JSON.stringify(data));
 
-    if (!data.choices || data.choices.length === 0) {
-      throw new Error('No response from OpenRouter');
+    // Check if the response has the expected structure
+    if (!data.choices || data.choices.length === 0 || !data.choices[0].message || !data.choices[0].message.content) {
+      console.error("Invalid response format from OpenRouter:", JSON.stringify(data));
+      throw new Error('Invalid response format from the API');
     }
 
+    const content = data.choices[0].message.content;
+    console.log("Extracted content:", content);
+
     return new Response(JSON.stringify({
-      content: data.choices[0].message.content
+      content: content
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error("Error in wisdom-chat function:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    
+    return new Response(JSON.stringify({ 
+      content: "As a stoic philosopher, I must acknowledge that even digital systems face challenges. Please try your question again in a moment, as wisdom sometimes requires patience."
+    }), {
+      status: 200, // Return 200 even for errors to ensure client gets a usable message
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
