@@ -53,8 +53,14 @@ serve(async (req) => {
       throw new Error('No response from OpenRouter');
     }
 
+    const content = data.choices[0].message.content;
+    
+    if (!content) {
+      throw new Error('Empty response from OpenRouter');
+    }
+
     return new Response(JSON.stringify({
-      content: data.choices[0].message.content
+      content: content
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

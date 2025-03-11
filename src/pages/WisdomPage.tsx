@@ -89,7 +89,9 @@ const WisdomPage = () => {
         throw new Error(error.message);
       }
       
-      if (!data || !data.content) {
+      // Make sure we have content in the response
+      if (!data || typeof data.content !== 'string') {
+        console.error("Invalid response format:", data);
         throw new Error('Invalid response format from the API');
       }
       
