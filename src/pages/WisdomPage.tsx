@@ -1,11 +1,14 @@
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
+import { Textarea } from "@/components/ui/textarea";
 import { Send, MessageSquare, Sparkles, User, RefreshCw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
@@ -14,7 +17,7 @@ interface Message {
   timestamp: Date;
 }
 
-// Stoic wisdom quotes
+// Stoic wisdom quotes for the side panel
 const stoicWisdom = [
   {
     quote: "The happiness of your life depends upon the quality of your thoughts.",
@@ -49,8 +52,20 @@ const WisdomPage = () => {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   
-  const handleSend = () => {
+  useEffect(() => {
+    // Scroll to the bottom when messages change
+    if (scrollAreaRef.current) {
+      const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollElement) {
+        scrollElement.scrollTop = scrollElement.scrollHeight;
+      }
+    }
+  }, [messages]);
+  
+  const handleSend = async () => {
     if (!input.trim()) return;
     
     const userMessage: Message = {
@@ -64,24 +79,44 @@ const WisdomPage = () => {
     setInput("");
     setIsLoading(true);
     
-    // Simulate AI response
-    setTimeout(() => {
-      // Get a random stoic response
-      const randomIndex = Math.floor(Math.random() * stoicWisdom.length);
-      const randomWisdom = stoicWisdom[randomIndex];
+    try {
+      // Call the Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('wisdom-chat', {
+        body: { message: input.trim() }
+      });
       
-      const response = `"${randomWisdom.quote}" - ${randomWisdom.author}\n\nThis wisdom teaches us that our perceptions shape our reality. Focus on what you can control, and accept with equanimity what you cannot.`;
+      if (error) {
+        throw new Error(error.message);
+      }
       
       const assistantMessage: Message = {
         id: Date.now().toString(),
-        content: response,
+        content: data.content,
         role: "assistant",
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("Error calling wisdom-chat function:", error);
+      toast({
+        title: "Error",
+        description: "Failed to get a response. Please try again.",
+        variant: "destructive"
+      });
+      
+      // Add a fallback response
+      const fallbackMessage: Message = {
+        id: Date.now().toString(),
+        content: "I apologize, but I'm unable to provide wisdom at the moment. Please try again later.",
+        role: "assistant",
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, fallbackMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -117,7 +152,7 @@ const WisdomPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-[400px] pr-4">
+            <ScrollArea className="h-[400px] pr-4" ref={scrollAreaRef}>
               <div className="space-y-4">
                 {messages.map((message) => (
                   <motion.div
@@ -146,7 +181,7 @@ const WisdomPage = () => {
                         )}
                       </div>
                       <div className="space-y-1">
-                        <p className="text-sm">{message.content}</p>
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                         <p className="text-xs opacity-70">
                           {message.timestamp.toLocaleTimeString([], { 
                             hour: '2-digit', 
@@ -168,7 +203,7 @@ const WisdomPage = () => {
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
                         <RefreshCw className="h-5 w-5 animate-spin" />
                       </div>
-                      <p className="text-sm">Thinking...</p>
+                      <p className="text-sm">Consulting ancient wisdom...</p>
                     </div>
                   </motion.div>
                 )}
@@ -177,20 +212,21 @@ const WisdomPage = () => {
           </CardContent>
           <CardFooter>
             <div className="flex w-full items-center gap-2">
-              <Input
+              <Textarea
                 placeholder="Ask for wisdom..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 disabled={isLoading}
-                className="flex-1"
+                className="flex-1 min-h-[60px] max-h-[120px]"
               />
               <Button 
                 onClick={handleSend} 
                 disabled={!input.trim() || isLoading}
                 size="icon"
+                className="h-[60px] w-[60px]"
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-5 w-5" />
               </Button>
             </div>
           </CardFooter>
