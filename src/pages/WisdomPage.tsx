@@ -89,6 +89,10 @@ const WisdomPage = () => {
         throw new Error(error.message);
       }
       
+      if (!data || !data.content) {
+        throw new Error('Invalid response format from the API');
+      }
+      
       const assistantMessage: Message = {
         id: Date.now().toString(),
         content: data.content,
