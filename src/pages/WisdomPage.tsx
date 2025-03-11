@@ -89,20 +89,21 @@ const WisdomPage = () => {
         throw new Error(error.message);
       }
       
-      // Make sure we have content in the response
-      if (!data || typeof data.content !== 'string') {
-        console.error("Invalid response format:", data);
-        throw new Error('Invalid response format from the API');
-      }
+      // Simplified response handling - directly use the content if available
+      const content = data?.content || "I couldn't generate wisdom at this moment.";
       
       const assistantMessage: Message = {
         id: Date.now().toString(),
-        content: data.content,
+        content: content,
         role: "assistant",
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // Log the successful response for debugging
+      console.log("Successful wisdom response:", content);
+      
     } catch (error) {
       console.error("Error calling wisdom-chat function:", error);
       toast({
@@ -111,10 +112,10 @@ const WisdomPage = () => {
         variant: "destructive"
       });
       
-      // Add a fallback response
+      // Add a fallback response with error details
       const fallbackMessage: Message = {
         id: Date.now().toString(),
-        content: "I apologize, but I'm unable to provide wisdom at the moment. Please try again later.",
+        content: `I apologize, but I'm unable to provide wisdom at the moment. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         role: "assistant",
         timestamp: new Date()
       };

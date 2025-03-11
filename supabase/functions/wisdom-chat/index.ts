@@ -47,20 +47,11 @@ serve(async (req) => {
     });
 
     const data = await response.json();
-    console.log("OpenRouter response:", data);
+    console.log("OpenRouter response:", JSON.stringify(data));
 
-    if (!data.choices || data.choices.length === 0) {
-      throw new Error('No response from OpenRouter');
-    }
-
-    const content = data.choices[0].message.content;
-    
-    if (!content) {
-      throw new Error('Empty response from OpenRouter');
-    }
-
+    // Simplified response handling - just return whatever we get
     return new Response(JSON.stringify({
-      content: content
+      content: data.choices?.[0]?.message?.content || "Could not generate wisdom at this time."
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
