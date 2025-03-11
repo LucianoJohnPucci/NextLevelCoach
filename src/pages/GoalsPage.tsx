@@ -5,6 +5,8 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Target, CheckCircle, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 interface Goal {
   id: string;
@@ -27,6 +29,8 @@ const GoalsPage = () => {
     { id: "3", title: "Yoga session", frequency: "W" },
     { id: "4", title: "Reading time", frequency: "D" },
   ]);
+  const [newGoalTitle, setNewGoalTitle] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
   // Load goals from localStorage on component mount
@@ -57,6 +61,8 @@ const GoalsPage = () => {
 
   // Function to add a new goal
   const addGoal = (title: string) => {
+    if (!title.trim()) return;
+    
     const newGoal = {
       id: Date.now().toString(),
       title,
@@ -65,10 +71,12 @@ const GoalsPage = () => {
     };
     
     setGoals(prev => [...prev, newGoal]);
+    setNewGoalTitle("");
+    setIsDialogOpen(false);
     
     toast({
       title: "Goal Added",
-      description: `"${title}" has been added to your goals.`,
+      description: `"${title.substring(0, 30)}${title.length > 30 ? '...' : ''}" has been added to your goals.`,
     });
   };
 
@@ -105,7 +113,7 @@ const GoalsPage = () => {
               {goals.map((goal) => (
                 <div key={goal.id} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="font-medium">{goal.title}</div>
+                    <div className="font-medium whitespace-pre-wrap">{goal.title}</div>
                     <div className="flex items-center gap-2">
                       <div className="text-sm text-muted-foreground">{goal.progress}%</div>
                       <Button 
@@ -135,7 +143,10 @@ const GoalsPage = () => {
               ))}
             </div>
             
-            <Button className="w-full gap-2">
+            <Button 
+              className="w-full gap-2"
+              onClick={() => setIsDialogOpen(true)}
+            >
               <Plus className="h-4 w-4" />
               Add New Goal
             </Button>
@@ -169,11 +180,35 @@ const GoalsPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Goal</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Enter your goal"
+              value={newGoalTitle}
+              onChange={(e) => setNewGoalTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  addGoal(newGoalTitle);
+                }
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => addGoal(newGoalTitle)}>Add Goal</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-// Export the component and also the addGoal function for use in other components
+// Export the component
 export default GoalsPage;
 export { type Goal };
 

@@ -1,7 +1,5 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
@@ -129,9 +127,7 @@ const WisdomPage = () => {
 
   const addMessageToGoals = (message: Message) => {
     if (message.role === "assistant") {
-      // Extract actionable items from the message
-      // For simplicity, we're using the entire message, but you could parse it
-      // to extract specific action items in a more complex implementation
+      // Pass the full content with formatting intact
       addGoalToLocalStorage(message.content);
       
       toast({
