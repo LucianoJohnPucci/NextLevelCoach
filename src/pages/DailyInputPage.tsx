@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -271,11 +270,11 @@ const DailyInputPage = () => {
       ) : (
         <>
           <Tabs defaultValue="mood" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="mood">Mood & Energy</TabsTrigger>
-              <TabsTrigger value="emotions">Emotions</TabsTrigger>
-              <TabsTrigger value="accomplishments">Accomplishments</TabsTrigger>
-              <TabsTrigger value="reflections">Reflections</TabsTrigger>
+            <TabsList className="flex flex-col sm:grid sm:grid-cols-4 w-full gap-2 sm:gap-0 h-auto">
+              <TabsTrigger value="mood" className="px-2 py-2 text-sm">Mood & Energy</TabsTrigger>
+              <TabsTrigger value="emotions" className="px-2 py-2 text-sm">Emotions</TabsTrigger>
+              <TabsTrigger value="accomplishments" className="px-2 py-2 text-sm">Accomplishments</TabsTrigger>
+              <TabsTrigger value="reflections" className="px-2 py-2 text-sm">Reflections</TabsTrigger>
             </TabsList>
             
             <TabsContent value="mood" className="mt-6">
