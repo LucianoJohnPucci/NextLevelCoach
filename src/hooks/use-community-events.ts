@@ -1,0 +1,144 @@
+
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
+import { format } from "date-fns";
+
+export interface Event {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  participants: number;
+  ticket_cost: number | null;
+  is_open: boolean;
+}
+
+export function useCommunityEvents() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('community_events')
+        .select('*')
+        .order('event_date', { ascending: true });
+        
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        const formattedEvents: Event[] = data.map(event => ({
+          id: event.id,
+          title: event.title,
+          date: new Date(event.event_date).toLocaleString(),
+          location: event.location,
+          participants: event.participants,
+          ticket_cost: event.ticket_cost,
+          is_open: event.is_open
+        }));
+        setEvents(formattedEvents);
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      toast.error('Failed to load community events');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const searchEvents = async (searchLocation: string, searchDate: Date | undefined) => {
+    try {
+      setLoading(true);
+      
+      let query = supabase.from('community_events').select('*');
+      
+      if (searchLocation) {
+        query = query.ilike('location', `%${searchLocation}%`);
+      }
+      
+      if (searchDate) {
+        const formattedDate = format(searchDate, 'yyyy-MM-dd');
+        query = query.gte('event_date', `${formattedDate}T00:00:00Z`)
+                     .lt('event_date', `${formattedDate}T23:59:59Z`);
+      }
+      
+      const { data, error } = await query.order('event_date', { ascending: true });
+        
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        const formattedEvents: Event[] = data.map(event => ({
+          id: event.id,
+          title: event.title,
+          date: new Date(event.event_date).toLocaleString(),
+          location: event.location,
+          participants: event.participants,
+          ticket_cost: event.ticket_cost,
+          is_open: event.is_open
+        }));
+        setEvents(formattedEvents);
+        toast.success('Search results loaded');
+      }
+    } catch (error) {
+      console.error('Error searching events:', error);
+      toast.error('Failed to search community events');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const joinEvent = async (eventId: string) => {
+    if (!user) {
+      toast.error('Please sign in to join this event');
+      return;
+    }
+    
+    try {
+      const { data: eventData, error: fetchError } = await supabase
+        .from('community_events')
+        .select('*')
+        .eq('id', eventId)
+        .single();
+        
+      if (fetchError) throw fetchError;
+      
+      if (!eventData.is_open) {
+        toast.error('This event is no longer open for registration');
+        return;
+      }
+      
+      const { error: updateError } = await supabase
+        .from('community_events')
+        .update({ participants: eventData.participants + 1 })
+        .eq('id', eventId);
+        
+      if (updateError) throw updateError;
+      
+      toast.success(`You've successfully joined: ${eventData.title}`);
+      fetchEvents();
+    } catch (error) {
+      console.error('Error joining event:', error);
+      toast.error('Failed to join event');
+    }
+  };
+  
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+  
+  return {
+    events,
+    loading,
+    fetchEvents,
+    searchEvents,
+    joinEvent
+  };
+}
