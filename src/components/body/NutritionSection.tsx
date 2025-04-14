@@ -1,4 +1,3 @@
-
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Utensils, Plus, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -81,6 +80,13 @@ export const NutritionSection = ({ meals, onAddCalories, onAddWater, nutritionSt
         </CardHeader>
         <CardContent className="space-y-4">
           <NutritionStat
+            label="Water"
+            value={nutritionStats.water.value}
+            total={nutritionStats.water.total}
+            unit="L"
+            color="bg-sky-500"
+          />
+          <NutritionStat
             label="Calories"
             value={nutritionStats.calories.value}
             total={nutritionStats.calories.total}
@@ -107,13 +113,6 @@ export const NutritionSection = ({ meals, onAddCalories, onAddWater, nutritionSt
             total={nutritionStats.fat.total}
             unit="g"
             color="bg-green-500"
-          />
-          <NutritionStat
-            label="Water"
-            value={nutritionStats.water.value}
-            total={nutritionStats.water.total}
-            unit="L"
-            color="bg-sky-500"
           />
         </CardContent>
       </Card>
