@@ -1,24 +1,76 @@
 
+import { useState, useEffect } from "react";
 import PracticeCard from "./PracticeCard";
 import { Clock, Users, Heart } from "lucide-react";
+import { useSoulMetrics } from "@/services/soulMetricsService";
+import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
 
-interface PracticesSectionProps {
-  reflectionMinutes: number;
-  setReflectionMinutes: (value: number) => void;
-  connectionsAttended: number;
-  setConnectionsAttended: (value: number) => void;
-  gratitudeDays: number;
-  setGratitudeDays: (value: number) => void;
-}
-
-const PracticesSection = ({
-  reflectionMinutes,
-  setReflectionMinutes,
-  connectionsAttended,
-  setConnectionsAttended,
-  gratitudeDays,
-  setGratitudeDays
-}: PracticesSectionProps) => {
+const PracticesSection = () => {
+  const { user } = useAuth();
+  const { 
+    reflectionMinutes, 
+    connectionsAttended, 
+    gratitudeStreak, 
+    updateMetrics,
+    isLoading,
+    isError
+  } = useSoulMetrics();
+  
+  const [localReflectionMinutes, setLocalReflectionMinutes] = useState(0);
+  const [localConnectionsAttended, setLocalConnectionsAttended] = useState(0);
+  const [localGratitudeDays, setLocalGratitudeDays] = useState(0);
+  
+  // Initialize local state from database values when loaded
+  useEffect(() => {
+    if (!isLoading) {
+      setLocalReflectionMinutes(reflectionMinutes);
+      setLocalConnectionsAttended(connectionsAttended);
+      setLocalGratitudeDays(gratitudeStreak);
+    }
+  }, [reflectionMinutes, connectionsAttended, gratitudeStreak, isLoading]);
+  
+  // Handle updating reflection minutes
+  const handleReflectionChange = (value: number) => {
+    setLocalReflectionMinutes(value);
+    if (user) {
+      updateMetrics({ reflection_minutes: value });
+      toast.success("Reflection minutes updated");
+    } else {
+      toast.error("Please log in to save your progress");
+    }
+  };
+  
+  // Handle updating connections attended
+  const handleConnectionsChange = (value: number) => {
+    setLocalConnectionsAttended(value);
+    if (user) {
+      updateMetrics({ connections_attended: value });
+      toast.success("Connections attended updated");
+    } else {
+      toast.error("Please log in to save your progress");
+    }
+  };
+  
+  // Handle updating gratitude days
+  const handleGratitudeDaysChange = (value: number) => {
+    setLocalGratitudeDays(value);
+    if (user) {
+      updateMetrics({ gratitude_streak_days: value });
+      toast.success("Gratitude streak updated");
+    } else {
+      toast.error("Please log in to save your progress");
+    }
+  };
+  
+  if (isError) {
+    return (
+      <div className="text-center p-4 bg-destructive/10 rounded-md">
+        <p className="text-destructive">Error loading soul metrics. Please try again later.</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
       <PracticeCard
@@ -26,33 +78,33 @@ const PracticesSection = ({
         description="Take time to reflect on your values and principles."
         icon={Clock}
         measurementType="Time spent reflecting"
-        currentValue={reflectionMinutes}
+        currentValue={localReflectionMinutes}
         maxValue={60}
         unit="minutes"
         delay={0.1}
-        onValueChange={setReflectionMinutes}
+        onValueChange={handleReflectionChange}
       />
       <PracticeCard
         title="Meaningful Connections"
         description="Join community events and discussions."
         icon={Users}
         measurementType="Events attended"
-        currentValue={connectionsAttended}
+        currentValue={localConnectionsAttended}
         maxValue={5}
         unit="events"
         delay={0.2}
-        onValueChange={setConnectionsAttended}
+        onValueChange={handleConnectionsChange}
       />
       <PracticeCard
         title="Gratitude Practice"
         description="Cultivate thankfulness for life's gifts."
         icon={Heart}
         measurementType="Thankfulness streak"
-        currentValue={gratitudeDays}
+        currentValue={localGratitudeDays}
         maxValue={10}
         unit="days"
         delay={0.3}
-        onValueChange={setGratitudeDays}
+        onValueChange={handleGratitudeDaysChange}
       />
     </div>
   );

@@ -1,6 +1,5 @@
 
 import { motion } from "framer-motion";
-import { useState } from "react";
 import PracticesSection from "@/components/soul/PracticesSection";
 import ReadingsSection from "@/components/soul/ReadingsSection";
 import GuidedPracticesSection from "@/components/soul/GuidedPracticesSection";
@@ -8,11 +7,6 @@ import InspirationSection from "@/components/soul/InspirationSection";
 import CommunityEventsSection from "@/components/soul/CommunityEventsSection";
 
 const SoulPage = () => {
-  // State for practice card values
-  const [reflectionMinutes, setReflectionMinutes] = useState(15);
-  const [connectionsAttended, setConnectionsAttended] = useState(2);
-  const [gratitudeDays, setGratitudeDays] = useState(4);
-  
   const readings = [
     {
       title: "Meditations",
@@ -63,14 +57,7 @@ const SoulPage = () => {
         </p>
       </motion.div>
       
-      <PracticesSection 
-        reflectionMinutes={reflectionMinutes}
-        setReflectionMinutes={setReflectionMinutes}
-        connectionsAttended={connectionsAttended}
-        setConnectionsAttended={setConnectionsAttended}
-        gratitudeDays={gratitudeDays}
-        setGratitudeDays={setGratitudeDays}
-      />
+      <PracticesSection />
       
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div className="md:col-span-2">

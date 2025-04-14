@@ -285,6 +285,39 @@ export type Database = {
         }
         Relationships: []
       }
+      soul_metrics: {
+        Row: {
+          connections_attended: number
+          created_at: string
+          date: string
+          gratitude_streak_days: number
+          id: string
+          reflection_minutes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          connections_attended?: number
+          created_at?: string
+          date?: string
+          gratitude_streak_days?: number
+          id?: string
+          reflection_minutes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          connections_attended?: number
+          created_at?: string
+          date?: string
+          gratitude_streak_days?: number
+          id?: string
+          reflection_minutes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_meditation_preferences: {
         Row: {
           created_at: string
