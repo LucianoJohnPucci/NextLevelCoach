@@ -15,6 +15,16 @@ export interface Event {
   is_open: boolean;
 }
 
+export interface EventFormData {
+  title: string;
+  location: string;
+  event_date: Date;
+  notes?: string;
+  is_free: boolean;
+  ticket_cost?: number;
+  max_participants: number;
+}
+
 export function useCommunityEvents() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -94,6 +104,39 @@ export function useCommunityEvents() {
       setLoading(false);
     }
   };
+
+  const createEvent = async (eventData: EventFormData) => {
+    if (!user) {
+      toast.error('Please sign in to create an event');
+      return;
+    }
+    
+    try {
+      const { is_free, ticket_cost, ...restData } = eventData;
+      
+      const { error } = await supabase
+        .from('community_events')
+        .insert({
+          user_id: user.id,
+          title: eventData.title,
+          location: eventData.location,
+          event_date: eventData.event_date.toISOString(),
+          notes: eventData.notes || null,
+          ticket_cost: is_free ? null : ticket_cost,
+          participants: 0,
+          is_open: true
+        });
+        
+      if (error) throw error;
+      
+      toast.success('Event created successfully!');
+      fetchEvents(); // Reload events after creation
+    } catch (error) {
+      console.error('Error creating event:', error);
+      toast.error('Failed to create event');
+      throw error;
+    }
+  };
   
   const joinEvent = async (eventId: string) => {
     if (!user) {
@@ -139,6 +182,7 @@ export function useCommunityEvents() {
     loading,
     fetchEvents,
     searchEvents,
+    createEvent,
     joinEvent
   };
 }

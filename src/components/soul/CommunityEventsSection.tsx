@@ -1,14 +1,18 @@
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import CommunityEvent from "./CommunityEvent";
 import EventSearch from "./EventSearch";
+import EventForm from "./EventForm";
 import { useCommunityEvents } from "@/hooks/use-community-events";
 
 const CommunityEventsSection = () => {
-  const { events, loading, joinEvent, searchEvents, fetchEvents } = useCommunityEvents();
+  const { events, loading, joinEvent, searchEvents, fetchEvents, createEvent } = useCommunityEvents();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   
   return (
     <motion.div 
@@ -51,7 +55,11 @@ const CommunityEventsSection = () => {
           )}
         </CardContent>
         <CardFooter className="flex flex-col gap-2">
-          <Button variant="outline" className="w-full flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className="w-full flex items-center gap-2"
+            onClick={() => setIsCreateDialogOpen(true)}
+          >
             <Plus className="h-4 w-4" /> Create New Event
           </Button>
           
@@ -61,6 +69,21 @@ const CommunityEventsSection = () => {
           />
         </CardFooter>
       </Card>
+
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>Create New Event</DialogTitle>
+            <DialogDescription>
+              Fill in the details below to create a new community event.
+            </DialogDescription>
+          </DialogHeader>
+          <EventForm 
+            onSubmit={createEvent}
+            onCancel={() => setIsCreateDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
