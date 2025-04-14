@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
-import { Activity, Heart, Utensils, Clock, Calendar, BarChart2, Plus } from "lucide-react";
+import { Activity, Heart, Utensils, Clock, Calendar, BarChart2, Plus, Flag } from "lucide-react";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Toggle } from "@/components/ui/toggle";
+import { toast } from "sonner";
 
 const WorkoutItem = ({ 
   title, 
@@ -14,7 +16,8 @@ const WorkoutItem = ({
   difficulty,
   favorite,
   index,
-  onAdd
+  onAdd,
+  onToggleFavorite
 }: { 
   title: string; 
   category: string; 
@@ -23,6 +26,7 @@ const WorkoutItem = ({
   favorite: boolean;
   index: number;
   onAdd: () => void;
+  onToggleFavorite: () => void;
 }) => {
   const getMinutes = () => {
     const match = duration.match(/(\d+)/);
@@ -55,10 +59,20 @@ const WorkoutItem = ({
           </span>
         </div>
       </div>
-      <Button size="default" className="flex items-center gap-2" onClick={onAdd}>
-        <Plus className="h-4 w-4" />
-        Add
-      </Button>
+      <div className="flex items-center gap-2">
+        <Toggle 
+          pressed={favorite} 
+          onPressedChange={onToggleFavorite}
+          size="sm"
+          className="data-[state=on]:text-amber-500"
+        >
+          <Flag className={`h-4 w-4 ${favorite ? 'fill-amber-500' : ''}`} />
+        </Toggle>
+        <Button size="default" className="flex items-center gap-2" onClick={onAdd}>
+          <Plus className="h-4 w-4" />
+          Add
+        </Button>
+      </div>
     </motion.div>
   );
 };
@@ -133,7 +147,7 @@ const BodyPage = () => {
   const [workoutMinutes, setWorkoutMinutes] = useState(45);
   const workoutGoal = 120;
   
-  const workouts = [
+  const [workouts, setWorkouts] = useState([
     {
       title: "Morning Yoga",
       category: "Flexibility",
@@ -162,7 +176,7 @@ const BodyPage = () => {
       difficulty: "Easy" as const,
       favorite: false
     }
-  ];
+  ]);
   
   const filteredWorkouts = workouts.filter(workout => 
     workoutFilter === "all" || (workoutFilter === "favorites" && workout.favorite)
@@ -171,6 +185,19 @@ const BodyPage = () => {
   const addWorkout = (duration: string) => {
     const minutes = parseInt(duration.match(/(\d+)/)?.[0] || "0", 10);
     setWorkoutMinutes(prev => prev + minutes);
+    toast.success(`Added ${minutes} minutes to your workout`);
+  };
+  
+  const toggleFavorite = (index: number) => {
+    const updatedWorkouts = [...workouts];
+    updatedWorkouts[index].favorite = !updatedWorkouts[index].favorite;
+    setWorkouts(updatedWorkouts);
+    
+    toast.success(
+      updatedWorkouts[index].favorite 
+        ? `Added ${updatedWorkouts[index].title} to favorites` 
+        : `Removed ${updatedWorkouts[index].title} from favorites`
+    );
   };
   
   const meals = [
@@ -356,6 +383,7 @@ const BodyPage = () => {
                       favorite={workout.favorite}
                       index={index}
                       onAdd={() => addWorkout(workout.duration)}
+                      onToggleFavorite={() => toggleFavorite(workouts.indexOf(workout))}
                     />
                   ))
                 )}
