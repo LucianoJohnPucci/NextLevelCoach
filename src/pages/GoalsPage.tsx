@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Target, CheckCircle } from "lucide-react";
@@ -13,6 +14,12 @@ export interface Goal {
   added: Date;
   start_date?: Date;
   why?: string;
+}
+
+export interface Habit {
+  id: string;
+  title: string;
+  frequency: string;
 }
 
 const GoalsPage = () => {
@@ -95,29 +102,3 @@ const GoalsPage = () => {
 };
 
 export default GoalsPage;
-
-export const addGoalToLocalStorage = (title: string) => {
-  const savedGoals = localStorage.getItem("userGoals");
-  let currentGoals: Goal[] = [];
-  
-  if (savedGoals) {
-    try {
-      currentGoals = JSON.parse(savedGoals);
-    } catch (e) {
-      console.error("Failed to parse saved goals:", e);
-      currentGoals = [];
-    }
-  }
-  
-  const newGoal = {
-    id: Date.now().toString(),
-    title,
-    progress: 0,
-    added: new Date()
-  };
-  
-  const updatedGoals = [...currentGoals, newGoal];
-  localStorage.setItem("userGoals", JSON.stringify(updatedGoals));
-  
-  return newGoal;
-};
