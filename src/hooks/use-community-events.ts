@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 
 export interface Event {
   id: string;
@@ -121,6 +121,16 @@ export function useCommunityEvents() {
     }
   };
 
+  // Get events for a specific date
+  const getEventsForDate = useCallback((date: Date) => {
+    if (!date) return [];
+    
+    return events.filter(event => {
+      const eventDate = new Date(event.event_date);
+      return isSameDay(eventDate, date);
+    });
+  }, [events]);
+
   const createEvent = async (eventData: EventFormData) => {
     if (!user) {
       toast.error('Please sign in to create an event');
@@ -200,6 +210,7 @@ export function useCommunityEvents() {
     fetchEvents,
     searchEvents,
     createEvent,
-    joinEvent
+    joinEvent,
+    getEventsForDate
   };
 }

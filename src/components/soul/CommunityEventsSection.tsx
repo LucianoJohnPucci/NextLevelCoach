@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,26 @@ import EventForm from "./EventForm";
 import { useCommunityEvents } from "@/hooks/use-community-events";
 
 const CommunityEventsSection = () => {
-  const { events, eventDates, loading, joinEvent, searchEvents, fetchEvents, createEvent } = useCommunityEvents();
+  const { events, eventDates, loading, joinEvent, searchEvents, fetchEvents, createEvent, getEventsForDate } = useCommunityEvents();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [eventsOnSelectedDate, setEventsOnSelectedDate] = useState([]);
+  
+  // Update events on selected date whenever selected date changes
+  useEffect(() => {
+    if (selectedDate) {
+      const dateEvents = getEventsForDate(selectedDate);
+      setEventsOnSelectedDate(dateEvents);
+    } else {
+      setEventsOnSelectedDate([]);
+    }
+  }, [selectedDate, getEventsForDate]);
+
+  // Handle search with date selection side effect
+  const handleSearch = (location: string, date: Date | undefined, priceFilter: string | null) => {
+    setSelectedDate(date);
+    searchEvents(location, date, priceFilter);
+  };
   
   return (
     <motion.div 
@@ -64,9 +82,14 @@ const CommunityEventsSection = () => {
           </Button>
           
           <EventSearch 
-            onSearch={(location, date, priceFilter) => searchEvents(location, date, priceFilter)} 
-            onClearFilter={fetchEvents}
+            onSearch={handleSearch}
+            onClearFilter={() => {
+              setSelectedDate(undefined);
+              fetchEvents();
+            }}
             eventDates={eventDates}
+            eventsOnSelectedDate={eventsOnSelectedDate}
+            onJoin={joinEvent}
           />
         </CardFooter>
       </Card>

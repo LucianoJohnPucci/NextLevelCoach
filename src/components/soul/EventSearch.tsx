@@ -1,9 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
-import { Search, X, Calendar as CalendarIcon, DollarSign, Filter } from "lucide-react";
+import { Search, X, Calendar as CalendarIcon, DollarSign, Filter, Plus } from "lucide-react";
 import { 
   Dialog,
   DialogTrigger,
@@ -18,19 +18,30 @@ import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, Drawer
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Event } from "@/hooks/use-community-events";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { MapPin, Clock, Users, Tag } from "lucide-react";
 
 interface EventSearchProps {
   onSearch: (location: string, date: Date | undefined, priceFilter: string | null) => void;
   onClearFilter: () => void;
   eventDates?: Date[]; // Dates that have events
+  eventsOnSelectedDate?: Event[];
+  onJoin: (id: string) => void;
 }
 
-const EventSearch = ({ onSearch, onClearFilter, eventDates = [] }: EventSearchProps) => {
+const EventSearch = ({ onSearch, onClearFilter, eventDates = [], eventsOnSelectedDate = [], onJoin }: EventSearchProps) => {
   const [searchLocation, setSearchLocation] = useState("");
   const [searchDate, setSearchDate] = useState<Date | undefined>(undefined);
   const [priceFilter, setPriceFilter] = useState<string | null>(null); // "free", "paid", or null
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const isMobile = useIsMobile();
+
+  // Handle date selection
+  const handleDateSelect = (date: Date | undefined) => {
+    setSearchDate(date);
+  };
 
   const handleSearch = () => {
     onSearch(searchLocation, searchDate, priceFilter);
@@ -66,6 +77,67 @@ const EventSearch = ({ onSearch, onClearFilter, eventDates = [] }: EventSearchPr
       color: "#6E59A5", // Purple text color
       fontWeight: "bold" as const
     }
+  };
+
+  // Preview of events on selected date
+  const DateEventPreview = () => {
+    if (!searchDate || eventsOnSelectedDate.length === 0) return null;
+
+    return (
+      <div className="mt-4 border-t pt-4">
+        <h3 className="text-sm font-medium mb-2">
+          Events on {searchDate.toLocaleDateString()}: ({eventsOnSelectedDate.length})
+        </h3>
+        <div className="space-y-2 max-h-60 overflow-y-auto">
+          {eventsOnSelectedDate.map((event) => (
+            <Card key={event.id} className="shadow-sm border">
+              <CardHeader className="py-3 px-3">
+                <CardTitle className="text-sm font-medium flex items-center justify-between">
+                  {event.title}
+                  {event.is_open ? (
+                    <Badge variant="outline" className="bg-green-100 text-green-800 text-xs dark:bg-green-900 dark:text-green-100">Open</Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-gray-100 text-gray-800 text-xs dark:bg-gray-700 dark:text-gray-100">Closed</Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-0 px-3">
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    <span>{event.location}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    <span>{event.participants} participants</span>
+                  </div>
+                  {event.ticket_cost !== null && (
+                    <div className="flex items-center gap-1">
+                      <Tag className="h-3 w-3" />
+                      <span>${event.ticket_cost.toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter className="p-2 flex justify-end">
+                <Button 
+                  size="sm" 
+                  className="h-7 text-xs"
+                  disabled={!event.is_open}
+                  onClick={() => {
+                    onJoin(event.id);
+                    setIsSearchOpen(false);
+                  }}
+                >
+                  <Plus className="h-3 w-3 mr-1" /> 
+                  Add to List
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   const SearchDialog = () => (
@@ -116,7 +188,7 @@ const EventSearch = ({ onSearch, onClearFilter, eventDates = [] }: EventSearchPr
           <Calendar
             mode="single"
             selected={searchDate}
-            onSelect={setSearchDate}
+            onSelect={handleDateSelect}
             className="rounded-md border pointer-events-auto"
             modifiers={modifiers}
             modifiersStyles={modifiersStyles}
@@ -126,6 +198,9 @@ const EventSearch = ({ onSearch, onClearFilter, eventDates = [] }: EventSearchPr
             Dates with events are highlighted
           </p>
         </div>
+
+        {/* Preview section for events on selected date */}
+        <DateEventPreview />
       </div>
       <DialogFooter>
         <DialogClose asChild>
@@ -188,7 +263,7 @@ const EventSearch = ({ onSearch, onClearFilter, eventDates = [] }: EventSearchPr
             <Calendar
               mode="single"
               selected={searchDate}
-              onSelect={setSearchDate}
+              onSelect={handleDateSelect}
               className="rounded-md border pointer-events-auto"
               modifiers={modifiers}
               modifiersStyles={modifiersStyles}
@@ -198,6 +273,11 @@ const EventSearch = ({ onSearch, onClearFilter, eventDates = [] }: EventSearchPr
             <span className="inline-block w-3 h-3 bg-[#e5deff] rounded-full mr-1"></span>
             Dates with events are highlighted
           </p>
+        </div>
+
+        {/* Preview section for events on selected date */}
+        <div className="mb-4">
+          <DateEventPreview />
         </div>
       </div>
       <DrawerFooter className="pt-2">
