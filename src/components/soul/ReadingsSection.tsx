@@ -7,7 +7,7 @@ import { Book } from "lucide-react";
 import { useSoulMetrics } from "@/services/soulMetricsService";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Reading {
   title: string;
@@ -23,9 +23,17 @@ interface ReadingsSectionProps {
 
 const ReadingsSection = ({ readings }: ReadingsSectionProps) => {
   const { user } = useAuth();
-  const { reflectionMinutes, updateMetrics } = useSoulMetrics();
+  const { reflectionMinutes, updateMetrics, todayMetrics } = useSoulMetrics();
   const [filter, setFilter] = useState<string>("all");
   const [readingsState, setReadingsState] = useState(readings);
+  
+  // Update local state when data from the server changes
+  useEffect(() => {
+    if (todayMetrics) {
+      // This ensures we stay in sync with the server
+      console.log("Updated reflection minutes:", todayMetrics.reflection_minutes);
+    }
+  }, [todayMetrics]);
   
   const handleAddReading = (reading: Reading) => {
     if (!user) {

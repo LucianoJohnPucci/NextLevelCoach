@@ -14,7 +14,8 @@ const PracticesSection = () => {
     gratitudeStreak, 
     updateMetrics,
     isLoading,
-    isError
+    isError,
+    todayMetrics
   } = useSoulMetrics();
   
   const [localReflectionMinutes, setLocalReflectionMinutes] = useState(0);
@@ -23,12 +24,25 @@ const PracticesSection = () => {
   
   // Initialize local state from database values when loaded
   useEffect(() => {
-    if (!isLoading) {
-      setLocalReflectionMinutes(reflectionMinutes);
-      setLocalConnectionsAttended(connectionsAttended);
-      setLocalGratitudeDays(gratitudeStreak);
+    if (!isLoading && todayMetrics) {
+      setLocalReflectionMinutes(todayMetrics.reflection_minutes || 0);
+      setLocalConnectionsAttended(todayMetrics.connections_attended || 0);
+      setLocalGratitudeDays(todayMetrics.gratitude_streak_days || 0);
     }
-  }, [reflectionMinutes, connectionsAttended, gratitudeStreak, isLoading]);
+  }, [todayMetrics, isLoading]);
+  
+  // Also update when the individual values change
+  useEffect(() => {
+    setLocalReflectionMinutes(reflectionMinutes);
+  }, [reflectionMinutes]);
+  
+  useEffect(() => {
+    setLocalConnectionsAttended(connectionsAttended);
+  }, [connectionsAttended]);
+  
+  useEffect(() => {
+    setLocalGratitudeDays(gratitudeStreak);
+  }, [gratitudeStreak]);
   
   // Handle updating reflection minutes
   const handleReflectionChange = (value: number) => {
