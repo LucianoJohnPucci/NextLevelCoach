@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, MessageSquare, Sparkles, User, RefreshCw, ListPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { addGoalToLocalStorage } from "./GoalsPage";
 
 interface Message {
   id: string;
@@ -17,6 +15,33 @@ interface Message {
   role: "user" | "assistant";
   timestamp: Date;
 }
+
+// Function to add a goal from wisdom to localStorage
+export const addGoalToLocalStorage = (title: string) => {
+  const savedGoals = localStorage.getItem("userGoals");
+  let currentGoals = [];
+  
+  if (savedGoals) {
+    try {
+      currentGoals = JSON.parse(savedGoals);
+    } catch (e) {
+      console.error("Failed to parse saved goals:", e);
+      currentGoals = [];
+    }
+  }
+  
+  const newGoal = {
+    id: Date.now().toString(),
+    title,
+    progress: 0,
+    added: new Date()
+  };
+  
+  const updatedGoals = [...currentGoals, newGoal];
+  localStorage.setItem("userGoals", JSON.stringify(updatedGoals));
+  
+  return newGoal;
+};
 
 // Stoic wisdom quotes for the side panel
 const stoicWisdom = [

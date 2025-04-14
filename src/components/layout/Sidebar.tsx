@@ -11,7 +11,8 @@ import {
   Calendar, 
   BarChart2, 
   Target, 
-  MessageCircle
+  MessageCircle,
+  BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -105,6 +106,10 @@ const Sidebar = () => {
         
         <NavItem to="/goals" icon={Target} onClick={() => close()}>
           Goals & Habits
+        </NavItem>
+        
+        <NavItem to="/notes" icon={BookOpen} onClick={() => close()}>
+          My Notes
         </NavItem>
         
         <NavItem to="/wisdom" icon={MessageCircle} onClick={() => close()}>
