@@ -4,6 +4,7 @@ import { Utensils, Plus, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MealItem from "./MealItem";
 import NutritionStat from "./NutritionStat";
+import WaterIntakeTracker from "./WaterIntakeTracker";
 
 export interface Meal {
   title: string;
@@ -15,6 +16,7 @@ export interface Meal {
 export interface NutritionSectionProps {
   meals: Meal[];
   onAddCalories: (calories: number) => void;
+  onAddWater: (amount: number) => void;
   nutritionStats: {
     calories: { value: number; total: number };
     protein: { value: number; total: number };
@@ -24,7 +26,7 @@ export interface NutritionSectionProps {
   };
 }
 
-export const NutritionSection = ({ meals, onAddCalories, nutritionStats }: NutritionSectionProps) => {
+export const NutritionSection = ({ meals, onAddCalories, onAddWater, nutritionStats }: NutritionSectionProps) => {
   return (
     <div className="grid gap-6 md:grid-cols-3">
       <Card className="md:col-span-2">
@@ -46,6 +48,11 @@ export const NutritionSection = ({ meals, onAddCalories, nutritionStats }: Nutri
           </div>
         </CardHeader>
         <CardContent>
+          <WaterIntakeTracker 
+            value={nutritionStats.water.value} 
+            goal={nutritionStats.water.total} 
+            onAddWater={onAddWater}
+          />
           <div className="space-y-4">
             {meals.map((meal, index) => (
               <MealItem 

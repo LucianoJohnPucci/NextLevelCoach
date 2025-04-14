@@ -109,6 +109,17 @@ const BodyPage = () => {
     toast.success(`Added ${calories} calories to your nutrition tracking`);
   };
   
+  const handleAddWater = (amount: number) => {
+    setNutritionStats(prev => ({
+      ...prev,
+      water: {
+        ...prev.water,
+        value: parseFloat((prev.water.value + amount).toFixed(2))
+      }
+    }));
+    toast.success(`Added ${amount}L of water to your daily intake`);
+  };
+  
   return (
     <div className="space-y-6">
       <motion.div 
@@ -176,6 +187,7 @@ const BodyPage = () => {
           <NutritionSection 
             meals={meals} 
             onAddCalories={handleAddCalories}
+            onAddWater={handleAddWater}
             nutritionStats={nutritionStats}
           />
         </TabsContent>
