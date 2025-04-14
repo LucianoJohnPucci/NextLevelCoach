@@ -12,19 +12,22 @@ const SoulPage = () => {
       title: "Meditations",
       author: "Marcus Aurelius",
       duration: "15 min",
-      minutes: 15
+      minutes: 15,
+      isFavorite: true
     },
     {
       title: "Letters from a Stoic",
       author: "Seneca",
       duration: "20 min",
-      minutes: 20
+      minutes: 20,
+      isFavorite: false
     },
     {
       title: "The Enchiridion",
       author: "Epictetus",
       duration: "10 min",
-      minutes: 10
+      minutes: 10,
+      isFavorite: true
     }
   ];
   
