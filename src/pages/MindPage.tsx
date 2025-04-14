@@ -1,9 +1,9 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
-import { Brain, Timer, Play, Bookmark, Loader2 } from "lucide-react";
+import { Brain, Timer, Play, Bookmark, Loader2, BarChart2, Calendar } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 import { useMeditationSessions } from "@/services/meditationService";
@@ -158,9 +158,86 @@ const MindPage = () => {
       </motion.div>
       
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Meditation Progress</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="rounded-full bg-primary/10 p-2 text-primary">
+                    <Brain className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm font-medium">Minutes</span>
+                </div>
+                <div className="text-2xl font-bold">120</div>
+              </div>
+              <Progress value={60} className="h-2" />
+              <p className="text-xs text-muted-foreground">60% of weekly goal (200)</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="rounded-full bg-primary/10 p-2 text-primary">
+                    <Calendar className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm font-medium">Days</span>
+                </div>
+                <div className="text-2xl font-bold">7</div>
+              </div>
+              <Progress value={70} className="h-2" />
+              <p className="text-xs text-muted-foreground">Consistent meditation for 7 days</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Focus Score</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="rounded-full bg-primary/10 p-2 text-primary">
+                    <Timer className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm font-medium">Score</span>
+                </div>
+                <div className="text-2xl font-bold">82</div>
+              </div>
+              <Progress value={82} className="h-2" />
+              <p className="text-xs text-muted-foreground">Based on recent sessions</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <FeatureCard
-          title="Meditation"
-          description="Guided sessions to help you find focus and calm."
+          title="Guided Meditation"
+          description="Follow along with expert-led meditation sessions."
           icon={Brain}
           action="Explore Sessions"
           delay={0.1}
