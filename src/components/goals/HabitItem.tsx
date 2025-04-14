@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Habit } from "./useHabits";
+import { Habit } from "./hooks";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/AuthProvider";
-import { Habit, HabitFrequency, HabitUpdateData } from "./types/habitTypes";
+import { Habit, HabitFrequency, HabitUpdateData } from "../types/habitTypes";
 import {
   fetchHabitsFromSupabase,
   addHabitToSupabase,
@@ -11,9 +11,9 @@ import {
   getDefaultHabits,
   loadHabitsFromLocalStorage,
   saveHabitsToLocalStorage
-} from "./services/habitService";
+} from "../services/habitService";
 
-export type { Habit } from "./types/habitTypes";
+export type { Habit } from "../types/habitTypes";
 
 export const useHabits = () => {
   const [habits, setHabits] = useState<Habit[]>([]);

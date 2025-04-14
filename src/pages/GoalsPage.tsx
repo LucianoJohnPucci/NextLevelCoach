@@ -7,7 +7,7 @@ import HabitsList from "@/components/goals/HabitsList";
 import GoalDialog from "@/components/goals/GoalDialog";
 import HabitDialog from "@/components/goals/HabitDialog";
 import { useGoals } from "@/components/goals/useGoals";
-import { useHabits, Habit } from "@/components/goals/useHabits";
+import { useHabits, Habit } from "@/components/goals/hooks";
 
 export interface Goal {
   id: string;

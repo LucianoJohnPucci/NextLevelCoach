@@ -1,10 +1,9 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { CardContent } from "@/components/ui/card";
 import HabitItem from "./HabitItem";
-import { Habit } from "./useHabits";
+import { Habit } from "./hooks";
 
 interface HabitsListProps {
   habits: Habit[];
