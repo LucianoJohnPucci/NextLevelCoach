@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,9 +10,10 @@ import JournalEntryForm from "@/components/journal/JournalEntryForm";
 import JournalEntryList from "@/components/journal/JournalEntryList";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
-import { useMeditationSessions, MeditationSession } from "@/services/meditationService";
+import { useMeditationSessions } from "@/services/meditationService";
+import type { MeditationSession } from "@/services/meditationService";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { Switch } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 const FeatureCard = ({ 

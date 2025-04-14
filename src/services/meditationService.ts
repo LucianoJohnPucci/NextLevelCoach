@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 export interface MeditationSession {
   id: string;
@@ -109,7 +110,7 @@ export const useMeditationSessions = () => {
   });
   
   // Combine sessions with preferences
-  const combinedData = React.useMemo(() => {
+  const combinedData = useMemo(() => {
     if (!sessionsQuery.data) return [];
     
     return sessionsQuery.data.map(session => {
