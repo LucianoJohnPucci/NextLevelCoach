@@ -54,8 +54,7 @@ const PracticeCard = ({
             max={maxValue} 
             step={1}
             disabled={true}
-            trackColor="bg-secondary/50"
-            rangeColor="bg-primary/80"
+            className="cursor-default"
           />
           <Progress value={progressPercentage} className="h-2" />
           <p className="text-xs text-muted-foreground">
