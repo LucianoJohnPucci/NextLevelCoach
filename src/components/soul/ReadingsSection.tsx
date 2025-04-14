@@ -1,5 +1,4 @@
-
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ReadingItem from "./ReadingItem";
@@ -27,10 +26,8 @@ const ReadingsSection = ({ readings }: ReadingsSectionProps) => {
   const [filter, setFilter] = useState<string>("all");
   const [readingsState, setReadingsState] = useState(readings);
   
-  // Update local state when data from the server changes
   useEffect(() => {
     if (todayMetrics) {
-      // This ensures we stay in sync with the server
       console.log("Updated reflection minutes:", todayMetrics.reflection_minutes);
     }
   }, [todayMetrics]);
@@ -70,7 +67,7 @@ const ReadingsSection = ({ readings }: ReadingsSectionProps) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
+        <div className="flex items-center gap-4 mb-4">
           <Select 
             defaultValue="all" 
             onValueChange={(value) => setFilter(value)}
@@ -83,6 +80,12 @@ const ReadingsSection = ({ readings }: ReadingsSectionProps) => {
               <SelectItem value="favorites">Favourites</SelectItem>
             </SelectContent>
           </Select>
+          <Button 
+            variant="outline" 
+            className="ml-auto"
+          >
+            Browse Library
+          </Button>
         </div>
         <div className="space-y-4">
           {filteredReadings.map((reading, index) => (
@@ -96,11 +99,6 @@ const ReadingsSection = ({ readings }: ReadingsSectionProps) => {
           ))}
         </div>
       </CardContent>
-      <CardFooter>
-        <Button variant="outline" className="w-full">
-          Browse Library
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
