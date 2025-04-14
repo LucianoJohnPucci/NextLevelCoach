@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ReadingItem from "./ReadingItem";
-import { Book, Plus } from "lucide-react";
+import { Book } from "lucide-react";
 import { useSoulMetrics } from "@/services/soulMetricsService";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ const ReadingsSection = ({ readings }: ReadingsSectionProps) => {
   const { user } = useAuth();
   const { reflectionMinutes, updateMetrics } = useSoulMetrics();
   const [filter, setFilter] = useState<string>("all");
+  const [readingsState, setReadingsState] = useState(readings);
   
   const handleAddReading = (reading: Reading) => {
     if (!user) {
@@ -39,9 +40,15 @@ const ReadingsSection = ({ readings }: ReadingsSectionProps) => {
     toast.success(`Added ${minutes} minutes of reflection from "${reading.title}"`);
   };
   
+  const handleToggleFavorite = (index: number, isFavorite: boolean) => {
+    const updatedReadings = [...readingsState];
+    updatedReadings[index] = { ...updatedReadings[index], isFavorite };
+    setReadingsState(updatedReadings);
+  };
+  
   const filteredReadings = filter === "all" 
-    ? readings 
-    : readings.filter(reading => reading.isFavorite);
+    ? readingsState 
+    : readingsState.filter(reading => reading.isFavorite);
   
   return (
     <Card>
@@ -73,12 +80,10 @@ const ReadingsSection = ({ readings }: ReadingsSectionProps) => {
           {filteredReadings.map((reading, index) => (
             <ReadingItem 
               key={index}
-              title={reading.title}
-              author={reading.author}
-              duration={reading.duration}
-              minutes={reading.minutes}
+              {...reading}
               index={index}
               onAdd={() => handleAddReading(reading)}
+              onToggleFavorite={(isFavorite) => handleToggleFavorite(index, isFavorite)}
             />
           ))}
         </div>

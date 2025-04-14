@@ -1,7 +1,8 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Plus, BookOpen } from "lucide-react";
+import { Plus, BookOpen, Bookmark, BookmarkedIcon } from "lucide-react";
+import { useState } from "react";
 
 interface ReadingItemProps { 
   title: string;
@@ -9,7 +10,9 @@ interface ReadingItemProps {
   duration: string;
   minutes: number;
   index: number;
+  isFavorite?: boolean;
   onAdd: () => void;
+  onToggleFavorite?: (isFavorite: boolean) => void;
 }
 
 const ReadingItem = ({ 
@@ -18,8 +21,18 @@ const ReadingItem = ({
   duration,
   minutes,
   index,
-  onAdd
+  isFavorite: initialIsFavorite = false,
+  onAdd,
+  onToggleFavorite
 }: ReadingItemProps) => {
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
+
+  const handleToggleFavorite = () => {
+    const newFavoriteStatus = !isFavorite;
+    setIsFavorite(newFavoriteStatus);
+    onToggleFavorite?.(newFavoriteStatus);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -45,6 +58,17 @@ const ReadingItem = ({
         >
           <Plus className="h-3.5 w-3.5" />
           Add {minutes}m
+        </Button>
+        <Button 
+          size="icon" 
+          variant="ghost"
+          onClick={handleToggleFavorite}
+        >
+          {isFavorite ? (
+            <BookmarkedIcon className="h-4 w-4 text-primary" />
+          ) : (
+            <Bookmark className="h-4 w-4" />
+          )}
         </Button>
         <Button size="icon" variant="ghost">
           <BookOpen className="h-4 w-4" />
