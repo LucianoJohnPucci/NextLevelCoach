@@ -59,17 +59,19 @@ const ReadingItem = ({
           <Plus className="h-3.5 w-3.5" />
           Add {minutes}m
         </Button>
-        <Button 
-          size="icon" 
-          variant="ghost"
-          onClick={handleToggleFavorite}
-        >
-          {isFavorite ? (
-            <Bookmark className="h-4 w-4 fill-primary text-primary" />
-          ) : (
-            <Bookmark className="h-4 w-4" />
-          )}
-        </Button>
+        {onToggleFavorite && (
+          <Button 
+            size="icon" 
+            variant="ghost"
+            onClick={handleToggleFavorite}
+          >
+            {isFavorite ? (
+              <Bookmark className="h-4 w-4 fill-primary text-primary" />
+            ) : (
+              <Bookmark className="h-4 w-4" />
+            )}
+          </Button>
+        )}
       </div>
     </motion.div>
   );

@@ -5,6 +5,7 @@ import ReadingsSection from "@/components/soul/ReadingsSection";
 import GuidedPracticesSection from "@/components/soul/GuidedPracticesSection";
 import InspirationSection from "@/components/soul/InspirationSection";
 import CommunityEventsSection from "@/components/soul/CommunityEventsSection";
+import DailyReflectionsSection from "@/components/soul/DailyReflectionsSection";
 
 const SoulPage = () => {
   const readings = [
@@ -56,6 +57,8 @@ const SoulPage = () => {
           <GuidedPracticesSection />
         </div>
       </div>
+      
+      <DailyReflectionsSection />
       
       <CommunityEventsSection />
       
