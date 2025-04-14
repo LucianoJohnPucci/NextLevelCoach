@@ -21,7 +21,7 @@ const FeatureCard = ({
   title: string; 
   description: string; 
   icon: React.ElementType; 
-  action: string; 
+  action: string | React.ReactNode; 
   delay: number;
 }) => {
   return (
@@ -40,7 +40,13 @@ const FeatureCard = ({
         </CardHeader>
         <CardFooter>
           <Button variant="outline" className="w-full">
-            {action} <ArrowRight className="ml-2 h-4 w-4" />
+            {typeof action === 'string' ? (
+              <>
+                {action} <ArrowRight className="ml-2 h-4 w-4" />
+              </>
+            ) : (
+              action
+            )}
           </Button>
         </CardFooter>
       </Card>
@@ -231,7 +237,7 @@ const MindPage = () => {
           icon={PenLine}
           action={
             <Link to="/wisdom" className="w-full">
-              Start Writing
+              Start Writing <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           }
           delay={0.2}
