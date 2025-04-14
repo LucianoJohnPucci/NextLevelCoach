@@ -71,7 +71,7 @@ const MeditationSessionsList = ({
               <SelectItem value="all">All Durations</SelectItem>
               <SelectItem value="short">Short (≤ 10 min)</SelectItem>
               <SelectItem value="medium">Medium (11-20 min)</SelectItem>
-              <SelectItem value="long">Long (> 20 min)</SelectItem>
+              <SelectItem value="long">Long (&gt; 20 min)</SelectItem>
             </SelectContent>
           </Select>
         </div>
