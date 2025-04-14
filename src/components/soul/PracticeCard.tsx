@@ -50,10 +50,12 @@ const PracticeCard = ({
             </span>
           </div>
           <Slider 
-            defaultValue={[currentValue]} 
+            value={[currentValue]} 
             max={maxValue} 
             step={1}
-            onValueChange={(values) => onValueChange(values[0])}
+            disabled={true}
+            trackColor="bg-secondary/50"
+            rangeColor="bg-primary/80"
           />
           <Progress value={progressPercentage} className="h-2" />
           <p className="text-xs text-muted-foreground">
