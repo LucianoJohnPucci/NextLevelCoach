@@ -14,9 +14,17 @@ export interface Meal {
 
 export interface NutritionSectionProps {
   meals: Meal[];
+  onAddCalories: (calories: number) => void;
+  nutritionStats: {
+    calories: { value: number; total: number };
+    protein: { value: number; total: number };
+    carbs: { value: number; total: number };
+    fat: { value: number; total: number };
+    water: { value: number; total: number };
+  };
 }
 
-export const NutritionSection = ({ meals }: NutritionSectionProps) => {
+export const NutritionSection = ({ meals, onAddCalories, nutritionStats }: NutritionSectionProps) => {
   return (
     <div className="grid gap-6 md:grid-cols-3">
       <Card className="md:col-span-2">
@@ -47,6 +55,7 @@ export const NutritionSection = ({ meals }: NutritionSectionProps) => {
                 time={meal.time}
                 calories={meal.calories}
                 index={index}
+                onAddCalories={onAddCalories}
               />
             ))}
           </div>
@@ -66,36 +75,36 @@ export const NutritionSection = ({ meals }: NutritionSectionProps) => {
         <CardContent className="space-y-4">
           <NutritionStat
             label="Calories"
-            value={1470}
-            total={2000}
+            value={nutritionStats.calories.value}
+            total={nutritionStats.calories.total}
             unit="cal"
             color="bg-primary"
           />
           <NutritionStat
             label="Protein"
-            value={82}
-            total={120}
+            value={nutritionStats.protein.value}
+            total={nutritionStats.protein.total}
             unit="g"
             color="bg-blue-500"
           />
           <NutritionStat
             label="Carbs"
-            value={156}
-            total={250}
+            value={nutritionStats.carbs.value}
+            total={nutritionStats.carbs.total}
             unit="g"
             color="bg-yellow-500"
           />
           <NutritionStat
             label="Fat"
-            value={46}
-            total={65}
+            value={nutritionStats.fat.value}
+            total={nutritionStats.fat.total}
             unit="g"
             color="bg-green-500"
           />
           <NutritionStat
             label="Water"
-            value={1.2}
-            total={2.5}
+            value={nutritionStats.water.value}
+            total={nutritionStats.water.total}
             unit="L"
             color="bg-sky-500"
           />

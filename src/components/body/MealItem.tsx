@@ -1,5 +1,8 @@
 
 import { motion } from "framer-motion";
+import { Check, Plus } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export interface MealItemProps {
   title: string;
@@ -7,6 +10,7 @@ export interface MealItemProps {
   time: string;
   calories: number;
   index: number;
+  onAddCalories?: (calories: number) => void;
 }
 
 export const MealItem = ({ 
@@ -14,8 +18,18 @@ export const MealItem = ({
   description, 
   time,
   calories,
-  index
+  index,
+  onAddCalories
 }: MealItemProps) => {
+  const [added, setAdded] = useState(false);
+
+  const handleAddCalories = () => {
+    if (onAddCalories && !added) {
+      onAddCalories(calories);
+      setAdded(true);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -32,9 +46,25 @@ export const MealItem = ({
         </div>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
-      <div className="text-right">
-        <span className="text-sm font-medium">{calories}</span>
-        <span className="text-xs text-muted-foreground"> cal</span>
+      <div className="flex flex-col items-end justify-between">
+        <div className="text-right">
+          <span className="text-sm font-medium">{calories}</span>
+          <span className="text-xs text-muted-foreground"> cal</span>
+        </div>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="gap-1 mt-1" 
+          onClick={handleAddCalories}
+          disabled={added}
+        >
+          {added ? (
+            <Check className="h-4 w-4 text-green-500" />
+          ) : (
+            <Plus className="h-4 w-4" />
+          )}
+          {added ? "Added" : "Track"}
+        </Button>
       </div>
     </motion.div>
   );

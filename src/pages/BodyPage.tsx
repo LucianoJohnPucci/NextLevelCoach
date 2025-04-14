@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { Activity, Utensils, Calendar } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import MetricsCard from "@/components/body/MetricsCard";
 import WorkoutsSection from "@/components/body/WorkoutsSection";
 import NutritionSection from "@/components/body/NutritionSection";
@@ -12,6 +13,14 @@ import { Meal } from "@/components/body/NutritionSection";
 const BodyPage = () => {
   const [workoutMinutes, setWorkoutMinutes] = useState(45);
   const workoutGoal = 120;
+  
+  const [nutritionStats, setNutritionStats] = useState({
+    calories: { value: 0, total: 2000 },
+    protein: { value: 0, total: 120 },
+    carbs: { value: 0, total: 250 },
+    fat: { value: 0, total: 65 },
+    water: { value: 0, total: 2.5 }
+  });
   
   const initialWorkouts: Workout[] = [
     {
@@ -73,6 +82,31 @@ const BodyPage = () => {
   
   const handleAddWorkout = (minutes: number) => {
     setWorkoutMinutes(prev => prev + minutes);
+    toast.success(`Added ${minutes} minutes to your workout`);
+  };
+  
+  const handleAddCalories = (calories: number) => {
+    setNutritionStats(prev => ({
+      ...prev,
+      calories: {
+        ...prev.calories,
+        value: prev.calories.value + calories
+      },
+      // Also update other nutrients based on simple estimates
+      protein: {
+        ...prev.protein,
+        value: prev.protein.value + Math.round(calories * 0.15 / 4) // 15% protein, 4 cal per gram
+      },
+      carbs: {
+        ...prev.carbs,
+        value: prev.carbs.value + Math.round(calories * 0.55 / 4) // 55% carbs, 4 cal per gram
+      },
+      fat: {
+        ...prev.fat,
+        value: prev.fat.value + Math.round(calories * 0.3 / 9) // 30% fat, 9 cal per gram
+      }
+    }));
+    toast.success(`Added ${calories} calories to your nutrition tracking`);
   };
   
   return (
@@ -102,10 +136,10 @@ const BodyPage = () => {
         
         <MetricsCard 
           title="Nutrition"
-          value="1,470"
+          value={nutritionStats.calories.value}
           icon={Utensils}
-          progress={73}
-          progressMax={2000}
+          progress={nutritionStats.calories.value}
+          progressMax={nutritionStats.calories.total}
           progressUnit="cal"
           delay={0.2}
         />
@@ -139,7 +173,11 @@ const BodyPage = () => {
         </TabsContent>
         
         <TabsContent value="nutrition" className="mt-6">
-          <NutritionSection meals={meals} />
+          <NutritionSection 
+            meals={meals} 
+            onAddCalories={handleAddCalories}
+            nutritionStats={nutritionStats}
+          />
         </TabsContent>
       </Tabs>
     </div>
