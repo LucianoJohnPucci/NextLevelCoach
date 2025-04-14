@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Dialog,
@@ -20,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Habit } from "./useHabits";
+import { Habit } from "./hooks";
 
 interface HabitDialogProps {
   open: boolean;
