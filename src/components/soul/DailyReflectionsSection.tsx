@@ -33,16 +33,14 @@ const DailyReflectionsSection = () => {
   const fetchReflections = async () => {
     setIsLoading(true);
     try {
-      // Use type assertion to bypass TypeScript checking for the table name
-      const { data, error } = await (supabase
-        .from("daily_reflections" as any)
+      const { data, error } = await supabase
+        .from("daily_reflections")
         .select("*")
-        .order("created_at", { ascending: false }) as any);
+        .order("created_at", { ascending: false });
       
       if (error) throw error;
       
-      // Use type assertion to inform TypeScript that data is an array of Reflection
-      setReflections(data as Reflection[] || []);
+      setReflections(data || []);
     } catch (error) {
       console.error("Error fetching reflections:", error);
       toast.error("Failed to load reflections");
@@ -58,16 +56,15 @@ const DailyReflectionsSection = () => {
     }
 
     try {
-      // Use type assertion for the table name
-      const { data, error } = await (supabase
-        .from("daily_reflections" as any)
+      const { data, error } = await supabase
+        .from("daily_reflections")
         .insert([
           {
             ...newReflection,
             user_id: user.id
           }
         ])
-        .select() as any);
+        .select();
 
       if (error) throw error;
       
