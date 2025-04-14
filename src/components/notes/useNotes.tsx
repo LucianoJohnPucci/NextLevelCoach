@@ -2,9 +2,10 @@
 import { useState, useEffect } from "react";
 import { Note } from "@/pages/NotesPage";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
+import { fetchNotesFromSupabase, saveNoteToSupabase, deleteNoteFromSupabase } from "@/services/notesService";
+import { getNotesFromLocalStorage, saveNotesToLocalStorage } from "@/services/localStorageService";
 
 export const useNotes = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -12,48 +13,23 @@ export const useNotes = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   
-  // Load notes from Supabase on component mount
+  // Load notes on component mount
   useEffect(() => {
-    const fetchNotes = async () => {
-      if (!user) {
-        // If user is not logged in, try to load from localStorage as fallback
-        const savedNotes = localStorage.getItem("userNotes");
-        if (savedNotes) {
-          try {
-            const parsedNotes = JSON.parse(savedNotes);
-            const notesWithDates = parsedNotes.map((note: any) => ({
-              ...note,
-              created_at: new Date(note.created_at)
-            }));
-            setNotes(notesWithDates);
-          } catch (error) {
-            console.error("Failed to parse saved notes:", error);
-          }
-        }
-        setLoading(false);
-        return;
-      }
+    const loadNotes = async () => {
+      setLoading(true);
       
       try {
-        const { data, error } = await supabase
-          .from("users_notes")
-          .select("*")
-          .order("created_at", { ascending: false });
-        
-        if (error) throw error;
-        
-        // Transform the data to match our Note interface
-        const formattedNotes = data.map(note => ({
-          id: note.id,
-          title: note.title,
-          content: note.content,
-          category: note.category as "mind" | "body" | "soul", // Type assertion here
-          created_at: new Date(note.created_at)
-        }));
-        
-        setNotes(formattedNotes);
+        if (user) {
+          // If user is logged in, fetch from Supabase
+          const formattedNotes = await fetchNotesFromSupabase();
+          setNotes(formattedNotes);
+        } else {
+          // If user is not logged in, load from localStorage
+          const localNotes = getNotesFromLocalStorage();
+          setNotes(localNotes);
+        }
       } catch (error) {
-        console.error("Error fetching notes:", error);
+        console.error("Error loading notes:", error);
         toast({
           title: "Error",
           description: "Failed to load notes. Please try again later.",
@@ -64,7 +40,7 @@ export const useNotes = () => {
       }
     };
     
-    fetchNotes();
+    loadNotes();
   }, [user, toast]);
   
   const addNote = async (title: string, content: string, category: "mind" | "body" | "soul") => {
@@ -83,7 +59,7 @@ export const useNotes = () => {
     if (!user) {
       // If user is not logged in, save to localStorage
       const updatedNotes = [tempNote, ...notes];
-      localStorage.setItem("userNotes", JSON.stringify(updatedNotes));
+      saveNotesToLocalStorage(updatedNotes);
       
       toast({
         title: "Note Added",
@@ -95,28 +71,9 @@ export const useNotes = () => {
     
     // Save to Supabase
     try {
-      const { data, error } = await supabase
-        .from("users_notes")
-        .insert({
-          user_id: user.id,
-          title,
-          content,
-          category
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
+      const newNote = await saveNoteToSupabase(user.id, title, content, category);
       
       // Replace the temporary note with the one from the database
-      const newNote: Note = {
-        id: data.id,
-        title: data.title,
-        content: data.content,
-        category: data.category as "mind" | "body" | "soul", // Type assertion here
-        created_at: new Date(data.created_at)
-      };
-      
       setNotes(prev => [
         newNote,
         ...prev.filter(note => note.id !== tempNote.id)
@@ -150,7 +107,7 @@ export const useNotes = () => {
     if (!user) {
       // If user is not logged in, update localStorage
       const updatedNotes = notes.filter(note => note.id !== id);
-      localStorage.setItem("userNotes", JSON.stringify(updatedNotes));
+      saveNotesToLocalStorage(updatedNotes);
       
       toast({
         title: "Note Deleted",
@@ -162,12 +119,7 @@ export const useNotes = () => {
     
     // Delete from Supabase
     try {
-      const { error } = await supabase
-        .from("users_notes")
-        .delete()
-        .eq("id", id);
-      
-      if (error) throw error;
+      await deleteNoteFromSupabase(id);
       
       toast({
         title: "Note Deleted",
