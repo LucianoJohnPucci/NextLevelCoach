@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Bookmark, Loader2, Play } from "lucide-react";
+import { Bookmark, Loader2, PlusCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import type { MeditationSession } from "@/services/meditationService";
 import { Badge } from "@/components/ui/badge";
@@ -81,8 +81,14 @@ const MeditationSessionItem = ({
             )}
           </Button>
         )}
-        <Button size="icon" onClick={onPlay} title="Play meditation">
-          <Play className="h-4 w-4" />
+        <Button 
+          size="default" 
+          onClick={onPlay} 
+          title="Add meditation session"
+          className="flex items-center gap-2"
+        >
+          <PlusCircle className="h-4 w-4" />
+          Add
         </Button>
       </div>
     </motion.div>
@@ -90,3 +96,4 @@ const MeditationSessionItem = ({
 };
 
 export default MeditationSessionItem;
+
