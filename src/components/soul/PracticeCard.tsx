@@ -1,7 +1,5 @@
-
 import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
-import { Slider } from "@/components/ui/slider";
 
 interface PracticeCardProps {
   title: string;
@@ -49,13 +47,6 @@ const PracticeCard = ({
               {currentValue} / {maxValue} {unit}
             </span>
           </div>
-          <Slider 
-            value={[currentValue]} 
-            max={maxValue} 
-            step={1}
-            disabled={true}
-            className="cursor-default"
-          />
           <Progress value={progressPercentage} className="h-2" />
           <p className="text-xs text-muted-foreground">
             {progressPercentage}% complete
