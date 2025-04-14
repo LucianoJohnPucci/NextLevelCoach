@@ -80,7 +80,7 @@ export const useGoals = () => {
   }, [goals, user]);
 
   // Function to add a new goal
-  const addGoal = async (title: string, startDate: Date) => {
+  const addGoal = async (title: string, startDate: Date, why?: string) => {
     if (!title.trim()) {
       toast({
         title: "Error",
@@ -103,6 +103,7 @@ export const useGoals = () => {
               user_id: user.id,
               start_date: startDate.toISOString().split('T')[0],
               progress: 0,
+              why, // Added why field
             }
           ])
           .select();
@@ -140,7 +141,8 @@ export const useGoals = () => {
         title,
         progress: 0,
         added: new Date(),
-        start_date: startDate
+        start_date: startDate,
+        why, // Added why field
       };
       
       setGoals(prev => [...prev, newGoal]);

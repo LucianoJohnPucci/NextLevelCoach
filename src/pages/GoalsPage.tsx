@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Target, CheckCircle } from "lucide-react";
@@ -13,12 +12,7 @@ export interface Goal {
   progress: number;
   added: Date;
   start_date?: Date;
-}
-
-export interface Habit {
-  id: string;
-  title: string;
-  frequency: "D" | "W";
+  why?: string;
 }
 
 const GoalsPage = () => {
@@ -29,19 +23,18 @@ const GoalsPage = () => {
     { id: "4", title: "Reading time", frequency: "D" },
   ]);
 
-  // Dialog state
   const [openDialog, setOpenDialog] = useState(false);
   const [newGoalTitle, setNewGoalTitle] = useState("");
+  const [newGoalWhy, setNewGoalWhy] = useState("");
   const [startDate, setStartDate] = useState<Date>(new Date());
 
-  // Use the goals hook
   const { goals, isLoading, addGoal, removeGoal, updateGoalProgress } = useGoals();
 
   const handleAddGoal = async () => {
-    const success = await addGoal(newGoalTitle, startDate);
+    const success = await addGoal(newGoalTitle, startDate, newGoalWhy);
     if (success) {
-      // Reset form and close dialog
       setNewGoalTitle("");
+      setNewGoalWhy("");
       setStartDate(new Date());
       setOpenDialog(false);
     }
@@ -85,12 +78,13 @@ const GoalsPage = () => {
         </Card>
       </div>
 
-      {/* Add Goal Dialog */}
       <GoalDialog
         open={openDialog}
         onOpenChange={setOpenDialog}
         goalTitle={newGoalTitle}
         setGoalTitle={setNewGoalTitle}
+        goalWhy={newGoalWhy}
+        setGoalWhy={setNewGoalWhy}
         startDate={startDate}
         setStartDate={setStartDate}
         onAddGoal={handleAddGoal}
@@ -102,7 +96,6 @@ const GoalsPage = () => {
 
 export default GoalsPage;
 
-// Export a helper function that can be used by other components
 export const addGoalToLocalStorage = (title: string) => {
   const savedGoals = localStorage.getItem("userGoals");
   let currentGoals: Goal[] = [];

@@ -2,7 +2,7 @@
 import React from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Trash2, CalendarIcon } from "lucide-react";
+import { Trash2, CalendarIcon, Target } from "lucide-react";
 import { format } from "date-fns";
 import { Goal } from "@/pages/GoalsPage";
 
@@ -36,6 +36,12 @@ const GoalItem = ({ goal, updateGoalProgress, removeGoal }: GoalItemProps) => {
         className="cursor-default" 
         onValueChange={(value) => updateGoalProgress(goal.id, value[0])}
       />
+      {goal.why && (
+        <div className="text-xs text-muted-foreground flex items-center mt-1">
+          <Target className="h-3 w-3 mr-1" />
+          Why: {goal.why}
+        </div>
+      )}
       {goal.start_date && (
         <div className="text-xs text-muted-foreground flex items-center mt-1">
           <CalendarIcon className="h-3 w-3 mr-1" />

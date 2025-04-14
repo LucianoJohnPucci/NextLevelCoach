@@ -19,12 +19,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Textarea } from "@/components/ui/textarea";
 
 interface GoalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   goalTitle: string;
   setGoalTitle: (title: string) => void;
+  goalWhy: string;
+  setGoalWhy: (why: string) => void;
   startDate: Date;
   setStartDate: (date: Date) => void;
   onAddGoal: () => void;
@@ -36,6 +39,8 @@ const GoalDialog = ({
   onOpenChange,
   goalTitle,
   setGoalTitle,
+  goalWhy,
+  setGoalWhy,
   startDate,
   setStartDate,
   onAddGoal,
@@ -55,6 +60,15 @@ const GoalDialog = ({
               placeholder="Enter your goal"
               value={goalTitle}
               onChange={(e) => setGoalTitle(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="goal-why">Why This Goal?</Label>
+            <Textarea
+              id="goal-why"
+              placeholder="Describe why this goal is important to you"
+              value={goalWhy}
+              onChange={(e) => setGoalWhy(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
