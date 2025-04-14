@@ -5,11 +5,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Brain, Heart, Sparkles, Plus, Search, BookOpen } from "lucide-react";
+import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn } from "lucide-react";
 import { format } from "date-fns";
 import NoteForm from "@/components/notes/NoteForm";
 import NoteItem from "@/components/notes/NoteItem";
 import { useNotes } from "@/components/notes/useNotes";
+import { useAuth } from "@/components/AuthProvider";
+import { Link } from "react-router-dom";
 
 export interface Note {
   id: string;
@@ -22,7 +24,8 @@ export interface Note {
 const NotesPage = () => {
   const [openForm, setOpenForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { notes, addNote, deleteNote } = useNotes();
+  const { notes, addNote, deleteNote, loading } = useNotes();
+  const { user } = useAuth();
   
   const filteredNotes = notes.filter((note) => 
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -37,6 +40,27 @@ const NotesPage = () => {
           Capture insights and reflections across mind, body, and soul.
         </p>
       </div>
+      
+      {!user && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
+              <div>
+                <h3 className="text-lg font-medium">Sign in to sync your notes</h3>
+                <p className="text-sm text-muted-foreground">
+                  Your notes are currently stored locally. Sign in to access them from any device.
+                </p>
+              </div>
+              <Button asChild className="sm:ml-auto">
+                <Link to="/auth">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Sign In
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <div className="flex items-center justify-between">
         <div className="relative w-full max-w-sm">
@@ -77,7 +101,11 @@ const NotesPage = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {filteredNotes.length > 0 ? (
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                  </div>
+                ) : filteredNotes.length > 0 ? (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -116,7 +144,11 @@ const NotesPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {filteredNotes.filter(note => note.category === category).length > 0 ? (
+                  {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                    </div>
+                  ) : filteredNotes.filter(note => note.category === category).length > 0 ? (
                     <Table>
                       <TableHeader>
                         <TableRow>
