@@ -25,7 +25,6 @@ export const useHabits = () => {
     if (!user) return;
 
     try {
-      // Using a raw query to bypass TypeScript constraints
       const { data, error } = await supabase
         .rpc('get_habits')
         .order('created_at', { ascending: false });
@@ -113,7 +112,6 @@ export const useHabits = () => {
     if (user) {
       // Add to Supabase
       try {
-        // Using a raw query to bypass TypeScript constraints
         const { error } = await supabase.rpc('add_habit', {
           p_title: title,
           p_user_id: user.id,
@@ -180,7 +178,6 @@ export const useHabits = () => {
     if (user) {
       // Remove from Supabase
       try {
-        // Using a raw query to bypass TypeScript constraints
         const { error } = await supabase.rpc('delete_habit', { p_id: id });
 
         if (error) {
@@ -227,7 +224,6 @@ export const useHabits = () => {
   ) => {
     if (user) {
       try {
-        // Using a raw query to bypass TypeScript constraints
         const { error } = await supabase.rpc('update_habit', {
           p_id: id,
           p_title: updates.title,
