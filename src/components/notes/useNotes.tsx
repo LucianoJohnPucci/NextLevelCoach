@@ -47,7 +47,7 @@ export const useNotes = () => {
           id: note.id,
           title: note.title,
           content: note.content,
-          category: note.category as "mind" | "body" | "soul",
+          category: note.category as "mind" | "body" | "soul", // Type assertion here
           created_at: new Date(note.created_at)
         }));
         
@@ -113,7 +113,7 @@ export const useNotes = () => {
         id: data.id,
         title: data.title,
         content: data.content,
-        category: data.category,
+        category: data.category as "mind" | "body" | "soul", // Type assertion here
         created_at: new Date(data.created_at)
       };
       
