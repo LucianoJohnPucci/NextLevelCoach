@@ -72,9 +72,9 @@ const SoulPage = () => {
         </div>
       </div>
       
-      <InspirationSection />
-      
       <CommunityEventsSection events={events} />
+      
+      <InspirationSection />
     </div>
   );
 };
