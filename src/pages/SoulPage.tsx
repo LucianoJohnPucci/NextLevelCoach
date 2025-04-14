@@ -31,24 +31,6 @@ const SoulPage = () => {
     }
   ];
   
-  const events = [
-    {
-      title: "Group Meditation Session",
-      date: "Tomorrow, 7:00 PM",
-      participants: 24
-    },
-    {
-      title: "Stoicism Discussion Group",
-      date: "Saturday, 3:00 PM",
-      participants: 18
-    },
-    {
-      title: "Mindful Walking Practice",
-      date: "Sunday, 9:00 AM",
-      participants: 12
-    }
-  ];
-  
   return (
     <div className="space-y-6">
       <motion.div 
@@ -75,7 +57,7 @@ const SoulPage = () => {
         </div>
       </div>
       
-      <CommunityEventsSection events={events} />
+      <CommunityEventsSection />
       
       <InspirationSection />
     </div>

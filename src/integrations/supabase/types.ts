@@ -51,6 +51,48 @@ export type Database = {
         }
         Relationships: []
       }
+      community_events: {
+        Row: {
+          created_at: string
+          event_date: string
+          id: string
+          is_open: boolean
+          location: string
+          notes: string | null
+          participants: number
+          ticket_cost: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_date: string
+          id?: string
+          is_open?: boolean
+          location: string
+          notes?: string | null
+          participants?: number
+          ticket_cost?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          id?: string
+          is_open?: boolean
+          location?: string
+          notes?: string | null
+          participants?: number
+          ticket_cost?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_entries: {
         Row: {
           accomplishments: string | null
