@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { Brain, BookOpen, PenLine, Timer, Play, Bookmark, ArrowRight, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import JournalEntryForm from "@/components/journal/JournalEntryForm";
 import JournalEntryList from "@/components/journal/JournalEntryList";
 import { useAuth } from "@/components/AuthProvider";
@@ -228,7 +229,11 @@ const MindPage = () => {
           title="Journaling"
           description="Reflect on your thoughts with guided prompts."
           icon={PenLine}
-          action="Start Writing"
+          action={
+            <Link to="/wisdom" className="w-full">
+              Start Writing
+            </Link>
+          }
           delay={0.2}
         />
         <FeatureCard
