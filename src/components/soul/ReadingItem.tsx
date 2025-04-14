@@ -1,7 +1,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Plus, BookOpen, Bookmark, BookmarkedIcon } from "lucide-react";
+import { Plus, BookOpen, Bookmark } from "lucide-react";
 import { useState } from "react";
 
 interface ReadingItemProps { 
@@ -65,7 +65,7 @@ const ReadingItem = ({
           onClick={handleToggleFavorite}
         >
           {isFavorite ? (
-            <BookmarkedIcon className="h-4 w-4 text-primary" />
+            <Bookmark className="h-4 w-4 fill-primary text-primary" />
           ) : (
             <Bookmark className="h-4 w-4" />
           )}
