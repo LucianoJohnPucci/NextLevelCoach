@@ -11,6 +11,11 @@ export interface MeditationSession {
   duration: string;
   benefits: string;
   created_at: Date;
+  improves_focus?: boolean;
+  reduces_stress?: boolean;
+  promotes_calm?: boolean;
+  improves_sleep?: boolean;
+  enhances_clarity?: boolean;
   is_enabled?: boolean;
 }
 

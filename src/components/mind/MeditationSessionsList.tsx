@@ -1,8 +1,10 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Timer, Loader2 } from "lucide-react";
+import { Timer, Loader2, Search } from "lucide-react";
 import MeditationSessionItem from "./MeditationSessionItem";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { MeditationSession } from "@/services/meditationService";
 
 interface MeditationSessionsListProps {
@@ -24,6 +26,22 @@ const MeditationSessionsList = ({
   onToggleFavorite,
   onPlayMeditation,
 }: MeditationSessionsListProps) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [durationFilter, setDurationFilter] = useState("all");
+  
+  // Filter sessions by search query and duration
+  const filteredSessions = sessions.filter(session => {
+    const matchesSearch = session.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         session.description.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesDuration = durationFilter === "all" || 
+                           (durationFilter === "short" && parseInt(session.duration) <= 10) ||
+                           (durationFilter === "medium" && parseInt(session.duration) > 10 && parseInt(session.duration) <= 20) ||
+                           (durationFilter === "long" && parseInt(session.duration) > 20);
+    
+    return matchesSearch && matchesDuration;
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -34,6 +52,29 @@ const MeditationSessionsList = ({
         <CardDescription>
           Guided practices to improve focus and reduce stress.
         </CardDescription>
+        
+        <div className="flex flex-col sm:flex-row gap-2 mt-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search sessions..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Select value={durationFilter} onValueChange={setDurationFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Duration" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Durations</SelectItem>
+              <SelectItem value="short">Short (≤ 10 min)</SelectItem>
+              <SelectItem value="medium">Medium (11-20 min)</SelectItem>
+              <SelectItem value="long">Long (> 20 min)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -45,12 +86,12 @@ const MeditationSessionsList = ({
             <div className="rounded-lg bg-destructive/10 p-4 text-center text-destructive">
               <p>Failed to load meditation sessions</p>
             </div>
-          ) : sessions.length === 0 ? (
+          ) : filteredSessions.length === 0 ? (
             <div className="rounded-lg bg-muted p-4 text-center">
               <p>No meditation sessions available</p>
             </div>
           ) : (
-            sessions.map((session) => (
+            filteredSessions.map((session) => (
               <MeditationSessionItem 
                 key={session.id}
                 session={session}
