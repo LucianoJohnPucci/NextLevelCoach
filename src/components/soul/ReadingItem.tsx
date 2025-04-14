@@ -1,20 +1,24 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Bookmark, BookOpen } from "lucide-react";
+import { Plus, BookOpen } from "lucide-react";
 
 interface ReadingItemProps { 
   title: string;
   author: string;
   duration: string;
+  minutes: number;
   index: number;
+  onAdd: () => void;
 }
 
 const ReadingItem = ({ 
   title, 
   author, 
   duration,
-  index
+  minutes,
+  index,
+  onAdd
 }: ReadingItemProps) => {
   return (
     <motion.div
@@ -33,10 +37,16 @@ const ReadingItem = ({
         <p className="text-sm text-muted-foreground">By {author}</p>
       </div>
       <div className="flex items-center gap-2">
-        <Button size="icon" variant="ghost">
-          <Bookmark className="h-4 w-4" />
+        <Button 
+          onClick={onAdd} 
+          variant="outline" 
+          size="sm" 
+          className="gap-1"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Add {minutes}m
         </Button>
-        <Button size="icon">
+        <Button size="icon" variant="ghost">
           <BookOpen className="h-4 w-4" />
         </Button>
       </div>
