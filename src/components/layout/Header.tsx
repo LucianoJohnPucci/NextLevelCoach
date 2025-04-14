@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "./SidebarProvider";
 import { Menu } from "lucide-react";
@@ -9,6 +9,7 @@ import { UserProfileButton } from "../UserProfileButton";
 
 const Header = () => {
   const { toggle } = useSidebar();
+  const location = useLocation();
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
