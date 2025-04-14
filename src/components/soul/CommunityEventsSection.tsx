@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -6,7 +7,7 @@ import { Users, Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import CommunityEvent from "./CommunityEvent";
 import EventSearch from "./EventSearch";
-import EventForm from "./EventForm";
+import EventForm from "./event-form";
 import { useCommunityEvents } from "@/hooks/community-events";
 
 const CommunityEventsSection = () => {
