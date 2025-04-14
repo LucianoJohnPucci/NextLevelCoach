@@ -4,19 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
-import { Activity, Heart, Utensils, Clock, Calendar, Play, BarChart2, Plus } from "lucide-react";
+import { Activity, Heart, Utensils, Clock, Calendar, BarChart2, Plus } from "lucide-react";
+import { useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const WorkoutItem = ({ 
   title, 
   category, 
   duration,
   difficulty,
+  favorite,
   index
 }: { 
   title: string; 
   category: string; 
   duration: string;
   difficulty: "Easy" | "Medium" | "Hard";
+  favorite: boolean;
   index: number;
 }) => {
   return (
@@ -45,8 +49,9 @@ const WorkoutItem = ({
           </span>
         </div>
       </div>
-      <Button size="icon">
-        <Play className="h-4 w-4" />
+      <Button size="default" className="flex items-center gap-2">
+        <Plus className="h-4 w-4" />
+        Add
       </Button>
     </motion.div>
   );
@@ -118,32 +123,43 @@ const NutritionStat = ({
 };
 
 const BodyPage = () => {
+  const [workoutFilter, setWorkoutFilter] = useState("all");
+  
   const workouts = [
     {
       title: "Morning Yoga",
       category: "Flexibility",
       duration: "20 min",
-      difficulty: "Easy" as const
+      difficulty: "Easy" as const,
+      favorite: true
     },
     {
       title: "HIIT Cardio",
       category: "Cardio",
       duration: "30 min",
-      difficulty: "Hard" as const
+      difficulty: "Hard" as const,
+      favorite: false
     },
     {
       title: "Strength Training",
       category: "Strength",
       duration: "45 min",
-      difficulty: "Medium" as const
+      difficulty: "Medium" as const,
+      favorite: true
     },
     {
       title: "Evening Stretch",
       category: "Recovery",
       duration: "15 min",
-      difficulty: "Easy" as const
+      difficulty: "Easy" as const,
+      favorite: false
     }
   ];
+  
+  // Filter workouts based on the selected filter
+  const filteredWorkouts = workouts.filter(workout => 
+    workoutFilter === "all" || (workoutFilter === "favorites" && workout.favorite)
+  );
   
   const meals = [
     {
@@ -290,24 +306,46 @@ const BodyPage = () => {
                     Recommended exercises for your fitness goals.
                   </CardDescription>
                 </div>
-                <Button size="sm" className="gap-1">
-                  <Plus className="h-4 w-4" />
-                  Add
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Select value={workoutFilter} onValueChange={setWorkoutFilter}>
+                    <SelectTrigger className="w-[150px]">
+                      <SelectValue placeholder="Show" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Workouts</SelectItem>
+                      <SelectItem value="favorites">Favorites</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button size="sm" className="gap-1">
+                    <Plus className="h-4 w-4" />
+                    Add
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {workouts.map((workout, index) => (
-                  <WorkoutItem 
-                    key={index}
-                    title={workout.title}
-                    category={workout.category}
-                    duration={workout.duration}
-                    difficulty={workout.difficulty}
-                    index={index}
-                  />
-                ))}
+                {filteredWorkouts.length === 0 ? (
+                  <div className="rounded-lg bg-muted p-4 text-center">
+                    <p>
+                      {workoutFilter === "favorites" 
+                        ? "No favorite workouts found" 
+                        : "No workouts available"}
+                    </p>
+                  </div>
+                ) : (
+                  filteredWorkouts.map((workout, index) => (
+                    <WorkoutItem 
+                      key={index}
+                      title={workout.title}
+                      category={workout.category}
+                      duration={workout.duration}
+                      difficulty={workout.difficulty}
+                      favorite={workout.favorite}
+                      index={index}
+                    />
+                  ))
+                )}
               </div>
             </CardContent>
             <CardFooter>
