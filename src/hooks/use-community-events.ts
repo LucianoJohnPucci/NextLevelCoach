@@ -9,6 +9,7 @@ export interface Event {
   id: string;
   title: string;
   date: string;
+  event_date: string; // Raw date string from database
   location: string;
   participants: number;
   ticket_cost: number | null;
@@ -27,6 +28,7 @@ export interface EventFormData {
 
 export function useCommunityEvents() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [eventDates, setEventDates] = useState<Date[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   
@@ -47,12 +49,18 @@ export function useCommunityEvents() {
           id: event.id,
           title: event.title,
           date: new Date(event.event_date).toLocaleString(),
+          event_date: event.event_date, // Store raw date string
           location: event.location,
           participants: event.participants,
           ticket_cost: event.ticket_cost,
           is_open: event.is_open
         }));
+        
+        // Extract dates for the calendar
+        const dates = data.map(event => new Date(event.event_date));
+        
         setEvents(formattedEvents);
+        setEventDates(dates);
       }
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -62,7 +70,7 @@ export function useCommunityEvents() {
     }
   };
   
-  const searchEvents = async (searchLocation: string, searchDate: Date | undefined) => {
+  const searchEvents = async (searchLocation: string, searchDate: Date | undefined, priceFilter: string | null) => {
     try {
       setLoading(true);
       
@@ -78,6 +86,13 @@ export function useCommunityEvents() {
                      .lt('event_date', `${formattedDate}T23:59:59Z`);
       }
       
+      // Add price filter
+      if (priceFilter === 'free') {
+        query = query.is('ticket_cost', null);
+      } else if (priceFilter === 'paid') {
+        query = query.not('ticket_cost', 'is', null);
+      }
+      
       const { data, error } = await query.order('event_date', { ascending: true });
         
       if (error) {
@@ -89,6 +104,7 @@ export function useCommunityEvents() {
           id: event.id,
           title: event.title,
           date: new Date(event.event_date).toLocaleString(),
+          event_date: event.event_date,
           location: event.location,
           participants: event.participants,
           ticket_cost: event.ticket_cost,
@@ -179,6 +195,7 @@ export function useCommunityEvents() {
   
   return {
     events,
+    eventDates,
     loading,
     fetchEvents,
     searchEvents,

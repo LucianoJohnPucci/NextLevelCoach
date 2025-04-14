@@ -11,7 +11,7 @@ import EventForm from "./EventForm";
 import { useCommunityEvents } from "@/hooks/use-community-events";
 
 const CommunityEventsSection = () => {
-  const { events, loading, joinEvent, searchEvents, fetchEvents, createEvent } = useCommunityEvents();
+  const { events, eventDates, loading, joinEvent, searchEvents, fetchEvents, createEvent } = useCommunityEvents();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   
   return (
@@ -64,8 +64,9 @@ const CommunityEventsSection = () => {
           </Button>
           
           <EventSearch 
-            onSearch={searchEvents} 
-            onClearFilter={fetchEvents} 
+            onSearch={(location, date, priceFilter) => searchEvents(location, date, priceFilter)} 
+            onClearFilter={fetchEvents}
+            eventDates={eventDates}
           />
         </CardFooter>
       </Card>
