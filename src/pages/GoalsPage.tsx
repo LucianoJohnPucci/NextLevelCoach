@@ -101,7 +101,6 @@ const GoalsPage = () => {
 };
 
 export default GoalsPage;
-export { type Goal };
 
 // Export a helper function that can be used by other components
 export const addGoalToLocalStorage = (title: string) => {
