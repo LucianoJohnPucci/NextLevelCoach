@@ -56,11 +56,19 @@ const WaterIntakeTracker = ({ value, goal, onAddWater }: WaterIntakeTrackerProps
               </Button>
               <Button 
                 size="sm" 
+                variant="outline" 
+                className="gap-1" 
+                onClick={() => setAmount(1.0)}
+              >
+                1.0L
+              </Button>
+              <Button 
+                size="sm" 
                 className="gap-1" 
                 onClick={handleAddWater}
               >
                 <Plus className="h-4 w-4" />
-                Add {amount}L
+                Track {amount}L
               </Button>
             </div>
           </div>
