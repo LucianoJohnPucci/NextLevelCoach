@@ -40,10 +40,10 @@ const ReadingsSection = ({ readings }: ReadingsSectionProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Book className="h-5 w-5" />
-          Philosophical Readings
+          Daily Reflections Favourites
         </CardTitle>
         <CardDescription>
-          Add reflections to track your philosophical practice.
+          Select your favorite philosophical readings to track your daily reflections.
         </CardDescription>
       </CardHeader>
       <CardContent>
