@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Drawer, DrawerTrigger } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Event } from "@/hooks/use-community-events";
+import { Event } from "@/hooks/community-events";
 import SearchDialog from "./event-search/SearchDialog";
 import SearchDrawer from "./event-search/SearchDrawer";
 

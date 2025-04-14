@@ -1,5 +1,5 @@
 
-import { Event } from "@/hooks/use-community-events";
+import { Event } from "@/hooks/community-events";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -8,15 +7,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import CommunityEvent from "./CommunityEvent";
 import EventSearch from "./EventSearch";
 import EventForm from "./EventForm";
-import { useCommunityEvents } from "@/hooks/use-community-events";
+import { useCommunityEvents } from "@/hooks/community-events";
 
 const CommunityEventsSection = () => {
   const { events, eventDates, loading, joinEvent, searchEvents, fetchEvents, createEvent, getEventsForDate } = useCommunityEvents();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [eventsOnSelectedDate, setEventsOnSelectedDate] = useState([]);
-  
-  // Update events on selected date whenever selected date changes
+
   useEffect(() => {
     if (selectedDate) {
       const dateEvents = getEventsForDate(selectedDate);
@@ -26,12 +24,11 @@ const CommunityEventsSection = () => {
     }
   }, [selectedDate, getEventsForDate]);
 
-  // Handle search with date selection side effect
   const handleSearch = (location: string, date: Date | undefined, priceFilter: string | null) => {
     setSelectedDate(date);
     searchEvents(location, date, priceFilter);
   };
-  
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
