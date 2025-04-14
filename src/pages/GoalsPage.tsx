@@ -3,14 +3,24 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Target, CheckCircle, Plus, Trash2 } from "lucide-react";
+import { Target, CheckCircle, Plus, Trash2, CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
 
 interface Goal {
   id: string;
   title: string;
   progress: number;
   added: Date;
+  start_date?: Date;
 }
 
 interface Habit {
@@ -28,58 +38,231 @@ const GoalsPage = () => {
     { id: "4", title: "Reading time", frequency: "D" },
   ]);
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  // Load goals from localStorage on component mount
-  useEffect(() => {
-    const savedGoals = localStorage.getItem("userGoals");
-    if (savedGoals) {
-      try {
-        setGoals(JSON.parse(savedGoals));
-      } catch (e) {
-        console.error("Failed to parse saved goals:", e);
+  // Dialog state
+  const [openDialog, setOpenDialog] = useState(false);
+  const [newGoalTitle, setNewGoalTitle] = useState("");
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch goals from Supabase
+  const fetchGoals = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("goals")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching goals:", error);
+        toast({
+          title: "Error fetching goals",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
       }
-    } else {
-      // Set default goals if none exist
-      const defaultGoals = [
-        { id: "1", title: "Read 12 books this year", progress: 25, added: new Date() },
-        { id: "2", title: "Practice meditation daily", progress: 75, added: new Date() },
-        { id: "3", title: "Exercise 3 times weekly", progress: 66, added: new Date() },
-      ];
-      setGoals(defaultGoals);
-      localStorage.setItem("userGoals", JSON.stringify(defaultGoals));
-    }
-  }, []);
 
-  // Save goals to localStorage whenever they change
+      if (data) {
+        const formattedGoals: Goal[] = data.map(goal => ({
+          id: goal.id,
+          title: goal.title,
+          progress: goal.progress || 0,
+          added: new Date(goal.created_at),
+          start_date: goal.start_date ? new Date(goal.start_date) : undefined,
+        }));
+        setGoals(formattedGoals);
+      }
+    } catch (error) {
+      console.error("Error in fetchGoals:", error);
+    }
+  };
+
+  // Load goals from Supabase when the component mounts
   useEffect(() => {
-    localStorage.setItem("userGoals", JSON.stringify(goals));
-  }, [goals]);
+    if (user) {
+      fetchGoals();
+    } else {
+      // If no user is logged in, try to load from localStorage as fallback
+      const savedGoals = localStorage.getItem("userGoals");
+      if (savedGoals) {
+        try {
+          setGoals(JSON.parse(savedGoals));
+        } catch (e) {
+          console.error("Failed to parse saved goals:", e);
+        }
+      } else {
+        // Set default goals if none exist
+        const defaultGoals = [
+          { id: "1", title: "Read 12 books this year", progress: 25, added: new Date() },
+          { id: "2", title: "Practice meditation daily", progress: 75, added: new Date() },
+          { id: "3", title: "Exercise 3 times weekly", progress: 66, added: new Date() },
+        ];
+        setGoals(defaultGoals);
+        localStorage.setItem("userGoals", JSON.stringify(defaultGoals));
+      }
+    }
+  }, [user]);
+
+  // Save goals to localStorage whenever they change (as fallback)
+  useEffect(() => {
+    if (goals.length > 0 && !user) {
+      localStorage.setItem("userGoals", JSON.stringify(goals));
+    }
+  }, [goals, user]);
 
   // Function to add a new goal
-  const addGoal = (title: string) => {
-    const newGoal = {
-      id: Date.now().toString(),
-      title,
-      progress: 0,
-      added: new Date()
-    };
-    
-    setGoals(prev => [...prev, newGoal]);
-    
-    toast({
-      title: "Goal Added",
-      description: `"${title}" has been added to your goals.`,
-    });
+  const addGoal = async () => {
+    if (!newGoalTitle.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a goal title",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    if (user) {
+      // Add to Supabase
+      try {
+        const { data, error } = await supabase
+          .from("goals")
+          .insert([
+            {
+              title: newGoalTitle,
+              user_id: user.id,
+              start_date: startDate.toISOString().split('T')[0],
+              progress: 0,
+            }
+          ])
+          .select();
+
+        if (error) {
+          console.error("Error adding goal:", error);
+          toast({
+            title: "Error adding goal",
+            description: error.message,
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        // Refresh goals after adding
+        fetchGoals();
+        
+        toast({
+          title: "Goal Added",
+          description: `"${newGoalTitle}" has been added to your goals.`,
+        });
+      } catch (error) {
+        console.error("Error in addGoal:", error);
+        toast({
+          title: "Error",
+          description: "Failed to add goal. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Add to local state if no user
+      const newGoal = {
+        id: Date.now().toString(),
+        title: newGoalTitle,
+        progress: 0,
+        added: new Date(),
+        start_date: startDate
+      };
+      
+      setGoals(prev => [...prev, newGoal]);
+      
+      toast({
+        title: "Goal Added",
+        description: `"${newGoalTitle}" has been added to your goals.`,
+      });
+    }
+
+    // Reset form and close dialog
+    setNewGoalTitle("");
+    setStartDate(new Date());
+    setOpenDialog(false);
+    setIsLoading(false);
   };
 
   // Function to remove a goal
-  const removeGoal = (id: string) => {
-    setGoals(prev => prev.filter(goal => goal.id !== id));
-    
-    toast({
-      title: "Goal Removed",
-      description: "The goal has been removed from your list.",
-    });
+  const removeGoal = async (id: string) => {
+    if (user) {
+      // Remove from Supabase
+      try {
+        const { error } = await supabase
+          .from("goals")
+          .delete()
+          .eq("id", id);
+
+        if (error) {
+          console.error("Error removing goal:", error);
+          toast({
+            title: "Error removing goal",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Update local state
+        setGoals(prev => prev.filter(goal => goal.id !== id));
+        
+        toast({
+          title: "Goal Removed",
+          description: "The goal has been removed from your list.",
+        });
+      } catch (error) {
+        console.error("Error in removeGoal:", error);
+      }
+    } else {
+      // Remove from local state
+      setGoals(prev => prev.filter(goal => goal.id !== id));
+      
+      toast({
+        title: "Goal Removed",
+        description: "The goal has been removed from your list.",
+      });
+    }
+  };
+
+  // Function to update goal progress
+  const updateGoalProgress = async (id: string, progress: number) => {
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from("goals")
+          .update({ progress })
+          .eq("id", id);
+
+        if (error) {
+          console.error("Error updating goal progress:", error);
+          toast({
+            title: "Error updating progress",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+      } catch (error) {
+        console.error("Error in updateGoalProgress:", error);
+      }
+    }
+
+    // Update local state (works for both with and without user)
+    setGoals(prev => 
+      prev.map(g => 
+        g.id === id ? {...g, progress} : g
+      )
+    );
   };
 
   return (
@@ -123,19 +306,19 @@ const GoalsPage = () => {
                     max={100} 
                     step={1} 
                     className="cursor-default" 
-                    onValueChange={(value) => {
-                      setGoals(prev => 
-                        prev.map(g => 
-                          g.id === goal.id ? {...g, progress: value[0]} : g
-                        )
-                      )
-                    }}
+                    onValueChange={(value) => updateGoalProgress(goal.id, value[0])}
                   />
+                  {goal.start_date && (
+                    <div className="text-xs text-muted-foreground flex items-center mt-1">
+                      <CalendarIcon className="h-3 w-3 mr-1" />
+                      Start date: {format(goal.start_date, 'PP')}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
             
-            <Button className="w-full gap-2">
+            <Button className="w-full gap-2" onClick={() => setOpenDialog(true)}>
               <Plus className="h-4 w-4" />
               Add New Goal
             </Button>
@@ -169,11 +352,63 @@ const GoalsPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Add Goal Dialog */}
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New Goal</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="goal-title">Goal Title</Label>
+              <Input
+                id="goal-title"
+                placeholder="Enter your goal"
+                value={newGoalTitle}
+                onChange={(e) => setNewGoalTitle(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="start-date">Start Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="start-date"
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !startDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={(date) => date && setStartDate(date)}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(false)}>Cancel</Button>
+            <Button onClick={addGoal} disabled={isLoading}>
+              {isLoading ? "Adding..." : "Add Goal"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-// Export the component and also the addGoal function for use in other components
 export default GoalsPage;
 export { type Goal };
 
