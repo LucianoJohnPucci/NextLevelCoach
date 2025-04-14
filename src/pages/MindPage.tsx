@@ -1,15 +1,18 @@
-
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Brain, BookOpen, PenLine, Timer, Play, Bookmark, ArrowRight, X } from "lucide-react";
+import { Brain, BookOpen, PenLine, Timer, Play, Bookmark, ArrowRight, X, Check, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import JournalEntryForm from "@/components/journal/JournalEntryForm";
 import JournalEntryList from "@/components/journal/JournalEntryList";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
+import { useMeditationSessions, MeditationSession } from "@/services/meditationService";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Switch } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
 const FeatureCard = ({ 
   title, 
@@ -55,41 +58,100 @@ const FeatureCard = ({
 };
 
 const MeditationSession = ({ 
-  title, 
-  duration, 
-  description,
-  index
+  session,
+  isAuthenticated,
+  isToggling,
+  onToggle,
+  onPlay
 }: { 
-  title: string; 
-  duration: string; 
-  description: string;
-  index: number;
+  session: MeditationSession;
+  isAuthenticated: boolean;
+  isToggling: boolean;
+  onToggle: (enabled: boolean) => void;
+  onPlay: () => void;
 }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 * index }}
+      transition={{ duration: 0.5, delay: 0.1 }}
       className="flex justify-between rounded-lg border bg-card p-4 shadow-sm"
     >
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <h3 className="font-medium">{title}</h3>
+          <h3 className="font-medium">{session.title}</h3>
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-            {duration}
+            {session.duration}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className="text-sm text-muted-foreground">{session.description}</p>
       </div>
       <div className="flex items-center gap-2">
-        <Button size="icon" variant="ghost">
-          <Bookmark className="h-4 w-4" />
-        </Button>
-        <Button size="icon">
+        {isAuthenticated && (
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            onClick={() => onToggle(!session.is_enabled)}
+            disabled={isToggling}
+          >
+            {isToggling ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : session.is_enabled ? (
+              <Bookmark className="h-4 w-4 text-primary" />
+            ) : (
+              <Bookmark className="h-4 w-4" />
+            )}
+          </Button>
+        )}
+        <Button size="icon" onClick={onPlay}>
           <Play className="h-4 w-4" />
         </Button>
       </div>
     </motion.div>
+  );
+};
+
+const MeditationInfoDrawer = ({ session }: { session: MeditationSession }) => {
+  const { user } = useAuth();
+
+  return (
+    <Drawer>
+      <DrawerTrigger asChild>
+        <Button variant="outline" className="w-full">
+          Learn More <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>{session.title}</DrawerTitle>
+          <DrawerDescription>
+            {session.duration} · {session.description}
+          </DrawerDescription>
+        </DrawerHeader>
+        <div className="p-4 pt-0">
+          <div className="rounded-lg bg-muted p-4">
+            <h4 className="mb-2 font-medium">How It Helps</h4>
+            <p className="text-sm text-muted-foreground">{session.benefits}</p>
+          </div>
+          
+          {!user && (
+            <div className="mt-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 p-4">
+              <p className="text-sm">
+                Sign in to save your favorite sessions and track your progress.
+              </p>
+            </div>
+          )}
+        </div>
+        <DrawerFooter>
+          <Button>
+            <Play className="mr-2 h-4 w-4" /> Start Session
+          </Button>
+          <DrawerClose asChild>
+            <Button variant="outline">Close</Button>
+          </DrawerClose>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   );
 };
 
@@ -178,28 +240,14 @@ const JournalPrompt = ({
 };
 
 const MindPage = () => {
-  const meditations = [
-    {
-      title: "Morning Mindfulness",
-      duration: "10 min",
-      description: "Start your day with clarity and focus."
-    },
-    {
-      title: "Stress Relief",
-      duration: "15 min",
-      description: "Release tension and find calm."
-    },
-    {
-      title: "Before Sleep",
-      duration: "20 min",
-      description: "Prepare your mind for restful sleep."
-    },
-    {
-      title: "Quick Reset",
-      duration: "5 min",
-      description: "Regain focus during a busy day."
-    }
-  ];
+  const { user } = useAuth();
+  const { 
+    sessions: meditations, 
+    isLoading: isMeditationsLoading,
+    isError: isMeditationsError,
+    toggleSession,
+    isToggling
+  } = useMeditationSessions();
   
   const journalPrompts = [
     "What are three things you're grateful for today?",
@@ -208,6 +256,39 @@ const MindPage = () => {
     "Reflect on a recent interaction that affected you. What did you learn?",
     "What are you looking forward to, and how can you prepare for it?"
   ];
+  
+  const handlePlayMeditation = (session: MeditationSession) => {
+    toast.info(`Playing ${session.title}`, {
+      description: "This feature is under development"
+    });
+  };
+
+  const handleToggleFavorite = (session: MeditationSession, enabled: boolean) => {
+    if (!user) {
+      toast.error("You must be logged in to save sessions", {
+        description: "Please sign in to save your favorite meditation sessions."
+      });
+      return;
+    }
+
+    toggleSession({ 
+      sessionId: session.id, 
+      isEnabled: enabled 
+    }, {
+      onSuccess: () => {
+        toast.success(enabled ? "Added to favorites" : "Removed from favorites", {
+          description: enabled 
+            ? `${session.title} has been added to your favorites`
+            : `${session.title} has been removed from your favorites`
+        });
+      },
+      onError: (error) => {
+        toast.error("Failed to update session", {
+          description: error.message
+        });
+      }
+    });
+  };
   
   return (
     <div className="space-y-6">
@@ -276,21 +357,36 @@ const MindPage = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {meditations.map((meditation, index) => (
-                  <MeditationSession 
-                    key={index}
-                    title={meditation.title}
-                    duration={meditation.duration}
-                    description={meditation.description}
-                    index={index}
-                  />
-                ))}
+                {isMeditationsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary/70" />
+                  </div>
+                ) : isMeditationsError ? (
+                  <div className="rounded-lg bg-destructive/10 p-4 text-center text-destructive">
+                    <p>Failed to load meditation sessions</p>
+                  </div>
+                ) : meditations.length === 0 ? (
+                  <div className="rounded-lg bg-muted p-4 text-center">
+                    <p>No meditation sessions available</p>
+                  </div>
+                ) : (
+                  meditations.map((meditation, index) => (
+                    <MeditationSession 
+                      key={meditation.id}
+                      session={meditation}
+                      isAuthenticated={!!user}
+                      isToggling={isToggling}
+                      onToggle={(enabled) => handleToggleFavorite(meditation, enabled)}
+                      onPlay={() => handlePlayMeditation(meditation)}
+                    />
+                  ))
+                )}
               </div>
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">
-                View All Sessions
-              </Button>
+            <CardFooter className="flex flex-col sm:flex-row gap-3">
+              {meditations.length > 0 && (
+                <MeditationInfoDrawer session={meditations[0]} />
+              )}
             </CardFooter>
           </Card>
         </TabsContent>

@@ -144,6 +144,36 @@ export type Database = {
         }
         Relationships: []
       }
+      meditation_sessions: {
+        Row: {
+          benefits: string
+          created_at: string
+          description: string
+          duration: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          benefits: string
+          created_at?: string
+          description: string
+          duration: string
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          benefits?: string
+          created_at?: string
+          description?: string
+          duration?: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -176,6 +206,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      user_meditation_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          session_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          session_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          session_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_meditation_preferences_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "meditation_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users_notes: {
         Row: {
