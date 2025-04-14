@@ -3,20 +3,33 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Sparkles, Book, Users, Heart, Music, Award, ArrowRight, BookOpen, Play, Clock, Bookmark } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
+import { useState } from "react";
 
 const PracticeCard = ({ 
   title, 
   description, 
   icon: Icon, 
-  action, 
-  delay 
+  measurementType,
+  currentValue,
+  maxValue,
+  unit,
+  delay,
+  onValueChange
 }: { 
   title: string; 
   description: string; 
   icon: React.ElementType; 
-  action: string; 
+  measurementType: string;
+  currentValue: number;
+  maxValue: number;
+  unit: string;
   delay: number;
+  onValueChange: (value: number) => void;
 }) => {
+  const progressPercentage = Math.round((currentValue / maxValue) * 100);
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -31,11 +44,24 @@ const PracticeCard = ({
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <CardFooter>
-          <Button variant="outline" className="w-full">
-            {action} <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </CardFooter>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">{measurementType}</span>
+            <span className="font-semibold">
+              {currentValue} / {maxValue} {unit}
+            </span>
+          </div>
+          <Slider 
+            defaultValue={[currentValue]} 
+            max={maxValue} 
+            step={1}
+            onValueChange={(values) => onValueChange(values[0])}
+          />
+          <Progress value={progressPercentage} className="h-2" />
+          <p className="text-xs text-muted-foreground">
+            {progressPercentage}% complete
+          </p>
+        </CardContent>
       </Card>
     </motion.div>
   );
@@ -136,6 +162,11 @@ const CommunityEvent = ({
 };
 
 const SoulPage = () => {
+  // Define state for practice card values
+  const [reflectionMinutes, setReflectionMinutes] = useState(15);
+  const [connectionsAttended, setConnectionsAttended] = useState(2);
+  const [gratitudeDays, setGratitudeDays] = useState(4);
+  
   const readings = [
     {
       title: "Meditations",
@@ -190,23 +221,35 @@ const SoulPage = () => {
         <PracticeCard
           title="Daily Reflection"
           description="Take time to reflect on your values and principles."
-          icon={Sparkles}
-          action="Start Reflection"
+          icon={Clock}
+          measurementType="Time spent reflecting"
+          currentValue={reflectionMinutes}
+          maxValue={60}
+          unit="minutes"
           delay={0.1}
+          onValueChange={setReflectionMinutes}
         />
         <PracticeCard
           title="Meaningful Connections"
           description="Join community events and discussions."
           icon={Users}
-          action="View Events"
+          measurementType="Events attended"
+          currentValue={connectionsAttended}
+          maxValue={5}
+          unit="events"
           delay={0.2}
+          onValueChange={setConnectionsAttended}
         />
         <PracticeCard
           title="Gratitude Practice"
           description="Cultivate thankfulness for life's gifts."
           icon={Heart}
-          action="Begin Practice"
+          measurementType="Thankfulness streak"
+          currentValue={gratitudeDays}
+          maxValue={10}
+          unit="days"
           delay={0.3}
+          onValueChange={setGratitudeDays}
         />
       </div>
       
