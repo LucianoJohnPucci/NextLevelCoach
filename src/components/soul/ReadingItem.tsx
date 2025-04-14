@@ -1,7 +1,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Plus, BookOpen, Bookmark } from "lucide-react";
+import { Plus, Bookmark } from "lucide-react";
 import { useState } from "react";
 
 interface ReadingItemProps { 
@@ -69,9 +69,6 @@ const ReadingItem = ({
           ) : (
             <Bookmark className="h-4 w-4" />
           )}
-        </Button>
-        <Button size="icon" variant="ghost">
-          <BookOpen className="h-4 w-4" />
         </Button>
       </div>
     </motion.div>
