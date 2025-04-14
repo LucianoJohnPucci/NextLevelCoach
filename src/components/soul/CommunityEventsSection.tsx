@@ -8,7 +8,7 @@ import EventSearch from "./EventSearch";
 import { useCommunityEvents } from "@/hooks/use-community-events";
 
 const CommunityEventsSection = () => {
-  const { events, loading, joinEvent, searchEvents } = useCommunityEvents();
+  const { events, loading, joinEvent, searchEvents, fetchEvents } = useCommunityEvents();
   
   return (
     <motion.div 
@@ -55,7 +55,10 @@ const CommunityEventsSection = () => {
             <Plus className="h-4 w-4" /> Create New Event
           </Button>
           
-          <EventSearch onSearch={searchEvents} />
+          <EventSearch 
+            onSearch={searchEvents} 
+            onClearFilter={fetchEvents} 
+          />
         </CardFooter>
       </Card>
     </motion.div>

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { 
   Dialog,
   DialogTrigger,
@@ -19,9 +19,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EventSearchProps {
   onSearch: (location: string, date: Date | undefined) => void;
+  onClearFilter: () => void;
 }
 
-const EventSearch = ({ onSearch }: EventSearchProps) => {
+const EventSearch = ({ onSearch, onClearFilter }: EventSearchProps) => {
   const [searchLocation, setSearchLocation] = useState("");
   const [searchDate, setSearchDate] = useState<Date | undefined>(undefined);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -29,6 +30,13 @@ const EventSearch = ({ onSearch }: EventSearchProps) => {
 
   const handleSearch = () => {
     onSearch(searchLocation, searchDate);
+    setIsSearchOpen(false);
+  };
+
+  const handleClearFilter = () => {
+    setSearchLocation("");
+    setSearchDate(undefined);
+    onClearFilter();
     setIsSearchOpen(false);
   };
 
@@ -66,6 +74,9 @@ const EventSearch = ({ onSearch }: EventSearchProps) => {
         <DialogClose asChild>
           <Button variant="outline">Cancel</Button>
         </DialogClose>
+        <Button onClick={handleClearFilter} variant="secondary" className="mr-2">
+          <X className="h-4 w-4 mr-2" /> Clear Filter
+        </Button>
         <Button onClick={handleSearch}>Search</Button>
       </DialogFooter>
     </DialogContent>
@@ -105,6 +116,9 @@ const EventSearch = ({ onSearch }: EventSearchProps) => {
       </div>
       <DrawerFooter className="pt-2">
         <Button onClick={handleSearch}>Search Events</Button>
+        <Button onClick={handleClearFilter} variant="secondary" className="mr-2">
+          <X className="h-4 w-4 mr-2" /> Clear Filter
+        </Button>
         <DrawerClose asChild>
           <Button variant="outline">Cancel</Button>
         </DrawerClose>
