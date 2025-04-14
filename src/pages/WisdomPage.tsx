@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -5,9 +6,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, MessageSquare, Sparkles, User, RefreshCw, ListPlus } from "lucide-react";
+import { Send, MessageSquare, Sparkles, User, RefreshCw, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/AuthProvider";
+import { saveNoteToSupabase } from "@/services/notesService";
+import { getNotesFromLocalStorage, saveNotesToLocalStorage } from "@/services/localStorageService";
+import { Note } from "@/pages/NotesPage";
 
 interface Message {
   id: string;
@@ -16,31 +21,63 @@ interface Message {
   timestamp: Date;
 }
 
-// Function to add a goal from wisdom to localStorage
-export const addGoalToLocalStorage = (title: string) => {
-  const savedGoals = localStorage.getItem("userGoals");
-  let currentGoals = [];
+// Function to add a wisdom message to notes
+const addWisdomToNotes = async (
+  message: Message, 
+  user: any | null,
+  toast: any
+): Promise<Note | null> => {
+  const title = "Wisdom: " + message.content.substring(0, 30) + (message.content.length > 30 ? "..." : "");
   
-  if (savedGoals) {
-    try {
-      currentGoals = JSON.parse(savedGoals);
-    } catch (e) {
-      console.error("Failed to parse saved goals:", e);
-      currentGoals = [];
+  try {
+    if (user) {
+      // If user is logged in, save to Supabase
+      const newNote = await saveNoteToSupabase(
+        user.id,
+        title,
+        message.content,
+        "soul" // Wisdom goes into the soul category
+      );
+      
+      toast({
+        title: "Added to Notes",
+        description: "The wisdom has been added to your notes.",
+      });
+      
+      return newNote;
+    } else {
+      // If user is not logged in, save to localStorage
+      const tempNote: Note = {
+        id: `local-${Date.now()}`,
+        title,
+        content: message.content,
+        category: "soul",
+        created_at: new Date()
+      };
+      
+      // Get existing notes from localStorage
+      const existingNotes = getNotesFromLocalStorage();
+      
+      // Add new note and save back to localStorage
+      const updatedNotes = [tempNote, ...existingNotes];
+      saveNotesToLocalStorage(updatedNotes);
+      
+      toast({
+        title: "Added to Notes",
+        description: "The wisdom has been saved to your local notes. Sign in to sync across devices.",
+      });
+      
+      return tempNote;
     }
+  } catch (error) {
+    console.error("Error adding wisdom to notes:", error);
+    toast({
+      title: "Error",
+      description: "Failed to add wisdom to notes. Please try again.",
+      variant: "destructive"
+    });
+    return null;
   }
-  
-  const newGoal = {
-    id: Date.now().toString(),
-    title,
-    progress: 0,
-    added: new Date()
-  };
-  
-  const updatedGoals = [...currentGoals, newGoal];
-  localStorage.setItem("userGoals", JSON.stringify(updatedGoals));
-  
-  return newGoal;
 };
 
 // Stoic wisdom quotes for the side panel
@@ -80,6 +117,7 @@ const WisdomPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
   
   useEffect(() => {
     // Scroll to the bottom when messages change
@@ -152,17 +190,9 @@ const WisdomPage = () => {
     }
   };
 
-  const addMessageToGoals = (message: Message) => {
+  const addMessageToNotes = async (message: Message) => {
     if (message.role === "assistant") {
-      // Extract actionable items from the message
-      // For simplicity, we're using the entire message, but you could parse it
-      // to extract specific action items in a more complex implementation
-      addGoalToLocalStorage(message.content);
-      
-      toast({
-        title: "Added to Goals",
-        description: "The wisdom has been added to your goals.",
-      });
+      await addWisdomToNotes(message, user, toast);
     }
   };
   
@@ -238,10 +268,10 @@ const WisdomPage = () => {
                             variant="outline"
                             size="sm"
                             className="flex items-center gap-1"
-                            onClick={() => addMessageToGoals(message)}
+                            onClick={() => addMessageToNotes(message)}
                           >
-                            <ListPlus className="h-4 w-4" />
-                            Add to Goals
+                            <FileText className="h-4 w-4" />
+                            Add to Notes
                           </Button>
                         </div>
                       )}
