@@ -1,11 +1,13 @@
 
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Timer, Loader2, Search } from "lucide-react";
+import { Timer, Loader2, Search, Star } from "lucide-react";
 import MeditationSessionItem from "./MeditationSessionItem";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { MeditationSession } from "@/services/meditationService";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface MeditationSessionsListProps {
   sessions: MeditationSession[];
@@ -28,8 +30,9 @@ const MeditationSessionsList = ({
 }: MeditationSessionsListProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [durationFilter, setDurationFilter] = useState("all");
+  const [favoriteFilter, setFavoriteFilter] = useState("all"); // New state for favorite filtering
   
-  // Filter sessions by search query and duration
+  // Filter sessions by search query, duration and favorites
   const filteredSessions = sessions.filter(session => {
     const matchesSearch = session.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          session.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -39,7 +42,11 @@ const MeditationSessionsList = ({
                            (durationFilter === "medium" && parseInt(session.duration) > 10 && parseInt(session.duration) <= 20) ||
                            (durationFilter === "long" && parseInt(session.duration) > 20);
     
-    return matchesSearch && matchesDuration;
+    // Filter by favorites
+    const matchesFavorites = favoriteFilter === "all" || 
+                            (favoriteFilter === "favorites" && session.is_enabled);
+    
+    return matchesSearch && matchesDuration && matchesFavorites;
   });
 
   return (
@@ -63,6 +70,7 @@ const MeditationSessionsList = ({
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
+          
           <Select value={durationFilter} onValueChange={setDurationFilter}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Duration" />
@@ -74,6 +82,18 @@ const MeditationSessionsList = ({
               <SelectItem value="long">Long (&gt; 20 min)</SelectItem>
             </SelectContent>
           </Select>
+          
+          {isAuthenticated && (
+            <Select value={favoriteFilter} onValueChange={setFavoriteFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Show" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sessions</SelectItem>
+                <SelectItem value="favorites">Favorites</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -88,7 +108,11 @@ const MeditationSessionsList = ({
             </div>
           ) : filteredSessions.length === 0 ? (
             <div className="rounded-lg bg-muted p-4 text-center">
-              <p>No meditation sessions available</p>
+              <p>
+                {favoriteFilter === "favorites" 
+                  ? "No favorite meditation sessions found" 
+                  : "No meditation sessions available"}
+              </p>
             </div>
           ) : (
             filteredSessions.map((session) => (
