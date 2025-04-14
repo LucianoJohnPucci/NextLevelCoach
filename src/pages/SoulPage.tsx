@@ -1,168 +1,14 @@
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Sparkles, Book, Users, Heart, Music, Award, ArrowRight, BookOpen, Play, Clock, Bookmark } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { Slider } from "@/components/ui/slider";
 import { useState } from "react";
-
-const PracticeCard = ({ 
-  title, 
-  description, 
-  icon: Icon, 
-  measurementType,
-  currentValue,
-  maxValue,
-  unit,
-  delay,
-  onValueChange
-}: { 
-  title: string; 
-  description: string; 
-  icon: React.ElementType; 
-  measurementType: string;
-  currentValue: number;
-  maxValue: number;
-  unit: string;
-  delay: number;
-  onValueChange: (value: number) => void;
-}) => {
-  const progressPercentage = Math.round((currentValue / maxValue) * 100);
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay }}
-    >
-      <Card className="h-full">
-        <CardHeader>
-          <div className="mb-2 w-fit rounded-lg bg-primary/10 p-2 text-primary">
-            <Icon className="h-5 w-5" />
-          </div>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">{measurementType}</span>
-            <span className="font-semibold">
-              {currentValue} / {maxValue} {unit}
-            </span>
-          </div>
-          <Slider 
-            defaultValue={[currentValue]} 
-            max={maxValue} 
-            step={1}
-            onValueChange={(values) => onValueChange(values[0])}
-          />
-          <Progress value={progressPercentage} className="h-2" />
-          <p className="text-xs text-muted-foreground">
-            {progressPercentage}% complete
-          </p>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-};
-
-const ReadingItem = ({ 
-  title, 
-  author, 
-  duration,
-  index
-}: { 
-  title: string; 
-  author: string; 
-  duration: string;
-  index: number;
-}) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 * index }}
-      className="flex justify-between rounded-lg border bg-card p-4 shadow-sm"
-    >
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <h3 className="font-medium">{title}</h3>
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-            {duration}
-          </span>
-        </div>
-        <p className="text-sm text-muted-foreground">By {author}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <Button size="icon" variant="ghost">
-          <Bookmark className="h-4 w-4" />
-        </Button>
-        <Button size="icon">
-          <BookOpen className="h-4 w-4" />
-        </Button>
-      </div>
-    </motion.div>
-  );
-};
-
-const InspirationCard = ({ 
-  quote, 
-  author, 
-  delay 
-}: { 
-  quote: string; 
-  author: string; 
-  delay: number;
-}) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay }}
-      className="rounded-lg bg-primary/5 p-6"
-    >
-      <p className="mb-4 text-lg italic">{quote}</p>
-      <p className="text-right font-medium">— {author}</p>
-    </motion.div>
-  );
-};
-
-const CommunityEvent = ({ 
-  title, 
-  date, 
-  participants,
-  index
-}: { 
-  title: string; 
-  date: string; 
-  participants: number;
-  index: number;
-}) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 * index }}
-      className="flex justify-between rounded-lg border bg-card p-4 shadow-sm"
-    >
-      <div className="space-y-1">
-        <h3 className="font-medium">{title}</h3>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Clock className="h-3 w-3" />
-          <span>{date}</span>
-          <span>•</span>
-          <Users className="h-3 w-3" />
-          <span>{participants} participating</span>
-        </div>
-      </div>
-      <Button>Join</Button>
-    </motion.div>
-  );
-};
+import PracticesSection from "@/components/soul/PracticesSection";
+import ReadingsSection from "@/components/soul/ReadingsSection";
+import GuidedPracticesSection from "@/components/soul/GuidedPracticesSection";
+import InspirationSection from "@/components/soul/InspirationSection";
+import CommunityEventsSection from "@/components/soul/CommunityEventsSection";
 
 const SoulPage = () => {
-  // Define state for practice card values
+  // State for practice card values
   const [reflectionMinutes, setReflectionMinutes] = useState(15);
   const [connectionsAttended, setConnectionsAttended] = useState(2);
   const [gratitudeDays, setGratitudeDays] = useState(4);
@@ -217,172 +63,28 @@ const SoulPage = () => {
         </p>
       </motion.div>
       
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <PracticeCard
-          title="Daily Reflection"
-          description="Take time to reflect on your values and principles."
-          icon={Clock}
-          measurementType="Time spent reflecting"
-          currentValue={reflectionMinutes}
-          maxValue={60}
-          unit="minutes"
-          delay={0.1}
-          onValueChange={setReflectionMinutes}
-        />
-        <PracticeCard
-          title="Meaningful Connections"
-          description="Join community events and discussions."
-          icon={Users}
-          measurementType="Events attended"
-          currentValue={connectionsAttended}
-          maxValue={5}
-          unit="events"
-          delay={0.2}
-          onValueChange={setConnectionsAttended}
-        />
-        <PracticeCard
-          title="Gratitude Practice"
-          description="Cultivate thankfulness for life's gifts."
-          icon={Heart}
-          measurementType="Thankfulness streak"
-          currentValue={gratitudeDays}
-          maxValue={10}
-          unit="days"
-          delay={0.3}
-          onValueChange={setGratitudeDays}
-        />
-      </div>
+      <PracticesSection 
+        reflectionMinutes={reflectionMinutes}
+        setReflectionMinutes={setReflectionMinutes}
+        connectionsAttended={connectionsAttended}
+        setConnectionsAttended={setConnectionsAttended}
+        gratitudeDays={gratitudeDays}
+        setGratitudeDays={setGratitudeDays}
+      />
       
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div className="md:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Book className="h-5 w-5" />
-                Philosophical Readings
-              </CardTitle>
-              <CardDescription>
-                Explore stoic texts and philosophical wisdom.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {readings.map((reading, index) => (
-                  <ReadingItem 
-                    key={index}
-                    title={reading.title}
-                    author={reading.author}
-                    duration={reading.duration}
-                    index={index}
-                  />
-                ))}
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">
-                Browse Library
-              </Button>
-            </CardFooter>
-          </Card>
+          <ReadingsSection readings={readings} />
         </div>
         
         <div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Music className="h-5 w-5" />
-                Guided Practices
-              </CardTitle>
-              <CardDescription>
-                Soul-nourishing audio guides.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between rounded-lg border bg-card p-4 shadow-sm">
-                <div className="space-y-1">
-                  <h3 className="font-medium">Gratitude Meditation</h3>
-                  <p className="text-sm text-muted-foreground">10 minutes</p>
-                </div>
-                <Button size="icon">
-                  <Play className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex justify-between rounded-lg border bg-card p-4 shadow-sm">
-                <div className="space-y-1">
-                  <h3 className="font-medium">Inner Peace</h3>
-                  <p className="text-sm text-muted-foreground">15 minutes</p>
-                </div>
-                <Button size="icon">
-                  <Play className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">
-                See All Guides
-              </Button>
-            </CardFooter>
-          </Card>
+          <GuidedPracticesSection />
         </div>
       </div>
       
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>Daily Inspiration</CardTitle>
-            <CardDescription>
-              Philosophical wisdom to contemplate.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <InspirationCard
-              quote="The happiness of your life depends upon the quality of your thoughts."
-              author="Marcus Aurelius"
-              delay={0.1}
-            />
-          </CardContent>
-        </Card>
-      </motion.div>
+      <InspirationSection />
       
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Community Events
-            </CardTitle>
-            <CardDescription>
-              Connect with like-minded individuals.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {events.map((event, index) => (
-                <CommunityEvent 
-                  key={index}
-                  title={event.title}
-                  date={event.date}
-                  participants={event.participants}
-                  index={index}
-                />
-              ))}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button variant="outline" className="w-full">
-              View All Events
-            </Button>
-          </CardFooter>
-        </Card>
-      </motion.div>
+      <CommunityEventsSection events={events} />
     </div>
   );
 };
