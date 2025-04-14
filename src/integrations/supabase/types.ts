@@ -176,7 +176,45 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      add_habit: {
+        Args: {
+          p_title: string
+          p_user_id: string
+          p_old_habit?: string
+          p_new_habit?: string
+          p_frequency?: string
+          p_rating?: number
+        }
+        Returns: undefined
+      }
+      delete_habit: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
+      get_habits: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          title: string
+          old_habit: string
+          new_habit: string
+          frequency: string
+          rating: number
+          created_at: string
+          user_id: string
+        }[]
+      }
+      update_habit: {
+        Args: {
+          p_id: string
+          p_title?: string
+          p_frequency?: string
+          p_old_habit?: string
+          p_new_habit?: string
+          p_rating?: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

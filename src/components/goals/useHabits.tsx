@@ -27,7 +27,7 @@ export const useHabits = () => {
     try {
       const { data, error } = await supabase
         .rpc('get_habits')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as any;
 
       if (error) {
         console.error("Error fetching habits:", error);
@@ -119,7 +119,7 @@ export const useHabits = () => {
           p_new_habit: newHabit,
           p_frequency: frequency,
           p_rating: rating
-        });
+        }) as any;
 
         if (error) {
           console.error("Error adding habit:", error);
@@ -178,7 +178,7 @@ export const useHabits = () => {
     if (user) {
       // Remove from Supabase
       try {
-        const { error } = await supabase.rpc('delete_habit', { p_id: id });
+        const { error } = await supabase.rpc('delete_habit', { p_id: id }) as any;
 
         if (error) {
           console.error("Error removing habit:", error);
@@ -231,7 +231,7 @@ export const useHabits = () => {
           p_old_habit: updates.old_habit,
           p_new_habit: updates.new_habit,
           p_rating: updates.rating
-        });
+        }) as any;
 
         if (error) {
           console.error("Error updating habit:", error);
