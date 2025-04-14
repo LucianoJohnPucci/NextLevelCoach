@@ -81,6 +81,42 @@ export type Database = {
         }
         Relationships: []
       }
+      habits: {
+        Row: {
+          created_at: string
+          frequency: string
+          id: string
+          new_habit: string | null
+          old_habit: string | null
+          rating: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          frequency?: string
+          id?: string
+          new_habit?: string | null
+          old_habit?: string | null
+          rating?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          frequency?: string
+          id?: string
+          new_habit?: string | null
+          old_habit?: string | null
+          rating?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           content: string | null

@@ -2,17 +2,18 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
+import { Habit, HabitFrequency, HabitUpdateData } from "./types/habitTypes";
+import {
+  fetchHabitsFromSupabase,
+  addHabitToSupabase,
+  removeHabitFromSupabase,
+  updateHabitInSupabase,
+  getDefaultHabits,
+  loadHabitsFromLocalStorage,
+  saveHabitsToLocalStorage
+} from "./services/habitService";
 
-export interface Habit {
-  id: string;
-  title: string;
-  old_habit?: string;
-  new_habit?: string;
-  frequency: "daily" | "weekly" | "monthly";
-  rating?: number;
-  created_at: Date;
-}
+export type { Habit } from "./types/habitTypes";
 
 export const useHabits = () => {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -20,65 +21,20 @@ export const useHabits = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Fetch habits from Supabase
-  const fetchHabits = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .rpc('get_habits')
-        .order('created_at', { ascending: false }) as any;
-
-      if (error) {
-        console.error("Error fetching habits:", error);
-        toast({
-          title: "Error fetching habits",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (data) {
-        const formattedHabits: Habit[] = data.map((habit: any) => ({
-          id: habit.id,
-          title: habit.title,
-          old_habit: habit.old_habit || undefined,
-          new_habit: habit.new_habit || undefined,
-          frequency: habit.frequency as "daily" | "weekly" | "monthly",
-          rating: habit.rating || undefined,
-          created_at: new Date(habit.created_at),
-        }));
-        setHabits(formattedHabits);
-      }
-    } catch (error) {
-      console.error("Error in fetchHabits:", error);
-    }
-  };
-
   // Load habits when the component mounts
   useEffect(() => {
     if (user) {
       fetchHabits();
     } else {
       // If no user is logged in, try to load from localStorage as fallback
-      const savedHabits = localStorage.getItem("userHabits");
+      const savedHabits = loadHabitsFromLocalStorage();
       if (savedHabits) {
-        try {
-          setHabits(JSON.parse(savedHabits));
-        } catch (e) {
-          console.error("Failed to parse saved habits:", e);
-        }
+        setHabits(savedHabits);
       } else {
         // Set default habits if none exist
-        const defaultHabits = [
-          { id: "1", title: "Morning meditation", frequency: "daily" as const, created_at: new Date() },
-          { id: "2", title: "Journal writing", frequency: "daily" as const, created_at: new Date() },
-          { id: "3", title: "Yoga session", frequency: "weekly" as const, created_at: new Date() },
-          { id: "4", title: "Reading time", frequency: "daily" as const, created_at: new Date() },
-        ];
+        const defaultHabits = getDefaultHabits();
         setHabits(defaultHabits);
-        localStorage.setItem("userHabits", JSON.stringify(defaultHabits));
+        saveHabitsToLocalStorage(defaultHabits);
       }
     }
   }, [user]);
@@ -86,14 +42,31 @@ export const useHabits = () => {
   // Save habits to localStorage whenever they change (as fallback)
   useEffect(() => {
     if (habits.length > 0 && !user) {
-      localStorage.setItem("userHabits", JSON.stringify(habits));
+      saveHabitsToLocalStorage(habits);
     }
   }, [habits, user]);
+
+  // Fetch habits from Supabase
+  const fetchHabits = async () => {
+    if (!user) return;
+
+    try {
+      const formattedHabits = await fetchHabitsFromSupabase();
+      setHabits(formattedHabits);
+    } catch (error) {
+      console.error("Error in fetchHabits:", error);
+      toast({
+        title: "Error fetching habits",
+        description: "Failed to load your habits. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Function to add a new habit
   const addHabit = async (
     title: string, 
-    frequency: "daily" | "weekly" | "monthly", 
+    frequency: HabitFrequency, 
     oldHabit?: string, 
     newHabit?: string, 
     rating?: number
@@ -112,25 +85,14 @@ export const useHabits = () => {
     if (user) {
       // Add to Supabase
       try {
-        const { error } = await supabase.rpc('add_habit', {
-          p_title: title,
-          p_user_id: user.id,
-          p_old_habit: oldHabit,
-          p_new_habit: newHabit,
-          p_frequency: frequency,
-          p_rating: rating
-        }) as any;
-
-        if (error) {
-          console.error("Error adding habit:", error);
-          toast({
-            title: "Error adding habit",
-            description: error.message,
-            variant: "destructive",
-          });
-          setIsLoading(false);
-          return false;
-        }
+        await addHabitToSupabase(
+          user.id,
+          title,
+          frequency,
+          oldHabit,
+          newHabit,
+          rating
+        );
 
         // Refresh habits after adding
         fetchHabits();
@@ -178,17 +140,7 @@ export const useHabits = () => {
     if (user) {
       // Remove from Supabase
       try {
-        const { error } = await supabase.rpc('delete_habit', { p_id: id }) as any;
-
-        if (error) {
-          console.error("Error removing habit:", error);
-          toast({
-            title: "Error removing habit",
-            description: error.message,
-            variant: "destructive",
-          });
-          return;
-        }
+        await removeHabitFromSupabase(id);
 
         // Update local state
         setHabits(prev => prev.filter(habit => habit.id !== id));
@@ -199,6 +151,11 @@ export const useHabits = () => {
         });
       } catch (error) {
         console.error("Error in removeHabit:", error);
+        toast({
+          title: "Error removing habit",
+          description: "Failed to remove habit. Please try again.",
+          variant: "destructive",
+        });
       }
     } else {
       // Remove from local state
@@ -212,36 +169,10 @@ export const useHabits = () => {
   };
 
   // Function to update a habit
-  const updateHabit = async (
-    id: string, 
-    updates: {
-      title?: string;
-      frequency?: "daily" | "weekly" | "monthly";
-      old_habit?: string;
-      new_habit?: string;
-      rating?: number;
-    }
-  ) => {
+  const updateHabit = async (id: string, updates: HabitUpdateData) => {
     if (user) {
       try {
-        const { error } = await supabase.rpc('update_habit', {
-          p_id: id,
-          p_title: updates.title,
-          p_frequency: updates.frequency,
-          p_old_habit: updates.old_habit,
-          p_new_habit: updates.new_habit,
-          p_rating: updates.rating
-        }) as any;
-
-        if (error) {
-          console.error("Error updating habit:", error);
-          toast({
-            title: "Error updating habit",
-            description: error.message,
-            variant: "destructive",
-          });
-          return false;
-        }
+        await updateHabitInSupabase(id, updates);
 
         // Refresh habits after updating
         fetchHabits();
@@ -253,6 +184,11 @@ export const useHabits = () => {
         return true;
       } catch (error) {
         console.error("Error in updateHabit:", error);
+        toast({
+          title: "Error updating habit",
+          description: "Failed to update habit. Please try again.",
+          variant: "destructive",
+        });
         return false;
       }
     } else {
