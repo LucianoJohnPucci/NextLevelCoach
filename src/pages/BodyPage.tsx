@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,7 +13,8 @@ const WorkoutItem = ({
   duration,
   difficulty,
   favorite,
-  index
+  index,
+  onAdd
 }: { 
   title: string; 
   category: string; 
@@ -22,7 +22,13 @@ const WorkoutItem = ({
   difficulty: "Easy" | "Medium" | "Hard";
   favorite: boolean;
   index: number;
+  onAdd: () => void;
 }) => {
+  const getMinutes = () => {
+    const match = duration.match(/(\d+)/);
+    return match ? parseInt(match[0], 10) : 0;
+  };
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -49,7 +55,7 @@ const WorkoutItem = ({
           </span>
         </div>
       </div>
-      <Button size="default" className="flex items-center gap-2">
+      <Button size="default" className="flex items-center gap-2" onClick={onAdd}>
         <Plus className="h-4 w-4" />
         Add
       </Button>
@@ -124,6 +130,8 @@ const NutritionStat = ({
 
 const BodyPage = () => {
   const [workoutFilter, setWorkoutFilter] = useState("all");
+  const [workoutMinutes, setWorkoutMinutes] = useState(45);
+  const workoutGoal = 120;
   
   const workouts = [
     {
@@ -156,10 +164,14 @@ const BodyPage = () => {
     }
   ];
   
-  // Filter workouts based on the selected filter
   const filteredWorkouts = workouts.filter(workout => 
     workoutFilter === "all" || (workoutFilter === "favorites" && workout.favorite)
   );
+  
+  const addWorkout = (duration: string) => {
+    const minutes = parseInt(duration.match(/(\d+)/)?.[0] || "0", 10);
+    setWorkoutMinutes(prev => prev + minutes);
+  };
   
   const meals = [
     {
@@ -218,12 +230,12 @@ const BodyPage = () => {
                   <div className="rounded-full bg-primary/10 p-2 text-primary">
                     <Activity className="h-4 w-4" />
                   </div>
-                  <span className="text-sm font-medium">Steps</span>
+                  <span className="text-sm font-medium">Workout Minutes</span>
                 </div>
-                <div className="text-2xl font-bold">8,246</div>
+                <div className="text-2xl font-bold">{workoutMinutes}</div>
               </div>
-              <Progress value={68} className="h-2" />
-              <p className="text-xs text-muted-foreground">68% of daily goal (12,000)</p>
+              <Progress value={(workoutMinutes / workoutGoal) * 100} className="h-2" />
+              <p className="text-xs text-muted-foreground">{Math.round((workoutMinutes / workoutGoal) * 100)}% of daily goal ({workoutGoal} min)</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -343,6 +355,7 @@ const BodyPage = () => {
                       difficulty={workout.difficulty}
                       favorite={workout.favorite}
                       index={index}
+                      onAdd={() => addWorkout(workout.duration)}
                     />
                   ))
                 )}
