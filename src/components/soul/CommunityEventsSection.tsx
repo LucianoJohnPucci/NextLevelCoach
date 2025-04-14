@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from "@/components/ui/drawer";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 
 interface Event {
@@ -41,7 +40,7 @@ const CommunityEventsSection = () => {
   const [searchDate, setSearchDate] = useState<Date | undefined>(undefined);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { user } = useAuth();
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     fetchEvents();
@@ -90,7 +89,6 @@ const CommunityEventsSection = () => {
       }
       
       if (searchDate) {
-        // Format date to match PostgreSQL format: YYYY-MM-DD
         const formattedDate = format(searchDate, 'yyyy-MM-dd');
         query = query.gte('event_date', `${formattedDate}T00:00:00Z`)
                      .lt('event_date', `${formattedDate}T23:59:59Z`);
@@ -131,7 +129,6 @@ const CommunityEventsSection = () => {
     }
     
     try {
-      // First get the current event to check if it's open and get current participants
       const { data: eventData, error: fetchError } = await supabase
         .from('community_events')
         .select('*')
@@ -145,7 +142,6 @@ const CommunityEventsSection = () => {
         return;
       }
       
-      // Update participant count
       const { error: updateError } = await supabase
         .from('community_events')
         .update({ participants: eventData.participants + 1 })
@@ -154,7 +150,7 @@ const CommunityEventsSection = () => {
       if (updateError) throw updateError;
       
       toast.success(`You've successfully joined: ${eventData.title}`);
-      fetchEvents(); // Refresh the events list
+      fetchEvents();
     } catch (error) {
       console.error('Error joining event:', error);
       toast.error('Failed to join event');
