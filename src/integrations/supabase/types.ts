@@ -174,6 +174,42 @@ export type Database = {
         }
         Relationships: []
       }
+      mind_metrics: {
+        Row: {
+          created_at: string
+          date: string
+          focus_score: number
+          id: string
+          meditation_minutes: number
+          mind_goals: string | null
+          streak_days: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          focus_score?: number
+          id?: string
+          meditation_minutes?: number
+          mind_goals?: string | null
+          streak_days?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          focus_score?: number
+          id?: string
+          meditation_minutes?: number
+          mind_goals?: string | null
+          streak_days?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

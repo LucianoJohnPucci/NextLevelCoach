@@ -7,6 +7,7 @@ import { Brain, Timer, Play, Bookmark, Loader2, BarChart2, Calendar } from "luci
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 import { useMeditationSessions } from "@/services/meditationService";
+import { useMindMetrics } from "@/services/mindMetricsService";
 import type { MeditationSession } from "@/services/meditationService";
 
 const FeatureCard = ({ 
@@ -109,10 +110,45 @@ const MindPage = () => {
     toggleSession,
     isToggling
   } = useMeditationSessions();
+
+  const {
+    weeklyMinutes,
+    currentStreak,
+    focusScore,
+    isLoading: isMetricsLoading,
+    recordSession,
+    isRecording
+  } = useMindMetrics();
   
   const handlePlayMeditation = (session: MeditationSession) => {
-    toast.info(`Playing ${session.title}`, {
-      description: "This feature is under development"
+    if (!user) {
+      toast.info(`Playing ${session.title}`, {
+        description: "This feature is under development"
+      });
+      return;
+    }
+
+    // Demo: Record a meditation session (in a real app, we'd time the actual session)
+    const minutes = parseInt(session.duration.split(' ')[0]);
+    
+    if (isNaN(minutes)) {
+      toast.info(`Playing ${session.title}`, {
+        description: "Session started"
+      });
+      return;
+    }
+    
+    recordSession({ minutes }, {
+      onSuccess: () => {
+        toast.success(`Meditation completed`, {
+          description: `${minutes} minutes added to your progress`
+        });
+      },
+      onError: (error) => {
+        toast.error("Failed to record session", {
+          description: error.message
+        });
+      }
     });
   };
 
@@ -143,6 +179,10 @@ const MindPage = () => {
     });
   };
   
+  // Calculate weekly goal percentage
+  const weeklyGoalMinutes = 200;
+  const weeklyProgressPercentage = Math.min(Math.round((weeklyMinutes / weeklyGoalMinutes) * 100), 100);
+  
   return (
     <div className="space-y-6">
       <motion.div 
@@ -168,17 +208,27 @@ const MindPage = () => {
               <CardTitle className="text-sm font-medium">Meditation Progress</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="rounded-full bg-primary/10 p-2 text-primary">
-                    <Brain className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-medium">Minutes</span>
+              {isMetricsLoading ? (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary/70" />
                 </div>
-                <div className="text-2xl font-bold">120</div>
-              </div>
-              <Progress value={60} className="h-2" />
-              <p className="text-xs text-muted-foreground">60% of weekly goal (200)</p>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-full bg-primary/10 p-2 text-primary">
+                        <Brain className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-medium">Minutes</span>
+                    </div>
+                    <div className="text-2xl font-bold">{weeklyMinutes}</div>
+                  </div>
+                  <Progress value={weeklyProgressPercentage} className="h-2" />
+                  <p className="text-xs text-muted-foreground">
+                    {weeklyProgressPercentage}% of weekly goal ({weeklyGoalMinutes})
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -193,17 +243,27 @@ const MindPage = () => {
               <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="rounded-full bg-primary/10 p-2 text-primary">
-                    <Calendar className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-medium">Days</span>
+              {isMetricsLoading ? (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary/70" />
                 </div>
-                <div className="text-2xl font-bold">7</div>
-              </div>
-              <Progress value={70} className="h-2" />
-              <p className="text-xs text-muted-foreground">Consistent meditation for 7 days</p>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-full bg-primary/10 p-2 text-primary">
+                        <Calendar className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-medium">Days</span>
+                    </div>
+                    <div className="text-2xl font-bold">{currentStreak}</div>
+                  </div>
+                  <Progress value={Math.min(currentStreak * 10, 100)} className="h-2" />
+                  <p className="text-xs text-muted-foreground">
+                    Consistent meditation for {currentStreak} days
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -218,17 +278,25 @@ const MindPage = () => {
               <CardTitle className="text-sm font-medium">Focus Score</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="rounded-full bg-primary/10 p-2 text-primary">
-                    <Timer className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-medium">Score</span>
+              {isMetricsLoading ? (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary/70" />
                 </div>
-                <div className="text-2xl font-bold">82</div>
-              </div>
-              <Progress value={82} className="h-2" />
-              <p className="text-xs text-muted-foreground">Based on recent sessions</p>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-full bg-primary/10 p-2 text-primary">
+                        <Timer className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-medium">Score</span>
+                    </div>
+                    <div className="text-2xl font-bold">{focusScore}</div>
+                  </div>
+                  <Progress value={focusScore} className="h-2" />
+                  <p className="text-xs text-muted-foreground">Based on recent sessions</p>
+                </>
+              )}
             </CardContent>
           </Card>
         </motion.div>
