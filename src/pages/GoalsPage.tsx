@@ -5,7 +5,9 @@ import { Target, CheckCircle } from "lucide-react";
 import GoalsList from "@/components/goals/GoalsList";
 import HabitsList from "@/components/goals/HabitsList";
 import GoalDialog from "@/components/goals/GoalDialog";
+import HabitDialog from "@/components/goals/HabitDialog";
 import { useGoals } from "@/components/goals/useGoals";
+import { useHabits, Habit } from "@/components/goals/useHabits";
 
 export interface Goal {
   id: string;
@@ -16,26 +18,28 @@ export interface Goal {
   why?: string;
 }
 
-export interface Habit {
-  id: string;
-  title: string;
-  frequency: string;
-}
-
 const GoalsPage = () => {
-  const [habits, setHabits] = useState<Habit[]>([
-    { id: "1", title: "Morning meditation", frequency: "D" },
-    { id: "2", title: "Journal writing", frequency: "D" },
-    { id: "3", title: "Yoga session", frequency: "W" },
-    { id: "4", title: "Reading time", frequency: "D" },
-  ]);
-
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openGoalDialog, setOpenGoalDialog] = useState(false);
+  const [openHabitDialog, setOpenHabitDialog] = useState(false);
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [newGoalWhy, setNewGoalWhy] = useState("");
   const [startDate, setStartDate] = useState<Date>(new Date());
+  
+  const [habitTitle, setHabitTitle] = useState("");
+  const [habitFrequency, setHabitFrequency] = useState<"daily" | "weekly" | "monthly">("daily");
+  const [oldHabit, setOldHabit] = useState("");
+  const [newHabit, setNewHabit] = useState("");
+  const [habitRating, setHabitRating] = useState<number>(3);
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
 
-  const { goals, isLoading, addGoal, removeGoal, updateGoalProgress } = useGoals();
+  const { goals, isLoading: isGoalsLoading, addGoal, removeGoal, updateGoalProgress } = useGoals();
+  const { 
+    habits, 
+    isLoading: isHabitsLoading, 
+    addHabit, 
+    removeHabit, 
+    updateHabit 
+  } = useHabits();
 
   const handleAddGoal = async () => {
     const success = await addGoal(newGoalTitle, startDate, newGoalWhy);
@@ -43,8 +47,65 @@ const GoalsPage = () => {
       setNewGoalTitle("");
       setNewGoalWhy("");
       setStartDate(new Date());
-      setOpenDialog(false);
+      setOpenGoalDialog(false);
     }
+  };
+
+  const handleAddHabit = async () => {
+    let success;
+    
+    if (editingHabit) {
+      // Update existing habit
+      success = await updateHabit(editingHabit.id, {
+        title: habitTitle,
+        frequency: habitFrequency,
+        old_habit: oldHabit || undefined,
+        new_habit: newHabit || undefined,
+        rating: habitRating
+      });
+    } else {
+      // Add new habit
+      success = await addHabit(
+        habitTitle, 
+        habitFrequency, 
+        oldHabit || undefined, 
+        newHabit || undefined, 
+        habitRating
+      );
+    }
+    
+    if (success) {
+      resetHabitForm();
+      setOpenHabitDialog(false);
+    }
+  };
+
+  const handleEditHabit = (habit: Habit) => {
+    setEditingHabit(habit);
+    setHabitTitle(habit.title);
+    setHabitFrequency(habit.frequency);
+    setOldHabit(habit.old_habit || "");
+    setNewHabit(habit.new_habit || "");
+    setHabitRating(habit.rating || 3);
+    setOpenHabitDialog(true);
+  };
+
+  const handleDeleteHabit = (id: string) => {
+    removeHabit(id);
+  };
+
+  const resetHabitForm = () => {
+    setHabitTitle("");
+    setHabitFrequency("daily");
+    setOldHabit("");
+    setNewHabit("");
+    setHabitRating(3);
+    setEditingHabit(null);
+  };
+
+  const openAddHabitDialog = () => {
+    resetHabitForm();
+    setOpenHabitDialog(true);
   };
 
   return (
@@ -69,7 +130,7 @@ const GoalsPage = () => {
             goals={goals} 
             updateGoalProgress={updateGoalProgress} 
             removeGoal={removeGoal} 
-            onOpenDialog={() => setOpenDialog(true)}
+            onOpenDialog={() => setOpenGoalDialog(true)}
           />
         </Card>
 
@@ -81,13 +142,18 @@ const GoalsPage = () => {
             </div>
             <CardDescription>Daily and weekly habits to build</CardDescription>
           </CardHeader>
-          <HabitsList habits={habits} />
+          <HabitsList 
+            habits={habits} 
+            onAddHabit={openAddHabitDialog}
+            onEditHabit={handleEditHabit}
+            onDeleteHabit={handleDeleteHabit}
+          />
         </Card>
       </div>
 
       <GoalDialog
-        open={openDialog}
-        onOpenChange={setOpenDialog}
+        open={openGoalDialog}
+        onOpenChange={setOpenGoalDialog}
         goalTitle={newGoalTitle}
         setGoalTitle={setNewGoalTitle}
         goalWhy={newGoalWhy}
@@ -95,7 +161,26 @@ const GoalsPage = () => {
         startDate={startDate}
         setStartDate={setStartDate}
         onAddGoal={handleAddGoal}
-        isLoading={isLoading}
+        isLoading={isGoalsLoading}
+      />
+
+      <HabitDialog
+        open={openHabitDialog}
+        onOpenChange={setOpenHabitDialog}
+        habitTitle={habitTitle}
+        setHabitTitle={setHabitTitle}
+        habitFrequency={habitFrequency}
+        setHabitFrequency={setHabitFrequency}
+        oldHabit={oldHabit}
+        setOldHabit={setOldHabit}
+        newHabit={newHabit}
+        setNewHabit={setNewHabit}
+        habitRating={habitRating}
+        setHabitRating={setHabitRating}
+        onAddHabit={handleAddHabit}
+        isLoading={isHabitsLoading}
+        habit={editingHabit || undefined}
+        isEditing={!!editingHabit}
       />
     </div>
   );
