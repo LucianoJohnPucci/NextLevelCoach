@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { BarChart2, Activity, Plus } from "lucide-react";
+import { BarChart2, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,10 +68,6 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
                 <SelectItem value="favorites">Favorites</SelectItem>
               </SelectContent>
             </Select>
-            <Button size="sm" className="gap-1">
-              <Plus className="h-4 w-4" />
-              Add
-            </Button>
           </div>
         </div>
       </CardHeader>
