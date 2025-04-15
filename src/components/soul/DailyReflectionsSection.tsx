@@ -2,13 +2,13 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Book, Plus } from "lucide-react";
+import { Book, Plus, Star, Clock, User } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import ReadingItem from "./ReadingItem";
 import ReflectionForm from "./reflection-form/ReflectionForm";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { motion } from "framer-motion";
 
 interface Reflection {
   id: string;
@@ -82,24 +82,45 @@ const DailyReflectionsSection = () => {
 
   const renderReflections = () => {
     if (isLoading) {
-      return <div className="text-center py-4">Loading reflections...</div>;
+      return (
+        <div className="flex justify-center py-8">
+          <div className="animate-pulse flex flex-col space-y-4 w-full">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-28 bg-primary/5 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      );
     }
 
     if (reflections.length === 0) {
-      return <div className="text-center py-4">No reflections found. Be the first to add one!</div>;
+      return (
+        <div className="text-center py-12 bg-primary/5 rounded-lg">
+          <Book className="h-12 w-12 mx-auto text-primary/60 mb-4" />
+          <h3 className="text-lg font-medium mb-2">No reflections found</h3>
+          <p className="text-muted-foreground mb-4">Be the first to add a reflection to our community library</p>
+          <Button 
+            onClick={() => setDialogOpen(true)}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Your First Reflection
+          </Button>
+        </div>
+      );
     }
 
-    return reflections.map((reflection, index) => (
-      <ReadingItem
-        key={reflection.id}
-        title={reflection.title}
-        author={reflection.author}
-        duration={`${reflection.minutes} min`}
-        minutes={reflection.minutes}
-        index={index}
-        onAdd={() => {}}
-      />
-    ));
+    return (
+      <div className="space-y-4">
+        {reflections.map((reflection, index) => (
+          <ReflectionCard
+            key={reflection.id}
+            reflection={reflection}
+            index={index}
+          />
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -114,7 +135,7 @@ const DailyReflectionsSection = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-4 mb-6">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button className="ml-auto gap-2">
@@ -127,11 +148,51 @@ const DailyReflectionsSection = () => {
             </DialogContent>
           </Dialog>
         </div>
-        <div className="space-y-4">
-          {renderReflections()}
-        </div>
+        {renderReflections()}
       </CardContent>
     </Card>
+  );
+};
+
+interface ReflectionCardProps {
+  reflection: Reflection;
+  index: number;
+}
+
+const ReflectionCard = ({ reflection, index }: ReflectionCardProps) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.1 }}
+    >
+      <div className="border rounded-lg p-4 hover:bg-primary/5 transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+          <h3 className="font-medium text-lg">{reflection.title}</h3>
+          <div className="flex items-center gap-1 text-muted-foreground text-sm">
+            <Star className="h-4 w-4 text-yellow-500" />
+            <span>{reflection.community_rating || 0}/5</span>
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap gap-x-4 gap-y-2 mb-3 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <User className="h-3.5 w-3.5" />
+            <span>{reflection.author}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" />
+            <span>{reflection.minutes} min read</span>
+          </div>
+        </div>
+        
+        {reflection.description && (
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {reflection.description}
+          </p>
+        )}
+      </div>
+    </motion.div>
   );
 };
 
