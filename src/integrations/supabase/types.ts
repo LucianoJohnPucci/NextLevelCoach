@@ -297,32 +297,50 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          body_exercise_minutes_goal: number | null
+          body_weight_goal: number | null
           created_at: string
           email: string | null
           f_name: string | null
           full_name: string | null
           id: string
+          mind_focus_goal: number | null
+          mind_meditation_goal: number | null
           sms: string | null
+          soul_gratitude_frequency: string | null
+          soul_reflection_goal: number | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          body_exercise_minutes_goal?: number | null
+          body_weight_goal?: number | null
           created_at?: string
           email?: string | null
           f_name?: string | null
           full_name?: string | null
           id: string
+          mind_focus_goal?: number | null
+          mind_meditation_goal?: number | null
           sms?: string | null
+          soul_gratitude_frequency?: string | null
+          soul_reflection_goal?: number | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          body_exercise_minutes_goal?: number | null
+          body_weight_goal?: number | null
           created_at?: string
           email?: string | null
           f_name?: string | null
           full_name?: string | null
           id?: string
+          mind_focus_goal?: number | null
+          mind_meditation_goal?: number | null
           sms?: string | null
+          soul_gratitude_frequency?: string | null
+          soul_reflection_goal?: number | null
           updated_at?: string
         }
         Relationships: []
