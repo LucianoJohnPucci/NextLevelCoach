@@ -1,14 +1,16 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { motion } from "framer-motion";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
+import { MindGoalsSection } from "@/components/profile/MindGoalsSection";
+import { BodyGoalsSection } from "@/components/profile/BodyGoalsSection";
+import { SoulGoalsSection } from "@/components/profile/SoulGoalsSection";
 
 const ProfilePage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -187,117 +189,34 @@ const ProfilePage = () => {
           </CardHeader>
           <form onSubmit={handleUpdateProfile}>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={user?.email || ""}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Email cannot be changed
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Your first name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone for SMS Notifications</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+1234567890"
-                />
-              </div>
+              <PersonalInfoSection 
+                user={user}
+                firstName={firstName}
+                setFirstName={setFirstName}
+                phone={phone}
+                setPhone={setPhone}
+              />
 
-              <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-semibold">Mind Goals</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="meditationGoal">Meditation Goal (minutes/day)</Label>
-                  <Input
-                    id="meditationGoal"
-                    type="number"
-                    value={meditationGoal || ''}
-                    onChange={(e) => setMeditationGoal(Number(e.target.value) || null)}
-                    placeholder="Enter daily meditation goal"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="focusGoal">Focus Goal (hours/day)</Label>
-                  <Input
-                    id="focusGoal"
-                    type="number"
-                    value={focusGoal || ''}
-                    onChange={(e) => setFocusGoal(Number(e.target.value) || null)}
-                    placeholder="Enter daily focus goal"
-                  />
-                </div>
-              </div>
+              <MindGoalsSection 
+                meditationGoal={meditationGoal}
+                setMeditationGoal={setMeditationGoal}
+                focusGoal={focusGoal}
+                setFocusGoal={setFocusGoal}
+              />
 
-              <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-semibold">Body Goals</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="weightGoal">Nutrition Calories Goal (cal/day)</Label>
-                  <Input
-                    id="weightGoal"
-                    type="number"
-                    step="1"
-                    value={weightGoal || ''}
-                    onChange={(e) => setWeightGoal(Number(e.target.value) || null)}
-                    placeholder="Enter daily nutrition calories goal"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="exerciseMinutesGoal">Exercise Goal (minutes/day)</Label>
-                  <Input
-                    id="exerciseMinutesGoal"
-                    type="number"
-                    value={exerciseMinutesGoal || ''}
-                    onChange={(e) => setExerciseMinutesGoal(Number(e.target.value) || null)}
-                    placeholder="Enter daily exercise goal"
-                  />
-                </div>
-              </div>
+              <BodyGoalsSection 
+                weightGoal={weightGoal}
+                setWeightGoal={setWeightGoal}
+                exerciseMinutesGoal={exerciseMinutesGoal}
+                setExerciseMinutesGoal={setExerciseMinutesGoal}
+              />
 
-              <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-semibold">Soul Goals</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="reflectionGoal">Reflection Goal (minutes/day)</Label>
-                  <Input
-                    id="reflectionGoal"
-                    type="number"
-                    value={reflectionGoal || ''}
-                    onChange={(e) => setReflectionGoal(Number(e.target.value) || null)}
-                    placeholder="Enter daily reflection goal"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="gratitudeFrequency">Gratitude Frequency</Label>
-                  <Select 
-                    value={gratitudeFrequency} 
-                    onValueChange={(value) => setGratitudeFrequency(value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select gratitude frequency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <SoulGoalsSection 
+                reflectionGoal={reflectionGoal}
+                setReflectionGoal={setReflectionGoal}
+                gratitudeFrequency={gratitudeFrequency}
+                setGratitudeFrequency={setGratitudeFrequency}
+              />
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={loading} className="w-full">
