@@ -43,23 +43,46 @@ const ProfilePage = () => {
         const { data, error } = await supabase
           .from("profiles")
           .select("f_name, sms, mind_meditation_goal, mind_focus_goal, body_weight_goal, body_exercise_minutes_goal, soul_reflection_goal, soul_gratitude_frequency")
-          .eq("id", user.id)
-          .single();
+          .eq("id", user.id);
           
         if (error) throw error;
         
-        if (data) {
-          setFirstName(data.f_name || "");
-          setPhone(data.sms || "");
+        if (!data || data.length === 0) {
+          const { error: insertError } = await supabase
+            .from("profiles")
+            .insert({
+              id: user.id,
+              f_name: user.user_metadata?.f_name || "",
+              sms: user.user_metadata?.sms || "",
+              updated_at: new Date().toISOString()
+            });
+            
+          if (insertError) throw insertError;
           
-          setMeditationGoal(data.mind_meditation_goal || null);
-          setFocusGoal(data.mind_focus_goal || null);
+          setFirstName(user.user_metadata?.f_name || "");
+          setPhone(user.user_metadata?.sms || "");
           
-          setWeightGoal(data.body_weight_goal || null);
-          setExerciseMinutesGoal(data.body_exercise_minutes_goal || null);
+          setMeditationGoal(user.user_metadata?.mind_meditation_goal || null);
+          setFocusGoal(user.user_metadata?.mind_focus_goal || null);
           
-          setReflectionGoal(data.soul_reflection_goal || null);
-          setGratitudeFrequency(data.soul_gratitude_frequency || "");
+          setWeightGoal(user.user_metadata?.body_weight_goal || null);
+          setExerciseMinutesGoal(user.user_metadata?.body_exercise_minutes_goal || null);
+          
+          setReflectionGoal(user.user_metadata?.soul_reflection_goal || null);
+          setGratitudeFrequency(user.user_metadata?.soul_gratitude_frequency || "");
+        } else {
+          const profile = data[0];
+          setFirstName(profile.f_name || "");
+          setPhone(profile.sms || "");
+          
+          setMeditationGoal(profile.mind_meditation_goal || null);
+          setFocusGoal(profile.mind_focus_goal || null);
+          
+          setWeightGoal(profile.body_weight_goal || null);
+          setExerciseMinutesGoal(profile.body_exercise_minutes_goal || null);
+          
+          setReflectionGoal(profile.soul_reflection_goal || null);
+          setGratitudeFrequency(profile.soul_gratitude_frequency || "");
         }
       } catch (error: any) {
         console.error("Error fetching profile:", error);
@@ -169,7 +192,7 @@ const ProfilePage = () => {
                 <Input
                   id="email"
                   type="email"
-                  value={user.email || ""}
+                  value={user?.email || ""}
                   disabled
                   className="bg-muted"
                 />
