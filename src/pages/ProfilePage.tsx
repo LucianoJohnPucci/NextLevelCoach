@@ -247,14 +247,14 @@ const ProfilePage = () => {
               <div className="space-y-4 border-t pt-4">
                 <h3 className="text-lg font-semibold">Body Goals</h3>
                 <div className="space-y-2">
-                  <Label htmlFor="weightGoal">Weight Goal (kg)</Label>
+                  <Label htmlFor="weightGoal">Nutrition Calories Goal (cal/day)</Label>
                   <Input
                     id="weightGoal"
                     type="number"
-                    step="0.1"
+                    step="1"
                     value={weightGoal || ''}
                     onChange={(e) => setWeightGoal(Number(e.target.value) || null)}
-                    placeholder="Enter weight goal"
+                    placeholder="Enter daily nutrition calories goal"
                   />
                 </div>
                 <div className="space-y-2">
