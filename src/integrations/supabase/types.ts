@@ -378,6 +378,30 @@ export type Database = {
         }
         Relationships: []
       }
+      Stoic_Blogs: {
+        Row: {
+          content: string | null
+          created_at: string
+          embedding: string | null
+          id: number
+          metadata: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          embedding?: string | null
+          id?: number
+          metadata?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          embedding?: string | null
+          id?: number
+          metadata?: string | null
+        }
+        Relationships: []
+      }
       user_meditation_preferences: {
         Row: {
           created_at: string

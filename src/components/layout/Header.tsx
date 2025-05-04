@@ -25,7 +25,7 @@ const Header = () => {
             <span className="sr-only">Toggle Menu</span>
           </Button>
           <Link to="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold">Mindful</span>
+            <span className="text-xl font-bold">CoreCultivate</span>
           </Link>
         </div>
         <div className="flex items-center gap-2">

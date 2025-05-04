@@ -99,7 +99,7 @@ const Index = () => {
         transition={{ duration: 0.5 }}
       >
         <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-          Welcome to Mindful
+          Welcome to CoreCultivate
         </span>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
           Nurture your mind, body, and soul
