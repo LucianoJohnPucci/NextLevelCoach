@@ -26,10 +26,10 @@ const DeviceMockups = () => {
         </div>
       </div>
 
-      {/* Tablet Mockup - Enhanced 3D with Better Fitting Image */}
-      <div className="relative transform perspective-1000 hover:rotate-y-2 transition-transform duration-300 ease-in-out">
-        <div className="relative mx-auto border-gray-900 dark:border-gray-800 bg-gray-900 border-[14px] rounded-[2.5rem] h-[454px] w-[304px] shadow-xl transform rotate-y-3">
-          <div className="h-[426px] w-[276px] bg-white dark:bg-gray-800 rounded-[2rem] overflow-hidden">
+      {/* Landscape Tablet Mockup - Enhanced 3D with Edge-to-Edge Image */}
+      <div className="relative transform perspective-1000 hover:rotate-y-2 transition-transform duration-300 ease-in-out mt-12 lg:mt-0">
+        <div className="relative mx-auto border-gray-900 dark:border-gray-800 bg-gray-900 border-[14px] rounded-[2.5rem] w-[454px] h-[304px] shadow-xl transform rotate-y-3">
+          <div className="w-[426px] h-[276px] bg-white dark:bg-gray-800 rounded-[2rem] overflow-hidden">
             <div className="h-full w-full relative">
               <img
                 src="/lovable-uploads/d60e726c-3598-45a5-901e-3e2bee673684.png"
@@ -37,14 +37,15 @@ const DeviceMockups = () => {
                 className="absolute inset-0 h-full w-full object-cover"
               />
               {/* Tablet Screen Glare Effect */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/20 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-white/20 pointer-events-none"></div>
             </div>
           </div>
-          <div className="absolute top-[156px] right-[-16px] h-[32px] w-[3px] bg-gray-800 dark:bg-gray-600 rounded-l-lg"></div>
-          <div className="absolute top-[196px] right-[-16px] h-[46px] w-[3px] bg-gray-800 dark:bg-gray-600 rounded-l-lg"></div>
-          <div className="absolute top-[266px] right-[-16px] h-[46px] w-[3px] bg-gray-800 dark:bg-gray-600 rounded-l-lg"></div>
+          {/* Move buttons to the side for landscape orientation */}
+          <div className="absolute top-[50px] left-[-16px] h-[32px] w-[3px] bg-gray-800 dark:bg-gray-600 rounded-r-lg"></div>
+          <div className="absolute top-[100px] left-[-16px] h-[46px] w-[3px] bg-gray-800 dark:bg-gray-600 rounded-r-lg"></div>
+          <div className="absolute top-[170px] left-[-16px] h-[46px] w-[3px] bg-gray-800 dark:bg-gray-600 rounded-r-lg"></div>
           {/* Tablet Shadow */}
-          <div className="absolute -bottom-3 -left-3 -right-3 h-6 bg-black/20 blur-xl rounded-full z-[-1]"></div>
+          <div className="absolute -bottom-4 -left-4 -right-4 h-6 bg-black/20 blur-xl rounded-full z-[-1]"></div>
         </div>
       </div>
     </motion.div>
