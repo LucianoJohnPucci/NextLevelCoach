@@ -38,6 +38,9 @@ export const useGoals = () => {
           progress: goal.progress || 0,
           added: new Date(goal.created_at),
           start_date: goal.start_date ? new Date(goal.start_date) : undefined,
+          milestone_date: goal.milestone_date ? new Date(goal.milestone_date) : undefined,
+          final_date: goal.final_date ? new Date(goal.final_date) : undefined,
+          why: goal.why || undefined,
         }));
         setGoals(formattedGoals);
       }
@@ -80,7 +83,7 @@ export const useGoals = () => {
   }, [goals, user]);
 
   // Function to add a new goal
-  const addGoal = async (title: string, startDate: Date, why?: string) => {
+  const addGoal = async (title: string, startDate: Date, why?: string, milestoneDate?: Date, finalDate?: Date) => {
     if (!title.trim()) {
       toast({
         title: "Error",
@@ -102,8 +105,10 @@ export const useGoals = () => {
               title,
               user_id: user.id,
               start_date: startDate.toISOString().split('T')[0],
+              milestone_date: milestoneDate ? milestoneDate.toISOString().split('T')[0] : null,
+              final_date: finalDate ? finalDate.toISOString().split('T')[0] : null,
               progress: 0,
-              why, // Added why field
+              why,
             }
           ])
           .select();
@@ -142,7 +147,9 @@ export const useGoals = () => {
         progress: 0,
         added: new Date(),
         start_date: startDate,
-        why, // Added why field
+        milestone_date: milestoneDate,
+        final_date: finalDate,
+        why,
       };
       
       setGoals(prev => [...prev, newGoal]);
@@ -229,11 +236,51 @@ export const useGoals = () => {
     );
   };
 
+  // Function to update goal dates
+  const updateGoalDates = async (id: string, milestoneDate?: Date, finalDate?: Date) => {
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from("goals")
+          .update({
+            milestone_date: milestoneDate ? milestoneDate.toISOString().split('T')[0] : null,
+            final_date: finalDate ? finalDate.toISOString().split('T')[0] : null
+          })
+          .eq("id", id);
+
+        if (error) {
+          console.error("Error updating goal dates:", error);
+          toast({
+            title: "Error updating dates",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        toast({
+          title: "Dates Updated",
+          description: "Goal dates have been updated successfully.",
+        });
+      } catch (error) {
+        console.error("Error in updateGoalDates:", error);
+      }
+    }
+
+    // Update local state (works for both with and without user)
+    setGoals(prev => 
+      prev.map(g => 
+        g.id === id ? {...g, milestone_date: milestoneDate, final_date: finalDate} : g
+      )
+    );
+  };
+
   return {
     goals,
     isLoading,
     addGoal,
     removeGoal,
-    updateGoalProgress
+    updateGoalProgress,
+    updateGoalDates
   };
 };

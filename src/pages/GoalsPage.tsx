@@ -15,6 +15,8 @@ export interface Goal {
   progress: number;
   added: Date;
   start_date?: Date;
+  milestone_date?: Date;
+  final_date?: Date;
   why?: string;
 }
 
@@ -24,6 +26,8 @@ const GoalsPage = () => {
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [newGoalWhy, setNewGoalWhy] = useState("");
   const [startDate, setStartDate] = useState<Date>(new Date());
+  const [milestoneDate, setMilestoneDate] = useState<Date | undefined>(undefined);
+  const [finalDate, setFinalDate] = useState<Date | undefined>(undefined);
   
   const [habitTitle, setHabitTitle] = useState("");
   const [habitFrequency, setHabitFrequency] = useState<"daily" | "weekly" | "monthly">("daily");
@@ -32,7 +36,14 @@ const GoalsPage = () => {
   const [habitRating, setHabitRating] = useState<number>(3);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
 
-  const { goals, isLoading: isGoalsLoading, addGoal, removeGoal, updateGoalProgress } = useGoals();
+  const { 
+    goals, 
+    isLoading: isGoalsLoading, 
+    addGoal, 
+    removeGoal, 
+    updateGoalProgress,
+    updateGoalDates
+  } = useGoals();
   const { 
     habits, 
     isLoading: isHabitsLoading, 
@@ -42,11 +53,13 @@ const GoalsPage = () => {
   } = useHabits();
 
   const handleAddGoal = async () => {
-    const success = await addGoal(newGoalTitle, startDate, newGoalWhy);
+    const success = await addGoal(newGoalTitle, startDate, newGoalWhy, milestoneDate, finalDate);
     if (success) {
       setNewGoalTitle("");
       setNewGoalWhy("");
       setStartDate(new Date());
+      setMilestoneDate(undefined);
+      setFinalDate(undefined);
       setOpenGoalDialog(false);
     }
   };
@@ -131,6 +144,7 @@ const GoalsPage = () => {
             updateGoalProgress={updateGoalProgress} 
             removeGoal={removeGoal} 
             onOpenDialog={() => setOpenGoalDialog(true)}
+            updateGoalDates={updateGoalDates}
           />
         </Card>
 
@@ -160,6 +174,10 @@ const GoalsPage = () => {
         setGoalWhy={setNewGoalWhy}
         startDate={startDate}
         setStartDate={setStartDate}
+        milestoneDate={milestoneDate}
+        setMilestoneDate={setMilestoneDate}
+        finalDate={finalDate}
+        setFinalDate={setFinalDate}
         onAddGoal={handleAddGoal}
         isLoading={isGoalsLoading}
       />

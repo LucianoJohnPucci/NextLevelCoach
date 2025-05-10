@@ -30,6 +30,10 @@ interface GoalDialogProps {
   setGoalWhy: (why: string) => void;
   startDate: Date;
   setStartDate: (date: Date) => void;
+  milestoneDate: Date | undefined;
+  setMilestoneDate: (date: Date | undefined) => void;
+  finalDate: Date | undefined;
+  setFinalDate: (date: Date | undefined) => void;
   onAddGoal: () => void;
   isLoading: boolean;
 }
@@ -43,6 +47,10 @@ const GoalDialog = ({
   setGoalWhy,
   startDate,
   setStartDate,
+  milestoneDate,
+  setMilestoneDate,
+  finalDate,
+  setFinalDate,
   onAddGoal,
   isLoading
 }: GoalDialogProps) => {
@@ -92,6 +100,60 @@ const GoalDialog = ({
                   mode="single"
                   selected={startDate}
                   onSelect={(date) => date && setStartDate(date)}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="milestone-date">On Track Milestone Date (Optional)</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="milestone-date"
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !milestoneDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {milestoneDate ? format(milestoneDate, "PPP") : <span>Pick a milestone date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={milestoneDate}
+                  onSelect={setMilestoneDate}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="final-date">Final Goal Date (Optional)</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="final-date"
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !finalDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {finalDate ? format(finalDate, "PPP") : <span>Pick a final date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={finalDate}
+                  onSelect={setFinalDate}
                   initialFocus
                   className="pointer-events-auto"
                 />

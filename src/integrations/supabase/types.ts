@@ -138,7 +138,9 @@ export type Database = {
       goals: {
         Row: {
           created_at: string | null
+          final_date: string | null
           id: string
+          milestone_date: string | null
           progress: number | null
           start_date: string | null
           title: string
@@ -147,7 +149,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          final_date?: string | null
           id?: string
+          milestone_date?: string | null
           progress?: number | null
           start_date?: string | null
           title: string
@@ -156,7 +160,9 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          final_date?: string | null
           id?: string
+          milestone_date?: string | null
           progress?: number | null
           start_date?: string | null
           title?: string

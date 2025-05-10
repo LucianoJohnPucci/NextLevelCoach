@@ -11,9 +11,10 @@ interface GoalsListProps {
   updateGoalProgress: (id: string, progress: number) => void;
   removeGoal: (id: string) => void;
   onOpenDialog: () => void;
+  updateGoalDates?: (id: string, milestoneDate?: Date, finalDate?: Date) => void;
 }
 
-const GoalsList = ({ goals, updateGoalProgress, removeGoal, onOpenDialog }: GoalsListProps) => {
+const GoalsList = ({ goals, updateGoalProgress, removeGoal, onOpenDialog, updateGoalDates }: GoalsListProps) => {
   return (
     <CardContent className="space-y-6">
       <div className="space-y-4">
@@ -22,7 +23,8 @@ const GoalsList = ({ goals, updateGoalProgress, removeGoal, onOpenDialog }: Goal
             key={goal.id} 
             goal={goal} 
             updateGoalProgress={updateGoalProgress} 
-            removeGoal={removeGoal} 
+            removeGoal={removeGoal}
+            updateGoalDates={updateGoalDates}
           />
         ))}
       </div>
