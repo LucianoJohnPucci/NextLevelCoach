@@ -226,7 +226,7 @@ const LandingPage = () => {
             </motion.div>
           </div>
 
-          {/* Device Mockups */}
+          {/* Device Mockups with the uploaded app screenshot */}
           <motion.div 
             className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12"
             initial={{ opacity: 0, y: 20 }}
@@ -238,7 +238,7 @@ const LandingPage = () => {
               <div className="relative mx-auto border-gray-800 dark:border-gray-800 bg-gray-800 border-[8px] rounded-t-xl h-[172px] max-w-[301px] md:h-[294px] md:max-w-[512px]">
                 <div className="h-[156px] md:h-[278px] bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
                   <img
-                    src="/placeholder.svg"
+                    src="/lovable-uploads/d60e726c-3598-45a5-901e-3e2bee673684.png"
                     alt="CoreCultivate dashboard on laptop"
                     className="h-full w-full object-cover"
                   />
@@ -254,7 +254,7 @@ const LandingPage = () => {
               <div className="relative mx-auto border-gray-900 dark:border-gray-800 bg-gray-900 border-[14px] rounded-[2.5rem] h-[454px] w-[304px] shadow-xl">
                 <div className="h-[426px] w-[276px] bg-white dark:bg-gray-800 rounded-[2rem] overflow-hidden">
                   <img
-                    src="/placeholder.svg"
+                    src="/lovable-uploads/d60e726c-3598-45a5-901e-3e2bee673684.png"
                     alt="CoreCultivate features on tablet"
                     className="h-full w-full object-cover"
                   />
