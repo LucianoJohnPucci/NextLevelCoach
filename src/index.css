@@ -78,6 +78,35 @@
   }
 }
 
+/* 3D Transform Utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.rotate-y-1 {
+  transform: rotateY(1deg);
+}
+
+.rotate-y-2 {
+  transform: rotateY(2deg);
+}
+
+.rotate-y-3 {
+  transform: rotateY(3deg);
+}
+
+.rotate-x-1 {
+  transform: rotateX(1deg);
+}
+
+.rotate-x-2 {
+  transform: rotateX(2deg);
+}
+
+.-rotate-x-1 {
+  transform: rotateX(-1deg);
+}
+
 /* Glass morphism effect */
 .glass {
   background: rgba(255, 255, 255, 0.25);
