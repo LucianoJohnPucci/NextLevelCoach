@@ -5,6 +5,7 @@ import { ArrowRight, Brain, Heart, Sparkles, Target, BarChart2, Calendar, LogIn 
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/components/AuthProvider";
+import LandingPage from "@/components/landing/LandingPage";
 
 const FeatureCard = ({ 
   title, 
@@ -43,7 +44,7 @@ const FeatureCard = ({
   );
 };
 
-const Index = () => {
+const AuthenticatedHome = () => {
   const { user } = useAuth();
   const features = [
     {
@@ -115,18 +116,9 @@ const Index = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="flex flex-wrap justify-center gap-4"
       >
-        {user ? (
-          <Button asChild size="lg">
-            <Link to="/daily">Start Today's Input</Link>
-          </Button>
-        ) : (
-          <Button asChild size="lg">
-            <Link to="/auth">
-              <LogIn className="mr-2 h-4 w-4" />
-              Sign In / Register
-            </Link>
-          </Button>
-        )}
+        <Button asChild size="lg">
+          <Link to="/daily">Start Today's Input</Link>
+        </Button>
         <Button asChild variant="outline" size="lg">
           <Link to="/wisdom">Seek Wisdom</Link>
         </Button>
@@ -152,6 +144,18 @@ const Index = () => {
       </motion.div>
     </div>
   );
+};
+
+const Index = () => {
+  const { user } = useAuth();
+
+  // Show landing page for non-authenticated users
+  if (!user) {
+    return <LandingPage />;
+  }
+
+  // Show authenticated home for logged in users
+  return <AuthenticatedHome />;
 };
 
 export default Index;

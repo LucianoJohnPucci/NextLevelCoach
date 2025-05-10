@@ -1,18 +1,27 @@
 
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { useSidebar } from "./SidebarProvider";
 import Header from "./Header";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 
 const Layout = () => {
   const { isOpen } = useSidebar();
   const [mounted, setMounted] = useState(false);
+  const { user } = useAuth();
+  const location = useLocation();
   
   // Prevent animation on initial mount
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Don't show the standard app layout for non-authenticated users on the home page
+  const isHomePage = location.pathname === "/";
+  if (isHomePage && !user) {
+    return <Outlet />;
+  }
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
