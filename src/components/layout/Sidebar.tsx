@@ -54,7 +54,7 @@ const Sidebar = () => {
       <div className="flex items-center justify-between px-2">
         <Link to="/" className="flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-primary" />
-          <span className="text-xl font-medium">CoreCultivate</span>
+          <span className="text-xl font-medium">Next Level Coach</span>
         </Link>
         
         <Button 
