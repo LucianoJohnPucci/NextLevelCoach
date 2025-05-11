@@ -8,6 +8,7 @@ import { useAuth } from "@/components/AuthProvider";
 import LandingPage from "@/components/landing/LandingPage";
 import { useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
+import GoalsProgress from "@/components/goals/GoalsProgress";
 
 const FeatureCard = ({ 
   title, 
@@ -112,6 +113,15 @@ const AuthenticatedHome = () => {
         <p className="mx-auto max-w-[700px] text-muted-foreground">
           Track your mental wellbeing, build healthy habits, and access wisdom to guide your journey.
         </p>
+      </motion.div>
+
+      {/* Goals Progress Graph */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <GoalsProgress />
       </motion.div>
 
       <motion.div
