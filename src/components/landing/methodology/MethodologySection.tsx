@@ -1,6 +1,5 @@
-
 import React from "react";
-import { ArrowRight, Calendar, Award, Clock, Star, Repeat, Heart, Brain, Search, Meditation } from "lucide-react";
+import { ArrowRight, Calendar, Award, Clock, Star, Repeat, Heart, Brain, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -79,7 +78,7 @@ const MethodologySection = () => {
             className="bg-background rounded-lg p-6 border border-primary/10 shadow-sm"
           >
             <div className="rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4">
-              <Meditation className="h-7 w-7 text-primary" />
+              <Star className="h-7 w-7 text-primary" />
             </div>
             <h3 className="text-xl font-bold mb-2">Spiritual Stoic Level</h3>
             <p className="text-muted-foreground mb-4">
