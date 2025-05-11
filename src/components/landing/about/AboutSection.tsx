@@ -27,7 +27,7 @@ const AboutSection = () => {
               </div>
               <h3 className="text-xl font-bold mb-2">Mental Clarity</h3>
               <p className="text-muted-foreground">
-                Modern life bombards us with information and demands our constant attention. CoreCultivate helps you find mental space to think clearly.
+                Modern life bombards us with information and demands our constant attention. Next Level Coach helps you find mental space to think clearly.
               </p>
             </CardContent>
           </Card>
@@ -51,7 +51,7 @@ const AboutSection = () => {
               </div>
               <h3 className="text-xl font-bold mb-2">Spiritual Growth</h3>
               <p className="text-muted-foreground">
-                Modern life can disconnect us from meaning and purpose. CoreCultivate helps you reconnect with your deeper values.
+                Modern life can disconnect us from meaning and purpose. Next Level Coach helps you reconnect with your deeper values.
               </p>
             </CardContent>
           </Card>

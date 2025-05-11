@@ -15,7 +15,7 @@ const TestimonialsSection = () => {
             What Our Users Say
           </h2>
           <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed">
-            See how CoreCultivate has helped people transform their lives and find balance.
+            See how Next Level Coach has helped people transform their lives and find balance.
           </p>
         </div>
 
@@ -30,7 +30,7 @@ const TestimonialsSection = () => {
                 <Star className="h-5 w-5 fill-primary text-primary" />
               </div>
               <p className="mb-4 italic text-muted-foreground">
-                "CoreCultivate has completely transformed my approach to wellness. The mind-body-soul framework has helped me create balance in ways I never thought possible."
+                "Next Level Coach has completely transformed my approach to wellness. The mind-body-soul framework has helped me create balance in ways I never thought possible."
               </p>
               <div>
                 <p className="font-bold">Sarah L.</p>
@@ -68,7 +68,7 @@ const TestimonialsSection = () => {
                 <Star className="h-5 w-5 fill-primary text-primary" />
               </div>
               <p className="mb-4 italic text-muted-foreground">
-                "As a busy parent, I never made time for my own wellbeing. CoreCultivate's simple daily practices have helped me carve out moments for myself that make a huge difference."
+                "As a busy parent, I never made time for my own wellbeing. Next Level Coach's simple daily practices have helped me carve out moments for myself that make a huge difference."
               </p>
               <div>
                 <p className="font-bold">Emma R.</p>

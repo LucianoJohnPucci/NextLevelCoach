@@ -20,7 +20,7 @@ const HeroSection = () => {
               Nurture Your Mind, Body, and Soul
             </h1>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-              CoreCultivate helps you track your mental wellbeing, build healthy habits, and access wisdom to guide your personal growth journey.
+              Next Level Coach helps you track your mental wellbeing, build healthy habits, and access wisdom to guide your personal growth journey.
             </p>
           </motion.div>
           <motion.div 
