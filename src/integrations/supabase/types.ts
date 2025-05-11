@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      body_goals: {
+        Row: {
+          created_at: string
+          exercise_progress: number
+          hydration_progress: number
+          id: string
+          nutrition_progress: number
+          sleep_progress: number
+          strength_progress: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_progress?: number
+          hydration_progress?: number
+          id?: string
+          nutrition_progress?: number
+          sleep_progress?: number
+          strength_progress?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          exercise_progress?: number
+          hydration_progress?: number
+          id?: string
+          nutrition_progress?: number
+          sleep_progress?: number
+          strength_progress?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       body_metrics: {
         Row: {
           body_goals: string | null
@@ -264,6 +300,42 @@ export type Database = {
         }
         Relationships: []
       }
+      mind_goals: {
+        Row: {
+          created_at: string
+          focus_progress: number
+          id: string
+          learning_progress: number
+          meditation_progress: number
+          mindfulness_progress: number
+          reading_progress: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          focus_progress?: number
+          id?: string
+          learning_progress?: number
+          meditation_progress?: number
+          mindfulness_progress?: number
+          reading_progress?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          focus_progress?: number
+          id?: string
+          learning_progress?: number
+          meditation_progress?: number
+          mindfulness_progress?: number
+          reading_progress?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mind_metrics: {
         Row: {
           created_at: string
@@ -429,6 +501,42 @@ export type Database = {
           soul_gratitude_frequency?: string | null
           soul_reflection_goal?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      soul_goals: {
+        Row: {
+          connection_progress: number
+          created_at: string
+          creativity_progress: number
+          gratitude_progress: number
+          id: string
+          purpose_progress: number
+          reflection_progress: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          connection_progress?: number
+          created_at?: string
+          creativity_progress?: number
+          gratitude_progress?: number
+          id?: string
+          purpose_progress?: number
+          reflection_progress?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          connection_progress?: number
+          created_at?: string
+          creativity_progress?: number
+          gratitude_progress?: number
+          id?: string
+          purpose_progress?: number
+          reflection_progress?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
