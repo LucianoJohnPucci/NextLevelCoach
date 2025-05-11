@@ -12,7 +12,8 @@ import {
   BarChart2, 
   Target, 
   MessageCircle,
-  BookOpen
+  BookOpen,
+  MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -114,6 +115,10 @@ const Sidebar = () => {
         
         <NavItem to="/wisdom" icon={MessageCircle} onClick={() => close()}>
           Wisdom
+        </NavItem>
+        
+        <NavItem to="https://discord.com/invite/nextlevelcoach" icon={MessageSquare} onClick={() => close()}>
+          Discord Community
         </NavItem>
       </div>
       
