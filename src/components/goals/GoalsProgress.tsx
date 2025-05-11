@@ -5,30 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Brain, Heart, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  TooltipProps
-} from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface GoalProgress {
   category: string;
   percentage: number;
   icon: React.ReactNode;
   color: string;
-}
-
-interface GoalProgressData {
-  name: string;
-  Mind: number;
-  Body: number;
-  Soul: number;
 }
 
 const GoalsProgress = () => {
@@ -39,7 +21,6 @@ const GoalsProgress = () => {
     { category: "Soul", percentage: 0, icon: <Sparkles className="h-5 w-5" />, color: "#8b5cf6" },
   ]);
   const [isLoading, setIsLoading] = useState(true);
-  const [progressData, setProgressData] = useState<GoalProgressData[]>([]);
 
   useEffect(() => {
     const fetchGoalsProgress = async () => {
@@ -112,16 +93,6 @@ const GoalsProgress = () => {
           { category: "Soul", percentage: soulProgress, icon: <Sparkles className="h-5 w-5" />, color: "#8b5cf6" },
         ]);
 
-        // Create chart data
-        setProgressData([
-          {
-            name: "Current Progress",
-            Mind: mindProgress,
-            Body: bodyProgress,
-            Soul: soulProgress
-          }
-        ]);
-
         // If user doesn't have records yet, create them
         if (!mindGoals && user) {
           await supabase.from("mind_goals").insert([{ user_id: user.id }]);
@@ -144,12 +115,6 @@ const GoalsProgress = () => {
 
     fetchGoalsProgress();
   }, [user]);
-
-  const chartConfig = {
-    Mind: { color: "#3b82f6" },
-    Body: { color: "#ef4444" },
-    Soul: { color: "#8b5cf6" },
-  };
 
   return (
     <Card className="mb-6">
@@ -177,63 +142,6 @@ const GoalsProgress = () => {
                 <Progress value={goal.percentage} className="h-2" />
               </div>
             ))}
-
-            <div className="pt-4 h-[180px]">
-              <ChartContainer config={chartConfig}>
-                <AreaChart data={progressData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    domain={[0, 100]}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <ChartTooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <ChartTooltipContent
-                            className="min-w-[150px]"
-                            indicator="line"
-                            formatter={(value) => `${value}%`}
-                          />
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="Mind" 
-                    stackId="1" 
-                    stroke="#3b82f6" 
-                    fill="#3b82f6"
-                    fillOpacity={0.6}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="Body" 
-                    stackId="1" 
-                    stroke="#ef4444" 
-                    fill="#ef4444"
-                    fillOpacity={0.6}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="Soul" 
-                    stackId="1" 
-                    stroke="#8b5cf6" 
-                    fill="#8b5cf6"
-                    fillOpacity={0.6}
-                  />
-                </AreaChart>
-              </ChartContainer>
-            </div>
           </>
         )}
       </CardContent>
