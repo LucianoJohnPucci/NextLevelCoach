@@ -9,11 +9,14 @@ const Footer = () => {
       <div className="container px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">CoreCultivate</span>
+          <span className="text-xl font-bold">
+            <span className="text-white">Next Level</span>
+            <span className="text-primary"> Coach</span>
+          </span>
         </div>
         
         <p className="text-sm text-muted-foreground text-center md:text-left">
-          © 2025 CoreCultivate. All rights reserved.
+          © 2025 Next Level Coach. All rights reserved.
         </p>
         
         <div className="flex gap-4">

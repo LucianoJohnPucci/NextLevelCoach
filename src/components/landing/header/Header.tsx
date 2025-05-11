@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -24,7 +23,10 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">CoreCultivate</span>
+          <span className="text-xl font-bold">
+            <span className="text-white">Next Level</span>
+            <span className="text-primary"> Coach</span>
+          </span>
         </div>
 
         <NavigationMenu>
@@ -44,7 +46,7 @@ const Header = () => {
                       >
                         <Sparkles className="h-6 w-6 text-primary" />
                         <div className="mb-2 mt-4 text-lg font-medium">
-                          CoreCultivate
+                          Next Level Coach
                         </div>
                         <p className="text-sm leading-tight text-muted-foreground">
                           A holistic wellness platform to nurture your mind, body, and soul through mindfulness, habits, and personal growth.

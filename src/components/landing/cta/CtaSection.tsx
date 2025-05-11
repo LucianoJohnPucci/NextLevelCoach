@@ -14,7 +14,7 @@ const CtaSection = () => {
               Begin Your Wellness Journey Today
             </h2>
             <p className="text-muted-foreground md:text-xl/relaxed">
-              Join thousands of others who have transformed their lives with CoreCultivate's holistic approach to wellbeing.
+              Join thousands of others who have transformed their lives with Next Level Coach's holistic approach to wellbeing.
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-4">
