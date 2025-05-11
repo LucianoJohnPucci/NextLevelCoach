@@ -11,16 +11,16 @@ const CtaSection = () => {
         <div className="flex flex-col items-center space-y-8 text-center">
           <div className="space-y-4 max-w-[800px]">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              Begin Your Wellness Journey Today
+              Transform Your Life in 5 Years
             </h2>
             <p className="text-muted-foreground md:text-xl/relaxed">
-              Join thousands of others who have transformed their lives with Next Level Coach's holistic approach to wellbeing.
+              Join thousands who have used Next Level Coach's methodology to achieve their financial, health, mental, and spiritual goals.
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-4">
             <Button asChild size="lg" className="rounded-full">
               <Link to="/auth">
-                Start Free Trial
+                Begin Your 5-Year Journey
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

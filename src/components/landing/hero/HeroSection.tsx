@@ -16,11 +16,14 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
+            <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+              Your 5-Year Transformation Plan
+            </span>
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
-              Nurture Your Mind, Body, and Soul
+              You Tell Us Where You Want To Be In 5 Years
             </h1>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-              Next Level Coach helps you track your mental wellbeing, build healthy habits, and access wisdom to guide your personal growth journey.
+              Next Level Coach helps you build the habits, skills, and mindset needed to transform your life through our proven methodology.
             </p>
           </motion.div>
           <motion.div 
@@ -30,10 +33,10 @@ const HeroSection = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <Button asChild size="lg">
-              <Link to="/auth">Start Your Journey</Link>
+              <Link to="/auth">Start Your 5-Year Journey</Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <a href="#features">Explore Features</a>
+              <a href="#methodology">See Our Approach</a>
             </Button>
           </motion.div>
         </div>
