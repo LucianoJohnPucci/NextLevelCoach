@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -24,7 +25,7 @@ const Header = () => {
         <div className="flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-primary" />
           <span className="text-xl font-bold">
-            <span className="text-white">Next Level</span>
+            <span className="text-black">Next Level</span>
             <span className="text-primary"> Coach</span>
           </span>
         </div>

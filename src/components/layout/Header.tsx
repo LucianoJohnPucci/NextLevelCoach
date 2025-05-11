@@ -26,7 +26,7 @@ const Header = () => {
           </Button>
           <Link to="/" className="flex items-center gap-2">
             <span className="text-xl font-bold">
-              <span className="text-white">Next Level</span>
+              <span className="text-black">Next Level</span>
               <span className="text-primary"> Coach</span>
             </span>
           </Link>
