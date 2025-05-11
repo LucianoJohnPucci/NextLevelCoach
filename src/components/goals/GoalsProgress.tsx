@@ -1,120 +1,19 @@
 
-import React, { useEffect, useState } from "react";
-import { Progress } from "@/components/ui/progress";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Brain, Heart, Sparkles } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/AuthProvider";
-
-interface GoalProgress {
-  category: string;
-  percentage: number;
-  icon: React.ReactNode;
-  color: string;
-}
+import GoalProgressItem from "./GoalProgressItem";
+import GoalProgressSkeleton from "./GoalProgressSkeleton";
+import { useGoalsProgress } from "./useGoalsProgress";
 
 const GoalsProgress = () => {
-  const { user } = useAuth();
-  const [goals, setGoals] = useState<GoalProgress[]>([
-    { category: "Mind", percentage: 0, icon: <Brain className="h-5 w-5" />, color: "#3b82f6" },
-    { category: "Body", percentage: 0, icon: <Heart className="h-5 w-5" />, color: "#ef4444" },
-    { category: "Soul", percentage: 0, icon: <Sparkles className="h-5 w-5" />, color: "#8b5cf6" },
-  ]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchGoalsProgress = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-      
-      try {
-        // Fetch mind goals from Supabase
-        const { data: mindGoals, error: mindError } = await supabase
-          .from("mind_goals")
-          .select("*")
-          .eq("user_id", user.id)
-          .single();
-
-        if (mindError && mindError.code !== 'PGRST116') {
-          console.error("Error fetching mind goals:", mindError);
-        }
-
-        // Fetch body goals from Supabase
-        const { data: bodyGoals, error: bodyError } = await supabase
-          .from("body_goals")
-          .select("*")
-          .eq("user_id", user.id)
-          .single();
-
-        if (bodyError && bodyError.code !== 'PGRST116') {
-          console.error("Error fetching body goals:", bodyError);
-        }
-
-        // Fetch soul goals from Supabase
-        const { data: soulGoals, error: soulError } = await supabase
-          .from("soul_goals")
-          .select("*")
-          .eq("user_id", user.id)
-          .single();
-
-        if (soulError && soulError.code !== 'PGRST116') {
-          console.error("Error fetching soul goals:", soulError);
-        }
-
-        // Calculate average progress for each category
-        const calculateAverageProgress = (goalsObj: any) => {
-          if (!goalsObj) return 0;
-          
-          // Remove these properties from calculation
-          const excludeProps = ['id', 'user_id', 'created_at', 'updated_at'];
-          
-          let total = 0;
-          let count = 0;
-          
-          for (const key in goalsObj) {
-            if (!excludeProps.includes(key) && typeof goalsObj[key] === 'number') {
-              total += goalsObj[key];
-              count++;
-            }
-          }
-          
-          return count > 0 ? Math.round(total / count) : 0;
-        };
-
-        const mindProgress = calculateAverageProgress(mindGoals);
-        const bodyProgress = calculateAverageProgress(bodyGoals);
-        const soulProgress = calculateAverageProgress(soulGoals);
-
-        setGoals([
-          { category: "Mind", percentage: mindProgress, icon: <Brain className="h-5 w-5" />, color: "#3b82f6" },
-          { category: "Body", percentage: bodyProgress, icon: <Heart className="h-5 w-5" />, color: "#ef4444" },
-          { category: "Soul", percentage: soulProgress, icon: <Sparkles className="h-5 w-5" />, color: "#8b5cf6" },
-        ]);
-
-        // If user doesn't have records yet, create them
-        if (!mindGoals && user) {
-          await supabase.from("mind_goals").insert([{ user_id: user.id }]);
-        }
-        
-        if (!bodyGoals && user) {
-          await supabase.from("body_goals").insert([{ user_id: user.id }]);
-        }
-        
-        if (!soulGoals && user) {
-          await supabase.from("soul_goals").insert([{ user_id: user.id }]);
-        }
-
-      } catch (error) {
-        console.error("Error calculating goals progress:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchGoalsProgress();
-  }, [user]);
+  const icons = {
+    mind: <Brain className="h-5 w-5" />,
+    body: <Heart className="h-5 w-5" />,
+    soul: <Sparkles className="h-5 w-5" />
+  };
+  
+  const { goals, isLoading } = useGoalsProgress(icons);
 
   return (
     <Card className="mb-6">
@@ -123,24 +22,17 @@ const GoalsProgress = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
-          <div className="flex justify-center py-4">
-            <div className="animate-spin rounded-full border-t-2 border-primary h-6 w-6"></div>
-          </div>
+          <GoalProgressSkeleton />
         ) : (
           <>
             {goals.map((goal) => (
-              <div key={goal.category} className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="rounded-full bg-primary/10 p-1 text-primary">
-                      {goal.icon}
-                    </div>
-                    <span className="font-medium">{goal.category}</span>
-                  </div>
-                  <span className="text-sm font-medium">{goal.percentage}%</span>
-                </div>
-                <Progress value={goal.percentage} className="h-2" />
-              </div>
+              <GoalProgressItem 
+                key={goal.category}
+                category={goal.category}
+                percentage={goal.percentage}
+                icon={goal.icon}
+                color={goal.color}
+              />
             ))}
           </>
         )}
