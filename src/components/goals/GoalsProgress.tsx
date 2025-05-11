@@ -200,7 +200,7 @@ const GoalsProgress = () => {
                           <ChartTooltipContent
                             className="min-w-[150px]"
                             indicator="line"
-                            formatType="percentage"
+                            formatter={(value) => `${value}%`}
                           />
                         );
                       }
