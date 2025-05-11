@@ -138,9 +138,9 @@ const AuthPage = () => {
       >
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">Mindful</CardTitle>
+            <CardTitle className="text-2xl font-bold">Next Level Coach</CardTitle>
             <CardDescription>
-              Enter your details to continue your mindfulness journey
+              Once the below is completed, you will be directed to a quick On-Boarding Q &amp; A for Ai to understand and tailor to your specific goals
             </CardDescription>
           </CardHeader>
           <Tabs defaultValue="login" className="w-full">
