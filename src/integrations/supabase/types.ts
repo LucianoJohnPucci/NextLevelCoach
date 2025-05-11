@@ -300,6 +300,87 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_answers: {
+        Row: {
+          answer_1: string | null
+          answer_10: string | null
+          answer_2: string | null
+          answer_3: string | null
+          answer_4: string | null
+          answer_5: string | null
+          answer_6: string | null
+          answer_7: string | null
+          answer_8: string | null
+          answer_9: string | null
+          id: string
+          last_updated: string
+          question_1: string | null
+          question_10: string | null
+          question_2: string | null
+          question_3: string | null
+          question_4: string | null
+          question_5: string | null
+          question_6: string | null
+          question_7: string | null
+          question_8: string | null
+          question_9: string | null
+          signup_date: string
+          user_id: string
+        }
+        Insert: {
+          answer_1?: string | null
+          answer_10?: string | null
+          answer_2?: string | null
+          answer_3?: string | null
+          answer_4?: string | null
+          answer_5?: string | null
+          answer_6?: string | null
+          answer_7?: string | null
+          answer_8?: string | null
+          answer_9?: string | null
+          id?: string
+          last_updated?: string
+          question_1?: string | null
+          question_10?: string | null
+          question_2?: string | null
+          question_3?: string | null
+          question_4?: string | null
+          question_5?: string | null
+          question_6?: string | null
+          question_7?: string | null
+          question_8?: string | null
+          question_9?: string | null
+          signup_date?: string
+          user_id: string
+        }
+        Update: {
+          answer_1?: string | null
+          answer_10?: string | null
+          answer_2?: string | null
+          answer_3?: string | null
+          answer_4?: string | null
+          answer_5?: string | null
+          answer_6?: string | null
+          answer_7?: string | null
+          answer_8?: string | null
+          answer_9?: string | null
+          id?: string
+          last_updated?: string
+          question_1?: string | null
+          question_10?: string | null
+          question_2?: string | null
+          question_3?: string | null
+          question_4?: string | null
+          question_5?: string | null
+          question_6?: string | null
+          question_7?: string | null
+          question_8?: string | null
+          question_9?: string | null
+          signup_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

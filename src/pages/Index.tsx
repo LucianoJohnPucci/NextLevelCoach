@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/components/AuthProvider";
 import LandingPage from "@/components/landing/LandingPage";
+import { useState } from "react";
+import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 
 const FeatureCard = ({ 
   title, 
@@ -46,6 +48,8 @@ const FeatureCard = ({
 
 const AuthenticatedHome = () => {
   const { user } = useAuth();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  
   const features = [
     {
       title: "Mind",
@@ -119,8 +123,12 @@ const AuthenticatedHome = () => {
         <Button asChild size="lg">
           <Link to="/daily">Start Today's Input</Link>
         </Button>
-        <Button asChild variant="outline" size="lg">
-          <Link to="/wisdom">Seek Wisdom</Link>
+        <Button 
+          variant="outline" 
+          size="lg" 
+          onClick={() => setShowOnboarding(true)}
+        >
+          Custom Plan Building
         </Button>
       </motion.div>
 
@@ -142,6 +150,12 @@ const AuthenticatedHome = () => {
         </p>
         <p className="text-sm font-medium">— Marcus Aurelius</p>
       </motion.div>
+      
+      {/* Onboarding Dialog */}
+      <OnboardingDialog 
+        open={showOnboarding} 
+        onOpenChange={setShowOnboarding}
+      />
     </div>
   );
 };
