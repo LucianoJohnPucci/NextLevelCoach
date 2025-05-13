@@ -1,81 +1,81 @@
 
 import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Star } from "lucide-react";
 
 const TestimonialsSection = () => {
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50">
+    <section className="w-full py-12 md:py-24">
       <div className="container px-4 md:px-6">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
-          <div className="space-y-2">
-            <div className="inline-block rounded-lg bg-primary px-3 py-1 text-sm text-primary-foreground">
-              Testimonials
-            </div>
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-              Transformative Results
-            </h2>
-            <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-              Hear from our users who have experienced profound changes in their wellbeing journey.
-            </p>
+        <div className="flex flex-col items-center space-y-4 text-center mb-12">
+          <div className="inline-block rounded-lg bg-primary px-3 py-1 text-sm text-primary-foreground">
+            Testimonials
           </div>
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+            What Our Users Say
+          </h2>
+          <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed">
+            See how Next Level Coach has helped people transform their lives and find balance.
+          </p>
         </div>
-        
-        <div className="mx-auto grid max-w-5xl grid-cols-1 md:grid-cols-2 gap-8 pt-12">
-          <div className="flex flex-col items-start space-y-4 rounded-xl bg-background p-6 shadow-sm">
-            <div className="flex items-center space-x-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="font-bold text-primary text-xl">SA</span>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <Card className="bg-background">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
               </div>
+              <p className="mb-4 italic text-muted-foreground">
+                "Next Level Coach has completely transformed my approach to wellness. The mind-body-soul framework has helped me create balance in ways I never thought possible."
+              </p>
               <div>
-                <h3 className="text-lg font-bold">Sarah A.</h3>
-                <p className="text-sm text-muted-foreground">Marketing Executive</p>
+                <p className="font-bold">Sarah L.</p>
+                <p className="text-sm text-muted-foreground">Marketing Director</p>
               </div>
-            </div>
-            <p className="text-muted-foreground">
-              "I was overwhelmed by stress and burnout before finding this platform. The daily meditation practices and personalized wellbeing plan have completely transformed my relationship with work and life balance."
-            </p>
-          </div>
-          <div className="flex flex-col items-start space-y-4 rounded-xl bg-background p-6 shadow-sm">
-            <div className="flex items-center space-x-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="font-bold text-primary text-xl">MK</span>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-background">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
               </div>
+              <p className="mb-4 italic text-muted-foreground">
+                "I've tried many wellness apps, but this is the first one that addresses all aspects of wellbeing in one place. The habit tracking feature has been game-changing for me."
+              </p>
               <div>
-                <h3 className="text-lg font-bold">Michael K.</h3>
+                <p className="font-bold">Michael T.</p>
                 <p className="text-sm text-muted-foreground">Software Engineer</p>
               </div>
-            </div>
-            <p className="text-muted-foreground">
-              "As someone who spent all day at a computer, I was experiencing physical discomfort and mental fatigue. The integrated approach to wellness helped me establish better work habits and find more meaning in what I do."
-            </p>
-          </div>
-          <div className="flex flex-col items-start space-y-4 rounded-xl bg-background p-6 shadow-sm">
-            <div className="flex items-center space-x-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="font-bold text-primary text-xl">JL</span>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-background">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
+                <Star className="h-5 w-5 fill-primary text-primary" />
               </div>
+              <p className="mb-4 italic text-muted-foreground">
+                "As a busy parent, I never made time for my own wellbeing. Next Level Coach's simple daily practices have helped me carve out moments for myself that make a huge difference."
+              </p>
               <div>
-                <h3 className="text-lg font-bold">Jennifer L.</h3>
-                <p className="text-sm text-muted-foreground">Healthcare Professional</p>
+                <p className="font-bold">Emma R.</p>
+                <p className="text-sm text-muted-foreground">Elementary Teacher</p>
               </div>
-            </div>
-            <p className="text-muted-foreground">
-              "Working in healthcare during the pandemic left me emotionally drained. The soul nourishment tools and community support have been essential for reconnecting with my purpose and finding joy again."
-            </p>
-          </div>
-          <div className="flex flex-col items-start space-y-4 rounded-xl bg-background p-6 shadow-sm">
-            <div className="flex items-center space-x-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="font-bold text-primary text-xl">DP</span>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold">David P.</h3>
-                <p className="text-sm text-muted-foreground">Small Business Owner</p>
-              </div>
-            </div>
-            <p className="text-muted-foreground">
-              "The goal-setting framework and accountability features have helped me make consistent progress on my wellbeing while managing the demands of running a business. I've never felt more centered and productive."
-            </p>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </section>
