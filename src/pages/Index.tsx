@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Brain, Heart, Sparkles, Target, BarChart2, Calendar, LogIn } from "lucide-react";
@@ -115,15 +116,7 @@ const AuthenticatedHome = () => {
         </p>
       </motion.div>
 
-      {/* Goals Progress Graph */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <GoalsProgress />
-      </motion.div>
-
+      {/* Buttons moved up directly under the title section */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -142,13 +135,22 @@ const AuthenticatedHome = () => {
         </Button>
       </motion.div>
 
-      {/* Onboarding Goals Summary - New Section */}
+      {/* Onboarding Goals Summary */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
         <OnboardingGoalsSummary />
+      </motion.div>
+
+      {/* Goals Progress Graph moved below OnboardingGoalsSummary */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <GoalsProgress />
       </motion.div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
