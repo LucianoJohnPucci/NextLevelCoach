@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Brain, Heart, Sparkles, Target, BarChart2, Calendar, LogIn } from "lucide-react";
@@ -9,6 +8,7 @@ import LandingPage from "@/components/landing/LandingPage";
 import { useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import GoalsProgress from "@/components/goals/GoalsProgress";
+import OnboardingGoalsSummary from "@/components/goals/OnboardingGoalsSummary";
 
 const FeatureCard = ({ 
   title, 
@@ -140,6 +140,15 @@ const AuthenticatedHome = () => {
         >
           Custom Plan Building
         </Button>
+      </motion.div>
+
+      {/* Onboarding Goals Summary - New Section */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <OnboardingGoalsSummary />
       </motion.div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

@@ -5,7 +5,6 @@ import HeroSection from "./hero/HeroSection";
 import AboutSection from "./about/AboutSection";
 import FeatureSection from "./features/FeatureSection";
 import MethodologySection from "./methodology/MethodologySection";
-import BenefitsSection from "./benefits/BenefitsSection";
 import TestimonialsSection from "./testimonials/TestimonialsSection";
 import CtaSection from "./cta/CtaSection";
 import ContactSection from "./contact/ContactSection";
@@ -26,7 +25,6 @@ const LandingPage = () => {
       <AboutSection />
       <FeatureSection />
       <MethodologySection />
-      <BenefitsSection />
       <TestimonialsSection />
       <CtaSection />
       <ContactSection />
