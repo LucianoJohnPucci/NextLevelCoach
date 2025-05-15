@@ -2,7 +2,6 @@
 import React from "react";
 import Header from "./header/Header";
 import HeroSection from "./hero/HeroSection";
-import AboutSection from "./about/AboutSection";
 import FeatureSection from "./features/FeatureSection";
 import MethodologySection from "./methodology/MethodologySection";
 import TestimonialsSection from "./testimonials/TestimonialsSection";
@@ -22,7 +21,6 @@ const LandingPage = () => {
 
       {/* Main content sections */}
       <HeroSection />
-      <AboutSection />
       <FeatureSection />
       <MethodologySection />
       <TestimonialsSection />
