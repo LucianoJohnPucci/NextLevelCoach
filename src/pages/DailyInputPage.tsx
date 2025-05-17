@@ -1,17 +1,18 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Check, Save, Smile, Frown, Meh, Calendar, ArrowLeft, ArrowRight } from "lucide-react";
+import { Check, Save, Smile, Frown, Meh, Calendar, ArrowLeft, ArrowRight, Database } from "lucide-react";
 import { format, parseISO, startOfToday, subDays, addDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import DailyChecklist from "@/components/daily/DailyChecklist";
+import { Label } from "@/components/ui/label";
 
 const EmotionButton = ({ 
   icon: Icon, 
@@ -61,6 +62,7 @@ const DailyInputPage = () => {
   const [isToday, setIsToday] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [recordsEnabled, setRecordsEnabled] = useState(true);
   
   const [mood, setMood] = useState<number[]>([5]);
   const [energy, setEnergy] = useState<number[]>([5]);
@@ -169,6 +171,14 @@ const DailyInputPage = () => {
       return;
     }
     
+    if (!recordsEnabled) {
+      toast('Records keeping is disabled', {
+        description: 'Enable database records to save your entries.',
+        icon: <Database className="h-4 w-4" />,
+      });
+      return;
+    }
+    
     setIsSaving(true);
     try {
       const dateString = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
@@ -223,6 +233,14 @@ const DailyInputPage = () => {
     { icon: Meh, label: "Neutral" },
     { icon: Frown, label: "Anxious" },
   ];
+
+  const handleRecordsToggle = (enabled: boolean) => {
+    setRecordsEnabled(enabled);
+    toast(enabled ? 'Database records enabled' : 'Database records disabled', {
+      description: enabled ? 'Your entries will be saved to the database.' : 'Your entries will not be saved to the database.',
+      icon: <Database className="h-4 w-4" />,
+    });
+  };
   
   return (
     <div className="space-y-6">
@@ -237,6 +255,37 @@ const DailyInputPage = () => {
           Track your well-being and reflect on your day.
         </p>
       </motion.div>
+      
+      {/* Records Keeping Toggle */}
+      <Card className="mb-6 overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" /> Database Records
+          </CardTitle>
+          <CardDescription>
+            Control whether your daily entries are saved to the database
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-4 space-y-6">
+            <div className="flex items-center justify-center space-x-4 w-full max-w-md">
+              <Label htmlFor="database-toggle" className="text-lg font-medium text-muted-foreground">Off</Label>
+              <Switch 
+                id="database-toggle" 
+                className="scale-150 data-[state=checked]:bg-green-500" 
+                checked={recordsEnabled} 
+                onCheckedChange={handleRecordsToggle} 
+              />
+              <Label htmlFor="database-toggle" className="text-lg font-medium text-muted-foreground">On</Label>
+            </div>
+            <p className="text-center text-sm text-muted-foreground">
+              {recordsEnabled 
+                ? "Database records are enabled. Your entries will be saved." 
+                : "Database records are disabled. Your entries will not be saved."}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
       
       {/* New Daily Checklist Component */}
       <DailyChecklist />
@@ -447,7 +496,7 @@ const DailyInputPage = () => {
               onClick={handleSubmit} 
               size="lg" 
               className="gap-2"
-              disabled={isSaving || !user}
+              disabled={isSaving || !user || !recordsEnabled}
             >
               {isSaving ? (
                 <span>Saving...</span>
