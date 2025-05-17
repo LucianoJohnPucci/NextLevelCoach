@@ -1,11 +1,14 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Check, Calendar, MessageSquare, ListCheck, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
 
 interface ChecklistItem {
   id: string;
@@ -16,7 +19,13 @@ interface ChecklistItem {
   completed: boolean;
 }
 
-const DailyChecklist = () => {
+interface DailyChecklistProps {
+  recordsEnabled: boolean;
+}
+
+const DailyChecklist = ({ recordsEnabled }: DailyChecklistProps) => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([
     {
       id: "braindump",
@@ -52,12 +61,129 @@ const DailyChecklist = () => {
     },
   ]);
 
+  // Fetch the checklist data from Supabase when the component mounts
+  useEffect(() => {
+    if (user && recordsEnabled) {
+      fetchChecklistData();
+    }
+  }, [user, recordsEnabled]);
+
+  // Save the checklist data to Supabase when the component unmounts or when window is closed
+  useEffect(() => {
+    // Save data when component unmounts
+    return () => {
+      if (user && recordsEnabled) {
+        saveChecklistData();
+      }
+    };
+  }, [user, recordsEnabled, checklistItems]);
+
+  // Add event listener for beforeunload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (user && recordsEnabled) {
+        saveChecklistData();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [user, recordsEnabled, checklistItems]);
+
+  const fetchChecklistData = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      
+      const { data, error } = await supabase
+        .from('daily_checklist_tracking')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('date', today)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
+        throw error;
+      }
+      
+      if (data) {
+        // Update the checklist items with the saved state
+        setChecklistItems(prevItems => 
+          prevItems.map(item => ({
+            ...item,
+            completed: data[`${item.id}_completed`] || false
+          }))
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching checklist data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveChecklistData = async () => {
+    if (!user || !recordsEnabled) return;
+    
+    try {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      
+      const checklistData = {
+        user_id: user.id,
+        date: today,
+        braindump_completed: checklistItems.find(item => item.id === 'braindump')?.completed || false,
+        prioritize_completed: checklistItems.find(item => item.id === 'prioritize')?.completed || false,
+        complete_completed: checklistItems.find(item => item.id === 'complete')?.completed || false,
+        review_completed: checklistItems.find(item => item.id === 'review')?.completed || false
+      };
+      
+      // Check if a record already exists for today
+      const { data, error: selectError } = await supabase
+        .from('daily_checklist_tracking')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('date', today)
+        .maybeSingle();
+      
+      if (selectError) throw selectError;
+      
+      if (data) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('daily_checklist_tracking')
+          .update(checklistData)
+          .eq('id', data.id);
+        
+        if (updateError) throw updateError;
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabase
+          .from('daily_checklist_tracking')
+          .insert([checklistData]);
+        
+        if (insertError) throw insertError;
+      }
+    } catch (error) {
+      console.error('Error saving checklist data:', error);
+    }
+  };
+
   const toggleCompleted = (id: string) => {
     setChecklistItems(
       checklistItems.map((item) =>
         item.id === id ? { ...item, completed: !item.completed } : item
       )
     );
+    
+    // If database records are enabled, save immediately after toggling
+    if (user && recordsEnabled) {
+      saveChecklistData();
+    }
   };
 
   return (

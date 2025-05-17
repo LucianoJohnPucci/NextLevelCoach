@@ -129,6 +129,42 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_checklist_tracking: {
+        Row: {
+          braindump_completed: boolean
+          complete_completed: boolean
+          created_at: string
+          date: string
+          id: string
+          prioritize_completed: boolean
+          review_completed: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          braindump_completed?: boolean
+          complete_completed?: boolean
+          created_at?: string
+          date?: string
+          id?: string
+          prioritize_completed?: boolean
+          review_completed?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          braindump_completed?: boolean
+          complete_completed?: boolean
+          created_at?: string
+          date?: string
+          id?: string
+          prioritize_completed?: boolean
+          review_completed?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_entries: {
         Row: {
           accomplishments: string | null

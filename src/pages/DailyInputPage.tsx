@@ -288,7 +288,7 @@ const DailyInputPage = () => {
       </Card>
       
       {/* New Daily Checklist Component */}
-      <DailyChecklist />
+      <DailyChecklist recordsEnabled={recordsEnabled} />
       
       <div className="flex items-center justify-between border-b pb-4">
         <Button
