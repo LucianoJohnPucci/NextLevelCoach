@@ -20,40 +20,44 @@ import NotesPage from "@/pages/NotesPage";
 import AuthPage from "@/pages/AuthPage";
 import ProfilePage from "@/pages/ProfilePage";
 import NotFound from "@/pages/NotFound";
+import { useState } from "react";
 
-const queryClient = new QueryClient();
+const App = () => {
+  // Create a new QueryClient instance inside the component
+  const [queryClient] = useState(() => new QueryClient());
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <SidebarProvider>
-          <AuthProvider>
-            <BrowserRouter>
-              <Toaster />
-              <Sonner />
-              <Routes>
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/" element={<Layout />}>
-                  <Route index element={<Index />} />
-                  <Route path="mind" element={<MindPage />} />
-                  <Route path="body" element={<BodyPage />} />
-                  <Route path="soul" element={<SoulPage />} />
-                  <Route path="daily" element={<DailyInputPage />} />
-                  <Route path="dashboard" element={<DashboardPage />} />
-                  <Route path="goals" element={<GoalsPage />} />
-                  <Route path="notes" element={<NotesPage />} />
-                  <Route path="wisdom" element={<WisdomPage />} />
-                  <Route path="profile" element={<ProfilePage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Route>
-              </Routes>
-            </BrowserRouter>
-          </AuthProvider>
-        </SidebarProvider>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <TooltipProvider>
+          <SidebarProvider>
+            <AuthProvider>
+              <BrowserRouter>
+                <Toaster />
+                <Sonner />
+                <Routes>
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/" element={<Layout />}>
+                    <Route index element={<Index />} />
+                    <Route path="mind" element={<MindPage />} />
+                    <Route path="body" element={<BodyPage />} />
+                    <Route path="soul" element={<SoulPage />} />
+                    <Route path="daily" element={<DailyInputPage />} />
+                    <Route path="dashboard" element={<DashboardPage />} />
+                    <Route path="goals" element={<GoalsPage />} />
+                    <Route path="notes" element={<NotesPage />} />
+                    <Route path="wisdom" element={<WisdomPage />} />
+                    <Route path="profile" element={<ProfilePage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Route>
+                </Routes>
+              </BrowserRouter>
+            </AuthProvider>
+          </SidebarProvider>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
