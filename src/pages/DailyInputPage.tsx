@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +11,7 @@ import { Check, Save, Smile, Frown, Meh, Calendar, ArrowLeft, ArrowRight } from 
 import { format, parseISO, startOfToday, subDays, addDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
+import DailyChecklist from "@/components/daily/DailyChecklist";
 
 const EmotionButton = ({ 
   icon: Icon, 
@@ -236,6 +238,9 @@ const DailyInputPage = () => {
         </p>
       </motion.div>
       
+      {/* New Daily Checklist Component */}
+      <DailyChecklist />
+      
       <div className="flex items-center justify-between border-b pb-4">
         <Button
           variant="outline"
@@ -269,7 +274,7 @@ const DailyInputPage = () => {
         </div>
       ) : (
         <>
-          <Tabs defaultValue="mood" className="w-full">
+          <Tabs defaultValue="mood" className="w-full" id="daily-input-tabs">
             <TabsList className="flex flex-col sm:grid sm:grid-cols-4 w-full gap-2 sm:gap-0 h-auto">
               <TabsTrigger value="mood" className="px-2 py-2 text-sm">Mood & Energy</TabsTrigger>
               <TabsTrigger value="emotions" className="px-2 py-2 text-sm">Emotions</TabsTrigger>
