@@ -13,9 +13,9 @@ const WisdomPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold tracking-tight">Wisdom</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Double Chat AI - Goals & Wisdom</h1>
         <p className="text-muted-foreground">
-          Seek guidance from stoic philosophy and timeless wisdom.
+          Seek guidance from stoic philosophy and break down your goals with AI assistance.
         </p>
       </motion.div>
       
