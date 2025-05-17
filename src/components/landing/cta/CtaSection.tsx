@@ -11,7 +11,7 @@ const CtaSection = () => {
         <div className="flex flex-col items-center space-y-8 text-center">
           <div className="space-y-4 max-w-[800px]">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              Transform Your Life in 5 Years
+              Pick your Goal Timeframe- Short term or Long term
             </h2>
             <p className="text-muted-foreground md:text-xl/relaxed">
               Pick your Goal, short term or long term or if you just want to do a 60-day Habit swap challenge- We have what you need to achieve it
