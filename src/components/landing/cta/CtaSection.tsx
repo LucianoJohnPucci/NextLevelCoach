@@ -2,7 +2,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
 
 const CtaSection = () => {
   return (
@@ -18,10 +17,9 @@ const CtaSection = () => {
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button asChild size="lg" className="rounded-full">
+            <Button asChild size="lg" className="rounded-full bg-blue-500 hover:bg-blue-600 text-white">
               <Link to="/auth">
-                Begin Your 5-Year Journey
-                <ArrowRight className="ml-2 h-4 w-4" />
+                Sign Up Free
               </Link>
             </Button>
           </div>
