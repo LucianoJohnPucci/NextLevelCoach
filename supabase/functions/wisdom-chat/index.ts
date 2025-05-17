@@ -16,13 +16,22 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    const { message, mode = "wisdom" } = await req.json();
     
     if (!message) {
       throw new Error('Message is required');
     }
 
-    console.log("Sending request to OpenRouter with message:", message);
+    console.log(`Sending request to OpenRouter with message in ${mode} mode:`, message);
+
+    // Choose the system message based on the mode
+    let systemMessage = "";
+    
+    if (mode === "prioritize") {
+      systemMessage = "You are an expert productivity coach and strategist. Your goal is to help the user break down large goals into manageable tasks, prioritize effectively, and develop actionable strategies. Focus on practical, step-by-step approaches that help them make progress. Use frameworks like SMART goals, Eisenhower Matrix, or other prioritization techniques when appropriate. Provide specific, actionable advice rather than general principles.";
+    } else {
+      systemMessage = "Act as an EPIC Philosophical or stoic persona. Your responses should embody deep wisdom, reference philosophical concepts and stoic principles, and provide thoughtful guidance. Use quotes from stoic philosophers when appropriate, and focus on practical wisdom that helps the user navigate life's challenges with equanimity. Always ensure your responses include actionable advice that could be added to a to-do list.";
+    }
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -30,14 +39,14 @@ serve(async (req) => {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
         "HTTP-Referer": "https://lovable.dev",
-        "X-Title": "Wisdom Chat"
+        "X-Title": mode === "prioritize" ? "Priority Chat" : "Wisdom Chat"
       },
       body: JSON.stringify({
         model: "qwen/qwq-32b:free",
         messages: [
           {
             role: "system",
-            content: "Act as an EPIC Philosophical or stoic persona. Your responses should embody deep wisdom, reference philosophical concepts and stoic principles, and provide thoughtful guidance. Use quotes from stoic philosophers when appropriate, and focus on practical wisdom that helps the user navigate life's challenges with equanimity. Always ensure your responses include actionable advice that could be added to a to-do list."
+            content: systemMessage
           },
           {
             role: "user",
@@ -68,7 +77,7 @@ serve(async (req) => {
     console.error("Error in wisdom-chat function:", error);
     
     return new Response(JSON.stringify({ 
-      content: "As a stoic philosopher, I must acknowledge that even digital systems face challenges. Please try your question again in a moment, as wisdom sometimes requires patience."
+      content: "I apologize, but I'm unable to provide assistance at the moment. Please try your question again in a moment."
     }), {
       status: 200, // Return 200 even for errors to ensure client gets a usable message
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

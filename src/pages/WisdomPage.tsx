@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import ChatBox from "@/components/wisdom/ChatBox";
 import DailyWisdom from "@/components/wisdom/DailyWisdom";
+import PrioritizeBox from "@/components/wisdom/PrioritizeBox";
 
 const WisdomPage = () => {
   return (
@@ -18,6 +19,12 @@ const WisdomPage = () => {
         </p>
       </motion.div>
       
+      {/* Prioritize Box Section */}
+      <div className="grid grid-cols-1 gap-6">
+        <PrioritizeBox />
+      </div>
+      
+      {/* Original Chat and Daily Wisdom Section */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <ChatBox />
         <DailyWisdom />
