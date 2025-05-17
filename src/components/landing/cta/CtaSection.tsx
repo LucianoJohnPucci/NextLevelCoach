@@ -14,7 +14,7 @@ const CtaSection = () => {
               Transform Your Life in 5 Years
             </h2>
             <p className="text-muted-foreground md:text-xl/relaxed">
-              Join thousands who have used Next Level Coach's methodology to achieve their financial, health, mental, and spiritual goals.
+              Pick your Goal, short term or long term or if you just want to do a 60-day Habit swap challenge- We have what you need to achieve it
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-4">
