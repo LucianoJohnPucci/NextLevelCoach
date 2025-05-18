@@ -1,6 +1,5 @@
-
-import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import AuthCard from "@/components/auth/AuthCard";
@@ -13,8 +12,11 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFoo
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+
+  // Component state 
   const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -25,150 +27,136 @@ const AuthPage = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   
-  // STEP 1: Immediately check for recovery flow before anything else happens
+  // Use refs to track critical state across rerenders
+  const recoveryDetectedRef = useRef(false);
+  const processStartedRef = useRef(false);
+  
+  // CRITICAL: This function runs before authentication checks
+  const checkForRecoveryFlow = () => {
+    // Don't run this more than once
+    if (processStartedRef.current) return false;
+    processStartedRef.current = true;
+    
+    // Check URL hash (primary method Supabase uses)
+    const hash = window.location.hash;
+    const fullUrl = window.location.href;
+    
+    // Log for debugging
+    console.log("[Password Recovery] URL check:", {
+      hash,
+      pathname: location.pathname,
+      fullUrl
+    });
+    
+    // Direct detection instead of parsing - more reliable
+    const isRecoveryFlow = 
+      hash.includes("type=recovery") || 
+      hash.includes("access_token") ||
+      fullUrl.includes("type=recovery") ||
+      fullUrl.includes("access_token") ||
+      location.pathname.includes("reset-password");
+    
+    recoveryDetectedRef.current = isRecoveryFlow;
+    
+    console.log("[Password Recovery] Is recovery flow detected:", isRecoveryFlow);
+    return isRecoveryFlow;
+  };
+  
+  // Main initialization effect - runs once on component mount
   useEffect(() => {
-    const detectRecoveryFlow = async () => {
-      setIsProcessing(true);
-      
+    // Immediately check if this is a recovery flow
+    const isRecoveryFlow = checkForRecoveryFlow();
+    
+    const initialize = async () => {
       try {
-        // Get all possible sources for recovery parameters
-        // IMPORTANT: Check hash first, as Supabase often puts recovery tokens there
-        const hash = window.location.hash;
-        // Clean up the hash properly - sometimes the # is followed by another character
-        const cleanHash = hash.startsWith('#') ? hash.substring(1) : hash;
-        const hashParams = new URLSearchParams(cleanHash);
-        
-        // Also check query parameters
-        const type = searchParams.get("type");
-        const accessToken = searchParams.get("access_token");
-        
-        // Get parameters from hash
-        const hashType = hashParams.get("type");
-        const hashAccessToken = hashParams.get("access_token");
-        
-        console.log("[Password Recovery] Detection parameters:", { 
-          urlType: type, 
-          urlToken: !!accessToken,
-          hashType,
-          hashToken: !!hashAccessToken,
-          hash,
-          cleanHash,
-          url: window.location.href
-        });
-        
-        // CRITICAL: Check for ANY indication of recovery flow
-        const isRecoveryFlow = 
-          type === "recovery" || 
-          accessToken || 
-          hashType === "recovery" || 
-          hashAccessToken || 
-          hash.includes("type=recovery") ||
-          hash.includes("access_token");
-        
-        console.log("[Password Recovery] Is recovery flow:", isRecoveryFlow);
-        
         if (isRecoveryFlow) {
-          console.log("[Password Recovery] RECOVERY FLOW DETECTED - Signing out all sessions immediately");
+          console.log("[Password Recovery] Recovery flow detected - Processing...");
           
-          // Force sign out BEFORE checking auth state, with await to ensure it completes
+          // CRITICAL: Force sign out ALL sessions immediately
+          console.log("[Password Recovery] Signing out all sessions");
           await supabase.auth.signOut({ scope: 'global' });
           
-          // Short delay to ensure sign-out completes
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Add delay to ensure sign out completes
+          await new Promise(resolve => setTimeout(resolve, 1000));
           
-          console.log("[Password Recovery] All sessions signed out successfully");
+          // Double-check the session was cleared
+          const { data } = await supabase.auth.getSession();
           
-          // Clear URL parameters but preserve the hash for Supabase to process
-          const cleanUrl = window.location.pathname;
-          // Don't modify history yet - we need the tokens for password reset to work
+          if (data.session) {
+            console.warn("[Password Recovery] WARNING: Session still exists after sign out");
+            await supabase.auth.signOut({ scope: 'global' });
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
           
-          // Show the password reset dialog
+          console.log("[Password Recovery] Setting up password reset dialog");
           setResetPasswordOpen(true);
           setIsAuthCheckComplete(true);
           setIsProcessing(false);
-          return true;
+        } else {
+          // Normal auth flow - check if user is authenticated
+          console.log("[Auth] Checking user session");
+          const { data } = await supabase.auth.getSession();
+          
+          if (data.session) {
+            console.log("[Auth] User is authenticated, redirecting to home");
+            navigate("/");
+          } else {
+            console.log("[Auth] No active session, showing login");
+            setIsAuthCheckComplete(true);
+            setIsProcessing(false);
+          }
         }
       } catch (error) {
-        console.error("[Password Recovery] Error during recovery detection:", error);
+        console.error("[Auth] Initialization error:", error);
+        setIsAuthCheckComplete(true);
+        setIsProcessing(false);
       }
-      
-      setIsProcessing(false);
-      return false;
     };
-
-    // CRITICAL: Make this function run synchronously without any delay
-    detectRecoveryFlow().then(isRecovery => {
-      if (!isRecovery) {
-        // Only check auth session if we're definitely not in recovery flow
-        const checkSession = async () => {
-          try {
-            const { data } = await supabase.auth.getSession();
-            
-            if (data.session) {
-              navigate("/");
-            } else {
-              setIsAuthCheckComplete(true);
-            }
-          } catch (error) {
-            console.error("[Auth] Session check error:", error);
-            setIsAuthCheckComplete(true);
-          }
-        };
-        
-        checkSession();
-      }
-    });
     
-    // Disable all dependencies to ensure this only runs once on initial mount
+    initialize();
+    
+    // Only run this once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Set up auth state listener to detect PASSWORD_RECOVERY events
+  
+  // Listen for Supabase auth events in a separate effect
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("[Password Recovery] Auth event detected:", event);
+        console.log("[Auth Event]", event, session ? "User session exists" : "No session");
         
-        // If we're already showing the reset dialog or just updated the password, don't handle more events
-        if (resetPasswordOpen || isPasswordUpdated) return;
-        
-        // Handle PASSWORD_RECOVERY event
+        // Handle PASSWORD_RECOVERY event from Supabase
         if (event === "PASSWORD_RECOVERY") {
-          console.log("[Password Recovery] PASSWORD_RECOVERY event detected - signing out first");
+          console.log("[Password Recovery] PASSWORD_RECOVERY event detected");
+          
+          // Prevent handling if already showing reset dialog
+          if (resetPasswordOpen || isPasswordUpdated) {
+            console.log("[Password Recovery] Reset dialog already open, ignoring event");
+            return;
+          }
           
           try {
-            // CRITICAL: Always sign out ALL sessions globally before showing reset dialog
+            // Always sign out first
             await supabase.auth.signOut({ scope: 'global' });
-            console.log("[Password Recovery] User signed out successfully after PASSWORD_RECOVERY event");
+            await new Promise(resolve => setTimeout(resolve, 500));
             
-            // Then show reset dialog
+            console.log("[Password Recovery] Showing password reset dialog");
             setResetPasswordOpen(true);
           } catch (error) {
-            console.error("[Password Recovery] Error during sign out after PASSWORD_RECOVERY event:", error);
+            console.error("[Password Recovery] Error during PASSWORD_RECOVERY handling:", error);
             toast({
               title: "Error",
-              description: "There was a problem preparing for password reset. Please try again.",
+              description: "There was a problem preparing for password reset.",
               variant: "destructive",
             });
           }
           return;
         }
         
-        // Only auto-redirect on login if we're not in a recovery flow or password reset process
-        if (session && !resetPasswordOpen && !isPasswordUpdated) {
-          // Check if this might be a recovery flow via URL
-          const type = searchParams.get("type");
-          const hash = window.location.hash;
-          const hashParams = new URLSearchParams(hash.replace('#', ''));
-          const isRecoveryFlow = 
-            type === "recovery" || 
-            hashParams.get("type") === "recovery" ||
-            hash.includes("type=recovery");
-          
-          // Only redirect to home if definitely not in recovery flow
-          if (!isRecoveryFlow) {
-            navigate("/");
-          }
+        // Handle user login events, but not during password reset
+        if (event === "SIGNED_IN" && !recoveryDetectedRef.current && !resetPasswordOpen) {
+          console.log("[Auth] User signed in, redirecting to home");
+          navigate("/");
         }
       }
     );
@@ -176,10 +164,10 @@ const AuthPage = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, searchParams, resetPasswordOpen, isPasswordUpdated, toast]);
+  }, [navigate, resetPasswordOpen, isPasswordUpdated, toast]);
 
   // Handle password reset submission
-  const handleResetPassword = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
     setPasswordError("");
     
@@ -198,7 +186,7 @@ const AuthPage = () => {
     try {
       setLoading(true);
       
-      console.log("[Password Recovery] Attempting to update password");
+      console.log("[Password Recovery] Updating password");
       
       // Update password using the Supabase API
       const { error } = await supabase.auth.updateUser({
@@ -223,32 +211,31 @@ const AuthPage = () => {
       setNewPassword("");
       setConfirmPassword("");
       
-    } catch (error: any) {
+    } catch (error) {
       console.error("[Password Recovery] Error during password reset:", error);
-      setPasswordError(error.message || "An error occurred while resetting your password. Please try again or request a new reset link.");
+      setPasswordError(error.message || "An error occurred while resetting your password.");
     } finally {
       setLoading(false);
     }
   };
 
-  // After successful password reset and success dialog is closed
+  // After successful password reset
   const handleSuccessDialogClose = async () => {
     try {
-      console.log("[Password Recovery] Signing out after password reset");
+      console.log("[Password Recovery] Reset completed, cleaning up");
       
-      // Sign out again after password reset to ensure clean state
+      // Sign out again to ensure clean state
       await supabase.auth.signOut({ scope: 'global' });
       
-      // Clear URL parameters and redirect to login
-      const cleanUrl = window.location.pathname;
-      window.history.replaceState({}, document.title, cleanUrl);
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
       
       setShowSuccessDialog(false);
       
-      // Force reload to ensure clean state
+      // Hard refresh to auth page for cleanest state
       window.location.href = "/auth";
     } catch (error) {
-      console.error("[Password Recovery] Error during sign out after password reset:", error);
+      console.error("[Password Recovery] Final cleanup error:", error);
       setShowSuccessDialog(false);
       navigate("/auth", { replace: true });
     }
@@ -258,22 +245,19 @@ const AuthPage = () => {
     navigate("/");
   };
 
-  // Handle reset dialog closing - ensure we clean up properly
-  const handleDialogChange = async (open: boolean) => {
+  // Handle manual dialog closing
+  const handleDialogChange = async (open) => {
     if (!open && resetPasswordOpen) {
       try {
         // Sign out when manually closing the dialog
-        console.log("[Password Recovery] Reset dialog closing, signing out user");
+        console.log("[Password Recovery] Dialog manually closed, signing out");
         await supabase.auth.signOut({ scope: 'global' });
         
-        // Clear URL parameters by replacing the current location
-        const cleanUrl = window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-        
-        // Navigate to the clean auth page
+        // Clean URL and reload
+        window.history.replaceState({}, document.title, window.location.pathname);
         window.location.href = "/auth";
       } catch (error) {
-        console.error("[Password Recovery] Error during sign out when closing reset dialog:", error);
+        console.error("[Password Recovery] Dialog close cleanup error:", error);
       } finally {
         setResetPasswordOpen(false);
       }
@@ -282,6 +266,7 @@ const AuthPage = () => {
     }
   };
 
+  // Loading state
   if (isProcessing) {
     return (
       <div className="container flex h-screen items-center justify-center">
