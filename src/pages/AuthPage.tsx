@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -20,29 +20,49 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [isAuthCheckComplete, setIsAuthCheckComplete] = useState(false);
   const [isPasswordUpdated, setIsPasswordUpdated] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   // PRIORITY 1: Check for password reset parameters and sign out any existing session
   useEffect(() => {
     const handleRecoveryFlow = async () => {
-      // Check parameters that indicate a recovery flow
+      // Check all possible parameters that indicate a recovery flow
       const type = searchParams.get("type");
       const accessToken = searchParams.get("access_token");
+      const hash = window.location.hash;
       
-      console.log("[Password Recovery] URL type parameter:", type);
-      console.log("[Password Recovery] URL contains access_token:", !!accessToken);
+      // Check for reset token in hash (format: #access_token=xxx&type=recovery)
+      const hashParams = new URLSearchParams(hash.replace('#', ''));
+      const hashType = hashParams.get("type");
+      const hashAccessToken = hashParams.get("access_token");
+      
+      const isRecoveryFlow = 
+        type === "recovery" || 
+        accessToken || 
+        hashType === "recovery" || 
+        hashAccessToken;
+      
+      console.log("[Password Recovery] Recovery detection:", {
+        urlType: type,
+        urlAccessToken: !!accessToken,
+        hashType,
+        hashAccessToken: !!hashAccessToken,
+        isRecoveryFlow
+      });
       
       // If this is a recovery flow, ALWAYS sign out first
-      if (type === "recovery" || accessToken) {
+      if (isRecoveryFlow) {
         console.log("[Password Recovery] Recovery flow detected - signing out user immediately");
+        setIsSigningOut(true);
         
         try {
-          // Force sign out first to ensure clean state
-          await supabase.auth.signOut();
+          // Force sign out all sessions to ensure clean state
+          await supabase.auth.signOut({ scope: 'global' });
           console.log("[Password Recovery] User signed out successfully before showing reset dialog");
           
           // After signing out, show the reset dialog
           setResetPasswordOpen(true);
           setIsAuthCheckComplete(true);
+          setIsSigningOut(false);
           return true; // Recovery flow detected, return true
         } catch (error) {
           console.error("[Password Recovery] Error during sign out before showing reset dialog:", error);
@@ -52,15 +72,18 @@ const AuthPage = () => {
             variant: "destructive",
           });
           setIsAuthCheckComplete(true);
+          setIsSigningOut(false);
           return true; // Still consider it a recovery flow even if there was an error
         }
       }
+      
+      setIsSigningOut(false);
       return false; // Not a recovery flow
     };
 
     // Only check regular session if not in recovery flow
     handleRecoveryFlow().then(isRecoveryFlow => {
-      if (!isRecoveryFlow) {
+      if (!isRecoveryFlow && !isSigningOut) {
         const checkSession = async () => {
           try {
             const { data } = await supabase.auth.getSession();
@@ -78,7 +101,7 @@ const AuthPage = () => {
         checkSession();
       }
     });
-  }, [navigate, searchParams, toast]);
+  }, [navigate, searchParams, toast, isSigningOut]);
 
   // Set up auth state listener to detect PASSWORD_RECOVERY events
   useEffect(() => {
@@ -86,13 +109,14 @@ const AuthPage = () => {
       async (event, session) => {
         console.log("[Password Recovery] Auth event detected:", event);
         
-        // Handle password recovery event
-        if (event === "PASSWORD_RECOVERY") {
+        // Only handle PASSWORD_RECOVERY event if the reset dialog isn't already open
+        if (event === "PASSWORD_RECOVERY" && !resetPasswordOpen) {
           console.log("[Password Recovery] PASSWORD_RECOVERY event detected - signing out first");
+          setIsSigningOut(true);
           
           try {
-            // Always sign out first
-            await supabase.auth.signOut();
+            // Always sign out first - use global scope to terminate all sessions
+            await supabase.auth.signOut({ scope: 'global' });
             console.log("[Password Recovery] User signed out successfully after PASSWORD_RECOVERY event");
             
             // Then show reset dialog
@@ -104,6 +128,8 @@ const AuthPage = () => {
               description: "There was a problem preparing for password reset. Please try again.",
               variant: "destructive",
             });
+          } finally {
+            setIsSigningOut(false);
           }
           return;
         }
@@ -111,10 +137,21 @@ const AuthPage = () => {
         // Check if we should ignore the session due to being in recovery flow
         const type = searchParams.get("type");
         const accessToken = searchParams.get("access_token");
-        const isRecoveryFlow = type === "recovery" || accessToken;
+        const hash = window.location.hash;
+        const hashParams = new URLSearchParams(hash.replace('#', ''));
+        const isRecoveryFlow = 
+          type === "recovery" || 
+          accessToken || 
+          hashParams.get("type") === "recovery" || 
+          hashParams.get("access_token");
         
-        // Only auto-redirect if we're not in recovery flow and have a session
-        if (session && !isRecoveryFlow && !resetPasswordOpen && !isPasswordUpdated) {
+        // Only auto-redirect if we're not in recovery flow, not actively signing out,
+        // not showing the reset password dialog, and password isn't just updated
+        if (session && 
+            !isRecoveryFlow && 
+            !resetPasswordOpen && 
+            !isPasswordUpdated && 
+            !isSigningOut) {
           navigate("/");
         }
       }
@@ -123,7 +160,7 @@ const AuthPage = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, searchParams, resetPasswordOpen, isPasswordUpdated, toast]);
+  }, [navigate, searchParams, resetPasswordOpen, isPasswordUpdated, toast, isSigningOut]);
 
   // Handle password reset submission
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -178,10 +215,16 @@ const AuthPage = () => {
       console.log("[Password Recovery] Password updated successfully, signing out user");
       
       // Sign out again after password reset to ensure clean state
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'global' });
       
       // Clear URL parameters and redirect to login
       console.log("[Password Recovery] Redirecting to login page");
+      
+      // Clear any URL parameters by replacing the current location
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+      
+      // Finally navigate to the auth page (which will show login form since user is signed out)
       navigate("/auth", { replace: true });
       
     } catch (error: any) {
@@ -206,9 +249,13 @@ const AuthPage = () => {
       try {
         // Sign out when manually closing the dialog
         console.log("[Password Recovery] Reset dialog closing, signing out user");
-        await supabase.auth.signOut();
+        await supabase.auth.signOut({ scope: 'global' });
         
-        // Clear URL parameters
+        // Clear URL parameters by replacing the current location
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+        
+        // Navigate to the clean auth page
         navigate("/auth", { replace: true });
       } catch (error) {
         console.error("[Password Recovery] Error during sign out when closing reset dialog:", error);
@@ -229,7 +276,7 @@ const AuthPage = () => {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          {isAuthCheckComplete && <AuthCard onAuthSuccess={handleAuthSuccess} />}
+          {isAuthCheckComplete && !isSigningOut && <AuthCard onAuthSuccess={handleAuthSuccess} />}
         </motion.div>
       </div>
       

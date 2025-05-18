@@ -39,6 +39,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
       
       // Create a properly structured redirect URL that ensures consistent behavior
       const origin = window.location.origin;
+      // Use a dedicated route pattern that our AuthPage will recognize
       const redirectUrl = `${origin}/auth?type=recovery`;
       console.log("[Password Recovery] Using redirect URL:", redirectUrl);
       
