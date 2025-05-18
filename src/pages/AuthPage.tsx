@@ -9,10 +9,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -20,21 +21,24 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [isAuthCheckComplete, setIsAuthCheckComplete] = useState(false);
   const [isPasswordUpdated, setIsPasswordUpdated] = useState(false);
-  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
-  // PRIORITY 1: Check for password reset parameters and sign out any existing session
+  // STEP 1: Immediately check for recovery flow before anything else happens
   useEffect(() => {
-    const handleRecoveryFlow = async () => {
-      // Check all possible parameters that indicate a recovery flow
+    const detectRecoveryAndSignOut = async () => {
+      setIsProcessing(true);
+      
+      // Check for recovery indicators in URL query params and hash
       const type = searchParams.get("type");
       const accessToken = searchParams.get("access_token");
       const hash = window.location.hash;
-      
-      // Check for reset token in hash (format: #access_token=xxx&type=recovery)
       const hashParams = new URLSearchParams(hash.replace('#', ''));
       const hashType = hashParams.get("type");
       const hashAccessToken = hashParams.get("access_token");
       
+      // Determine if this is a recovery flow from any source
       const isRecoveryFlow = 
         type === "recovery" || 
         accessToken || 
@@ -49,21 +53,20 @@ const AuthPage = () => {
         isRecoveryFlow
       });
       
-      // If this is a recovery flow, ALWAYS sign out first
+      // If this is a recovery flow, ALWAYS sign out first before anything else
       if (isRecoveryFlow) {
         console.log("[Password Recovery] Recovery flow detected - signing out user immediately");
-        setIsSigningOut(true);
         
         try {
           // Force sign out all sessions to ensure clean state
           await supabase.auth.signOut({ scope: 'global' });
-          console.log("[Password Recovery] User signed out successfully before showing reset dialog");
+          console.log("[Password Recovery] User signed out successfully");
           
           // After signing out, show the reset dialog
           setResetPasswordOpen(true);
           setIsAuthCheckComplete(true);
-          setIsSigningOut(false);
-          return true; // Recovery flow detected, return true
+          setIsProcessing(false);
+          return true; // Recovery flow handled
         } catch (error) {
           console.error("[Password Recovery] Error during sign out before showing reset dialog:", error);
           toast({
@@ -72,26 +75,28 @@ const AuthPage = () => {
             variant: "destructive",
           });
           setIsAuthCheckComplete(true);
-          setIsSigningOut(false);
-          return true; // Still consider it a recovery flow even if there was an error
+          setIsProcessing(false);
+          return true; // Still consider it handled even if there was an error
         }
       }
       
-      setIsSigningOut(false);
+      setIsProcessing(false);
       return false; // Not a recovery flow
     };
 
-    // Only check regular session if not in recovery flow
-    handleRecoveryFlow().then(isRecoveryFlow => {
-      if (!isRecoveryFlow && !isSigningOut) {
+    // Only proceed to check session if it's not a recovery flow
+    detectRecoveryAndSignOut().then(isRecoveryFlow => {
+      if (!isRecoveryFlow) {
         const checkSession = async () => {
           try {
             const { data } = await supabase.auth.getSession();
             
+            // If user is already authenticated and not in recovery flow, redirect to home
             if (data.session) {
               navigate("/");
+            } else {
+              setIsAuthCheckComplete(true);
             }
-            setIsAuthCheckComplete(true);
           } catch (error) {
             console.error("[Auth] Session check error:", error);
             setIsAuthCheckComplete(true);
@@ -101,7 +106,7 @@ const AuthPage = () => {
         checkSession();
       }
     });
-  }, [navigate, searchParams, toast, isSigningOut]);
+  }, [navigate, searchParams, toast]);
 
   // Set up auth state listener to detect PASSWORD_RECOVERY events
   useEffect(() => {
@@ -109,13 +114,15 @@ const AuthPage = () => {
       async (event, session) => {
         console.log("[Password Recovery] Auth event detected:", event);
         
-        // Only handle PASSWORD_RECOVERY event if the reset dialog isn't already open
-        if (event === "PASSWORD_RECOVERY" && !resetPasswordOpen) {
+        // If we're already showing the reset dialog or just updated the password, don't handle login events
+        if (resetPasswordOpen || isPasswordUpdated) return;
+        
+        // Handle PASSWORD_RECOVERY event
+        if (event === "PASSWORD_RECOVERY") {
           console.log("[Password Recovery] PASSWORD_RECOVERY event detected - signing out first");
-          setIsSigningOut(true);
           
           try {
-            // Always sign out first - use global scope to terminate all sessions
+            // Always sign out first to ensure a clean state
             await supabase.auth.signOut({ scope: 'global' });
             console.log("[Password Recovery] User signed out successfully after PASSWORD_RECOVERY event");
             
@@ -128,31 +135,24 @@ const AuthPage = () => {
               description: "There was a problem preparing for password reset. Please try again.",
               variant: "destructive",
             });
-          } finally {
-            setIsSigningOut(false);
           }
           return;
         }
         
-        // Check if we should ignore the session due to being in recovery flow
-        const type = searchParams.get("type");
-        const accessToken = searchParams.get("access_token");
-        const hash = window.location.hash;
-        const hashParams = new URLSearchParams(hash.replace('#', ''));
-        const isRecoveryFlow = 
-          type === "recovery" || 
-          accessToken || 
-          hashParams.get("type") === "recovery" || 
-          hashParams.get("access_token");
-        
-        // Only auto-redirect if we're not in recovery flow, not actively signing out,
-        // not showing the reset password dialog, and password isn't just updated
-        if (session && 
-            !isRecoveryFlow && 
-            !resetPasswordOpen && 
-            !isPasswordUpdated && 
-            !isSigningOut) {
-          navigate("/");
+        // Only auto-redirect on login if we're not in a recovery flow or password reset process
+        if (session && !resetPasswordOpen && !isPasswordUpdated) {
+          // Check if this might be a recovery flow via URL
+          const type = searchParams.get("type");
+          const hash = window.location.hash;
+          const hashParams = new URLSearchParams(hash.replace('#', ''));
+          const isRecoveryFlow = 
+            type === "recovery" || 
+            hashParams.get("type") === "recovery";
+          
+          // Only redirect to home if definitely not in recovery flow
+          if (!isRecoveryFlow) {
+            navigate("/");
+          }
         }
       }
     );
@@ -160,27 +160,22 @@ const AuthPage = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, searchParams, resetPasswordOpen, isPasswordUpdated, toast, isSigningOut]);
+  }, [navigate, searchParams, resetPasswordOpen, isPasswordUpdated, toast]);
 
   // Handle password reset submission
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPasswordError("");
     
+    // Validate password
     if (!newPassword || newPassword.length < 8) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 8 characters long",
-        variant: "destructive",
-      });
+      setPasswordError("Password must be at least 8 characters long");
       return;
     }
     
+    // Validate password confirmation match
     if (newPassword !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
+      setPasswordError("Passwords do not match");
       return;
     }
     
@@ -199,43 +194,47 @@ const AuthPage = () => {
         throw error;
       }
       
+      console.log("[Password Recovery] Password updated successfully");
+      
       // Mark password as updated to avoid redirect loops
       setIsPasswordUpdated(true);
+      setResetPasswordOpen(false);
       
-      toast({
-        title: "Password updated",
-        description: "Your password has been successfully updated. Please log in with your new password.",
-      });
+      // Show success dialog
+      setShowSuccessDialog(true);
       
       // Clear the form
       setNewPassword("");
       setConfirmPassword("");
-      setResetPasswordOpen(false);
       
-      console.log("[Password Recovery] Password updated successfully, signing out user");
+    } catch (error: any) {
+      console.error("[Password Recovery] Error during password reset:", error);
+      setPasswordError(error.message || "An error occurred while resetting your password. Please try again or request a new reset link.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // After successful password reset and success dialog is closed
+  const handleSuccessDialogClose = async () => {
+    try {
+      console.log("[Password Recovery] Signing out after password reset");
       
       // Sign out again after password reset to ensure clean state
       await supabase.auth.signOut({ scope: 'global' });
       
       // Clear URL parameters and redirect to login
-      console.log("[Password Recovery] Redirecting to login page");
-      
-      // Clear any URL parameters by replacing the current location
       const cleanUrl = window.location.pathname;
       window.history.replaceState({}, document.title, cleanUrl);
       
-      // Finally navigate to the auth page (which will show login form since user is signed out)
-      navigate("/auth", { replace: true });
+      setShowSuccessDialog(false);
       
-    } catch (error: any) {
-      console.error("[Password Recovery] Error during password reset:", error);
-      toast({
-        title: "Error",
-        description: error.message || "An error occurred while resetting your password. Please try again or request a new reset link.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      // Force reload to ensure clean state
+      window.location.href = "/auth";
+    } catch (error) {
+      console.error("[Password Recovery] Error during sign out after password reset:", error);
+      setShowSuccessDialog(false);
+      navigate("/auth", { replace: true });
     }
   };
 
@@ -243,7 +242,7 @@ const AuthPage = () => {
     navigate("/");
   };
 
-  // Handle dialog closing - ensure we clean up properly
+  // Handle reset dialog closing - ensure we clean up properly
   const handleDialogChange = async (open: boolean) => {
     if (!open && resetPasswordOpen) {
       try {
@@ -256,7 +255,7 @@ const AuthPage = () => {
         window.history.replaceState({}, document.title, cleanUrl);
         
         // Navigate to the clean auth page
-        navigate("/auth", { replace: true });
+        window.location.href = "/auth";
       } catch (error) {
         console.error("[Password Recovery] Error during sign out when closing reset dialog:", error);
       } finally {
@@ -267,6 +266,17 @@ const AuthPage = () => {
     }
   };
 
+  if (isProcessing) {
+    return (
+      <div className="container flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+          <p>Preparing authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="container flex h-screen items-center justify-center">
@@ -276,7 +286,7 @@ const AuthPage = () => {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          {isAuthCheckComplete && !isSigningOut && <AuthCard onAuthSuccess={handleAuthSuccess} />}
+          {isAuthCheckComplete && !resetPasswordOpen && <AuthCard onAuthSuccess={handleAuthSuccess} />}
         </motion.div>
       </div>
       
@@ -321,6 +331,12 @@ const AuthPage = () => {
                   minLength={8}
                 />
               </div>
+              
+              {passwordError && (
+                <div className="text-sm font-medium text-destructive">
+                  {passwordError}
+                </div>
+              )}
             </div>
             
             <DialogFooter>
@@ -331,6 +347,23 @@ const AuthPage = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Success Dialog */}
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Password Updated Successfully</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your password has been changed. You'll need to sign in with your new password.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button onClick={handleSuccessDialogClose}>
+              Continue to Login
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
