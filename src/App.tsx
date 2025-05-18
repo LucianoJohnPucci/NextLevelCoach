@@ -19,6 +19,7 @@ import NotesPage from "@/pages/NotesPage";
 import AuthPage from "@/pages/AuthPage";
 import ProfilePage from "@/pages/ProfilePage";
 import NotFound from "@/pages/NotFound";
+import PasswordResetPage from "@/pages/PasswordResetPage";
 import { useState } from "react";
 
 const App = () => {
@@ -36,11 +37,12 @@ const App = () => {
                 <Sonner />
                 <Routes>
                   {/* 
-                    Auth page route - keep this route outside the Layout to:
-                    1. Handle password recovery flow correctly 
+                    Auth pages - keep these routes outside the Layout to:
+                    1. Handle authentication flows correctly 
                     2. Prevent authenticated users from being redirected to home before password reset
                   */}
                   <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/reset-password" element={<PasswordResetPage />} />
                   
                   {/* Protected routes inside Layout */}
                   <Route path="/" element={<Layout />}>
