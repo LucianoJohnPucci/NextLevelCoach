@@ -8,9 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { motion } from "framer-motion";
 import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
-import { MindGoalsSection } from "@/components/profile/MindGoalsSection";
-import { BodyGoalsSection } from "@/components/profile/BodyGoalsSection";
-import { SoulGoalsSection } from "@/components/profile/SoulGoalsSection";
 
 const ProfilePage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -18,15 +15,6 @@ const ProfilePage = () => {
   const [firstName, setFirstName] = useState("");
   const [phone, setPhone] = useState("");
   
-  const [meditationGoal, setMeditationGoal] = useState<number | null>(null);
-  const [focusGoal, setFocusGoal] = useState<number | null>(null);
-  
-  const [weightGoal, setWeightGoal] = useState<number | null>(null);
-  const [exerciseMinutesGoal, setExerciseMinutesGoal] = useState<number | null>(null);
-  
-  const [reflectionGoal, setReflectionGoal] = useState<number | null>(null);
-  const [gratitudeFrequency, setGratitudeFrequency] = useState<string>("");
-
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -44,7 +32,7 @@ const ProfilePage = () => {
         setLoading(true);
         const { data, error } = await supabase
           .from("profiles")
-          .select("f_name, sms, mind_meditation_goal, mind_focus_goal, body_weight_goal, body_exercise_minutes_goal, soul_reflection_goal, soul_gratitude_frequency")
+          .select("f_name, sms")
           .eq("id", user.id);
           
         if (error) throw error;
@@ -63,28 +51,10 @@ const ProfilePage = () => {
           
           setFirstName(user.user_metadata?.f_name || "");
           setPhone(user.user_metadata?.sms || "");
-          
-          setMeditationGoal(user.user_metadata?.mind_meditation_goal || null);
-          setFocusGoal(user.user_metadata?.mind_focus_goal || null);
-          
-          setWeightGoal(user.user_metadata?.body_weight_goal || null);
-          setExerciseMinutesGoal(user.user_metadata?.body_exercise_minutes_goal || null);
-          
-          setReflectionGoal(user.user_metadata?.soul_reflection_goal || null);
-          setGratitudeFrequency(user.user_metadata?.soul_gratitude_frequency || "");
         } else {
           const profile = data[0];
           setFirstName(profile.f_name || "");
           setPhone(profile.sms || "");
-          
-          setMeditationGoal(profile.mind_meditation_goal || null);
-          setFocusGoal(profile.mind_focus_goal || null);
-          
-          setWeightGoal(profile.body_weight_goal || null);
-          setExerciseMinutesGoal(profile.body_exercise_minutes_goal || null);
-          
-          setReflectionGoal(profile.soul_reflection_goal || null);
-          setGratitudeFrequency(profile.soul_gratitude_frequency || "");
         }
       } catch (error: any) {
         console.error("Error fetching profile:", error);
@@ -114,16 +84,6 @@ const ProfilePage = () => {
         .update({
           f_name: firstName,
           sms: phone,
-          
-          mind_meditation_goal: meditationGoal,
-          mind_focus_goal: focusGoal,
-          
-          body_weight_goal: weightGoal,
-          body_exercise_minutes_goal: exerciseMinutesGoal,
-          
-          soul_reflection_goal: reflectionGoal,
-          soul_gratitude_frequency: gratitudeFrequency,
-          
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
@@ -133,16 +93,7 @@ const ProfilePage = () => {
       const { error: authError } = await supabase.auth.updateUser({
         data: { 
           f_name: firstName, 
-          sms: phone,
-          
-          mind_meditation_goal: meditationGoal,
-          mind_focus_goal: focusGoal,
-          
-          body_weight_goal: weightGoal,
-          body_exercise_minutes_goal: exerciseMinutesGoal,
-          
-          soul_reflection_goal: reflectionGoal,
-          soul_gratitude_frequency: gratitudeFrequency
+          sms: phone
         }
       });
       
@@ -195,27 +146,6 @@ const ProfilePage = () => {
                 setFirstName={setFirstName}
                 phone={phone}
                 setPhone={setPhone}
-              />
-
-              <MindGoalsSection 
-                meditationGoal={meditationGoal}
-                setMeditationGoal={setMeditationGoal}
-                focusGoal={focusGoal}
-                setFocusGoal={setFocusGoal}
-              />
-
-              <BodyGoalsSection 
-                weightGoal={weightGoal}
-                setWeightGoal={setWeightGoal}
-                exerciseMinutesGoal={exerciseMinutesGoal}
-                setExerciseMinutesGoal={setExerciseMinutesGoal}
-              />
-
-              <SoulGoalsSection 
-                reflectionGoal={reflectionGoal}
-                setReflectionGoal={setReflectionGoal}
-                gratitudeFrequency={gratitudeFrequency}
-                setGratitudeFrequency={setGratitudeFrequency}
               />
             </CardContent>
             <CardFooter>
