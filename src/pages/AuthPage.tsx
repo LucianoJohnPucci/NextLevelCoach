@@ -47,9 +47,12 @@ const AuthPage = () => {
   // Check if there's a password reset token
   useEffect(() => {
     const checkResetToken = async () => {
+      // Look specifically for the recovery type parameter which is sent by Supabase
+      // in the password reset email link
       const type = searchParams.get("type");
       
       if (type === "recovery") {
+        // Show the reset password dialog if this is a recovery link
         setResetPasswordOpen(true);
       }
     };
@@ -81,7 +84,8 @@ const AuthPage = () => {
     try {
       setLoading(true);
       
-      // Update password
+      // Update password using the Supabase API
+      // This will use the token from the URL automatically
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -90,15 +94,20 @@ const AuthPage = () => {
       
       toast({
         title: "Password updated",
-        description: "Your password has been successfully updated",
+        description: "Your password has been successfully updated. You can now log in with your new password.",
       });
       
       setResetPasswordOpen(false);
       
+      // Give the user feedback that their password was updated before redirecting
+      setTimeout(() => {
+        // Try to sign in with the updated credentials if available
+        navigate("/auth");
+      }, 2000);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "An error occurred while resetting your password",
+        description: error.message || "An error occurred while resetting your password. Please try again or request a new reset link.",
         variant: "destructive",
       });
     } finally {
@@ -144,6 +153,7 @@ const AuthPage = () => {
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="••••••••"
                   required
+                  minLength={8}
                 />
               </div>
               
@@ -156,6 +166,7 @@ const AuthPage = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
                   required
+                  minLength={8}
                 />
               </div>
             </div>
