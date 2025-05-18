@@ -19,36 +19,55 @@ const AuthPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Check if user is already logged in
   useEffect(() => {
+    // Check for the recovery parameters first, before any session checks
+    const type = searchParams.get("type");
+    const accessToken = searchParams.get("access_token");
+    
+    console.log("URL type parameter:", type);
+    console.log("URL contains access_token:", !!accessToken);
+    
+    if (type === "recovery" || accessToken) {
+      console.log("Password recovery flow detected - showing reset dialog");
+      setResetPasswordOpen(true);
+      
+      // We don't want to check for sessions in recovery flow because
+      // we don't want automatic login to happen
+      return;
+    }
+    
+    // Only check session if not in recovery flow
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       
-      // Check for the recovery type parameter which is sent by Supabase
-      const type = searchParams.get("type");
-      const accessToken = searchParams.get("access_token");
-      const isRecoveryFlow = type === "recovery" || accessToken;
-      
-      // Don't redirect to home if this is a password recovery flow
-      if (data.session && !isRecoveryFlow) {
+      if (data.session) {
         navigate("/");
       }
     };
     
     checkSession();
+  }, [navigate, searchParams]);
 
-    // Set up auth state listener
+  // Set up auth state listener
+  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        // Only navigate to home if this isn't a recovery flow
+        console.log("Auth event detected:", event);
+        
+        // Check for password recovery event
+        if (event === "PASSWORD_RECOVERY") {
+          console.log("Password recovery event detected");
+          setResetPasswordOpen(true);
+          return; // Don't proceed further for password recovery
+        }
+        
+        // Check if we should ignore the session due to being in recovery flow
         const type = searchParams.get("type");
         const accessToken = searchParams.get("access_token");
         const isRecoveryFlow = type === "recovery" || accessToken;
         
-        if (event === "PASSWORD_RECOVERY") {
-          console.log("Password recovery event detected");
-          setResetPasswordOpen(true);
-        } else if (session && !isRecoveryFlow) {
+        // Only auto-redirect if we're not in recovery flow and have a session
+        if (session && !isRecoveryFlow && !resetPasswordOpen) {
           navigate("/");
         }
       }
@@ -57,35 +76,7 @@ const AuthPage = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, searchParams]);
-
-  // Check if there's a password reset token
-  useEffect(() => {
-    const checkResetToken = async () => {
-      // Check for the recovery type parameter which is sent by Supabase
-      const type = searchParams.get("type");
-      console.log("URL type parameter:", type);
-      
-      // Also check for the access_token or token parameter which indicates a reset password link
-      const accessToken = searchParams.get("access_token");
-      const token = searchParams.get("token");
-      
-      console.log("URL contains access_token:", !!accessToken);
-      console.log("URL contains token:", !!token);
-      
-      if (type === "recovery" || accessToken || token) {
-        console.log("Recovery detected, opening password reset dialog");
-        
-        // In case the user got signed in automatically (which Supabase might do),
-        // we still want to show the password reset dialog
-        setResetPasswordOpen(true);
-      } else {
-        console.log("No recovery parameters detected in URL");
-      }
-    };
-    
-    checkResetToken();
-  }, [searchParams]);
+  }, [navigate, searchParams, resetPasswordOpen]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,11 +106,9 @@ const AuthPage = () => {
       
       // Update password using the Supabase API
       // This will use the token from the URL automatically
-      const { error, data } = await supabase.auth.updateUser({
+      const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
-      
-      console.log("Password update response:", data);
       
       if (error) {
         console.error("Password update error:", error);
@@ -133,11 +122,11 @@ const AuthPage = () => {
       
       setResetPasswordOpen(false);
       
-      // Give the user feedback that their password was updated before redirecting
-      setTimeout(() => {
-        // Clear the URL parameters and redirect to login
-        navigate("/auth");
-      }, 2000);
+      // Sign out the user after password reset to force them to log in again with new password
+      await supabase.auth.signOut();
+      
+      // Clear the URL parameters and redirect to login
+      navigate("/auth");
     } catch (error: any) {
       console.error("Error during password reset:", error);
       toast({

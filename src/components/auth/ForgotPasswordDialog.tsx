@@ -38,7 +38,6 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
       setLoading(true);
       
       // Make sure we're using the absolute URL with the exact format Supabase expects
-      // The URL should include the protocol, host, port (if applicable), and path
       const redirectUrl = `${window.location.origin}/auth?type=recovery`;
       console.log("Using redirect URL:", redirectUrl);
       
