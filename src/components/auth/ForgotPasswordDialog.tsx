@@ -37,10 +37,13 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
     try {
       setLoading(true);
       
-      // Send password reset email with correct redirectTo URL
-      // This ensures the user is directed back to our app with the proper route
+      // Make sure we're using the absolute URL with the exact format Supabase expects
+      // The URL should include the protocol, host, port (if applicable), and path
+      const redirectUrl = `${window.location.origin}/auth?type=recovery`;
+      console.log("Using redirect URL:", redirectUrl);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/auth',
+        redirectTo: redirectUrl,
       });
       
       if (error) throw error;

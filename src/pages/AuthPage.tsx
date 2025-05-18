@@ -47,13 +47,22 @@ const AuthPage = () => {
   // Check if there's a password reset token
   useEffect(() => {
     const checkResetToken = async () => {
-      // Look specifically for the recovery type parameter which is sent by Supabase
-      // in the password reset email link
+      // Check for the recovery type parameter which is sent by Supabase
       const type = searchParams.get("type");
+      console.log("URL type parameter:", type);
       
-      if (type === "recovery") {
-        // Show the reset password dialog if this is a recovery link
+      // Also check for the access_token or token parameter which indicates a reset password link
+      const accessToken = searchParams.get("access_token");
+      const token = searchParams.get("token");
+      
+      console.log("URL contains access_token:", !!accessToken);
+      console.log("URL contains token:", !!token);
+      
+      if (type === "recovery" || accessToken || token) {
+        console.log("Recovery detected, opening password reset dialog");
         setResetPasswordOpen(true);
+      } else {
+        console.log("No recovery parameters detected in URL");
       }
     };
     
@@ -84,13 +93,20 @@ const AuthPage = () => {
     try {
       setLoading(true);
       
+      console.log("Attempting to update password");
+      
       // Update password using the Supabase API
       // This will use the token from the URL automatically
-      const { error } = await supabase.auth.updateUser({
+      const { error, data } = await supabase.auth.updateUser({
         password: newPassword,
       });
       
-      if (error) throw error;
+      console.log("Password update response:", data);
+      
+      if (error) {
+        console.error("Password update error:", error);
+        throw error;
+      }
       
       toast({
         title: "Password updated",
@@ -101,10 +117,11 @@ const AuthPage = () => {
       
       // Give the user feedback that their password was updated before redirecting
       setTimeout(() => {
-        // Try to sign in with the updated credentials if available
+        // Clear the URL parameters and redirect to login
         navigate("/auth");
       }, 2000);
     } catch (error: any) {
+      console.error("Error during password reset:", error);
       toast({
         title: "Error",
         description: error.message || "An error occurred while resetting your password. Please try again or request a new reset link.",
