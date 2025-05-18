@@ -18,34 +18,47 @@ const AuthPage = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isAuthCheckComplete, setIsAuthCheckComplete] = useState(false);
 
+  // Check for password reset flow
   useEffect(() => {
-    // Check for the recovery parameters first, before any session checks
-    const type = searchParams.get("type");
-    const accessToken = searchParams.get("access_token");
-    
-    console.log("URL type parameter:", type);
-    console.log("URL contains access_token:", !!accessToken);
-    
-    if (type === "recovery" || accessToken) {
-      console.log("Password recovery flow detected - showing reset dialog");
-      setResetPasswordOpen(true);
+    const checkForRecoveryFlow = () => {
+      // Check parameters that indicate a recovery flow
+      const type = searchParams.get("type");
+      const accessToken = searchParams.get("access_token");
       
-      // We don't want to check for sessions in recovery flow because
-      // we don't want automatic login to happen
-      return;
-    }
-    
-    // Only check session if not in recovery flow
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
+      console.log("URL type parameter:", type);
+      console.log("URL contains access_token:", !!accessToken);
       
-      if (data.session) {
-        navigate("/");
+      // If this is a recovery flow, show the reset dialog
+      if (type === "recovery" || accessToken) {
+        console.log("Password recovery flow detected - showing reset dialog");
+        setResetPasswordOpen(true);
+        setIsAuthCheckComplete(true);
+        return true;
       }
+      return false;
     };
-    
-    checkSession();
+
+    // Only check session if not in recovery flow
+    const isRecoveryFlow = checkForRecoveryFlow();
+    if (!isRecoveryFlow) {
+      const checkSession = async () => {
+        try {
+          const { data } = await supabase.auth.getSession();
+          
+          if (data.session) {
+            navigate("/");
+          }
+          setIsAuthCheckComplete(true);
+        } catch (error) {
+          console.error("Session check error:", error);
+          setIsAuthCheckComplete(true);
+        }
+      };
+      
+      checkSession();
+    }
   }, [navigate, searchParams]);
 
   // Set up auth state listener
@@ -105,7 +118,6 @@ const AuthPage = () => {
       console.log("Attempting to update password");
       
       // Update password using the Supabase API
-      // This will use the token from the URL automatically
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -117,16 +129,17 @@ const AuthPage = () => {
       
       toast({
         title: "Password updated",
-        description: "Your password has been successfully updated. You can now log in with your new password.",
+        description: "Your password has been successfully updated. Please log in with your new password.",
       });
       
       setResetPasswordOpen(false);
       
-      // Sign out the user after password reset to force them to log in again with new password
+      // Sign out the user after password reset
       await supabase.auth.signOut();
       
       // Clear the URL parameters and redirect to login
       navigate("/auth");
+      
     } catch (error: any) {
       console.error("Error during password reset:", error);
       toast({
@@ -152,12 +165,21 @@ const AuthPage = () => {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          <AuthCard onAuthSuccess={handleAuthSuccess} />
+          {isAuthCheckComplete && <AuthCard onAuthSuccess={handleAuthSuccess} />}
         </motion.div>
       </div>
       
       {/* Reset Password Dialog */}
-      <Dialog open={resetPasswordOpen} onOpenChange={setResetPasswordOpen}>
+      <Dialog open={resetPasswordOpen} onOpenChange={(open) => {
+        // If user is trying to close the dialog manually, sign them out first
+        if (!open && resetPasswordOpen) {
+          supabase.auth.signOut().then(() => {
+            setResetPasswordOpen(false);
+          });
+        } else {
+          setResetPasswordOpen(open);
+        }
+      }}>
         <DialogContent className="sm:max-w-md">
           <form onSubmit={handleResetPassword}>
             <DialogHeader>
