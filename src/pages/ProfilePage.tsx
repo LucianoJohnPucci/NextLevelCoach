@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -17,19 +16,10 @@ const ProfilePage = () => {
   const [phone, setPhone] = useState("");
   
   const { toast } = useToast();
-  const navigate = useNavigate();
-
-  // Only redirect when we're sure authentication is complete and user is not logged in
-  useEffect(() => {
-    if (!authLoading && !user) {
-      console.log("[ProfilePage] No authenticated user found, redirecting to auth");
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user || authLoading) return; // Don't fetch if still loading or no user
+      if (!user) return; // Don't fetch if no user, but DON'T redirect
       
       try {
         setLoading(true);
@@ -73,7 +63,9 @@ const ProfilePage = () => {
       }
     };
     
-    fetchProfile();
+    if (!authLoading) {
+      fetchProfile();
+    }
   }, [user, toast, authLoading]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -138,9 +130,24 @@ const ProfilePage = () => {
     );
   }
 
-  // If auth check is complete but no user, return null (will redirect via useEffect)
+  // If no user is available but auth check is complete, show a login prompt
+  // instead of redirecting
   if (!user) {
-    return null;
+    return (
+      <div className="container py-10">
+        <Card>
+          <CardHeader>
+            <CardTitle>Please Sign In</CardTitle>
+            <CardDescription>
+              You need to be logged in to view your profile
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>Please sign in to access your profile information.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
