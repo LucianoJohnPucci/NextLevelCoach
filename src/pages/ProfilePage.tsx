@@ -18,26 +18,32 @@ const ProfilePage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Fix: Only redirect when we're sure authentication is complete and user is not logged in
   useEffect(() => {
     if (!authLoading && !user) {
+      console.log("[ProfilePage] No authenticated user found, redirecting to auth");
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user) return;
+      if (!user || authLoading) return; // Don't fetch if still loading or no user
       
       try {
         setLoading(true);
+        console.log("[ProfilePage] Fetching profile for user:", user.id);
+        
         const { data, error } = await supabase
           .from("profiles")
           .select("f_name, sms")
-          .eq("id", user.id);
+          .eq("id", user.id)
+          .maybeSingle(); // Use maybeSingle instead of expecting an array
           
         if (error) throw error;
         
-        if (!data || data.length === 0) {
+        if (!data) {
+          console.log("[ProfilePage] No profile found, creating new profile");
           const { error: insertError } = await supabase
             .from("profiles")
             .insert({
@@ -52,12 +58,12 @@ const ProfilePage = () => {
           setFirstName(user.user_metadata?.f_name || "");
           setPhone(user.user_metadata?.sms || "");
         } else {
-          const profile = data[0];
-          setFirstName(profile.f_name || "");
-          setPhone(profile.sms || "");
+          console.log("[ProfilePage] Profile found:", data);
+          setFirstName(data.f_name || "");
+          setPhone(data.sms || "");
         }
       } catch (error: any) {
-        console.error("Error fetching profile:", error);
+        console.error("[ProfilePage] Error fetching profile:", error);
         toast({
           title: "Error",
           description: "Failed to load profile data",
@@ -69,7 +75,7 @@ const ProfilePage = () => {
     };
     
     fetchProfile();
-  }, [user, toast]);
+  }, [user, toast, authLoading]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +84,7 @@ const ProfilePage = () => {
     
     try {
       setLoading(true);
+      console.log("[ProfilePage] Updating profile for user:", user.id);
       
       const { error } = await supabase
         .from("profiles")
@@ -115,12 +122,21 @@ const ProfilePage = () => {
     }
   };
 
+  // Show a proper loading state while auth is being checked
   if (authLoading) {
-    return <div className="container py-10">Loading...</div>;
+    return (
+      <div className="container flex items-center justify-center py-10">
+        <div className="text-center">
+          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
   }
 
+  // If auth check is complete but no user, return null (will redirect via useEffect)
   if (!user) {
-    return null; // Will redirect to auth page via useEffect
+    return null;
   }
 
   return (
