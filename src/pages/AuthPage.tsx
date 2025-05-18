@@ -20,64 +20,81 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [isAuthCheckComplete, setIsAuthCheckComplete] = useState(false);
 
-  // Check for password reset flow first, before anything else
+  // FIRST priority: Sign out any existing session if we detect password reset parameters
   useEffect(() => {
-    const checkForRecoveryFlow = () => {
+    const checkForRecoveryFlow = async () => {
       // Check parameters that indicate a recovery flow
       const type = searchParams.get("type");
       const accessToken = searchParams.get("access_token");
       
-      console.log("URL type parameter:", type);
-      console.log("URL contains access_token:", !!accessToken);
+      console.log("[Password Recovery] URL type parameter:", type);
+      console.log("[Password Recovery] URL contains access_token:", !!accessToken);
       
-      // If this is a recovery flow, show the reset dialog and sign out any current session
+      // If this is a recovery flow, ALWAYS sign out first and then show the reset dialog
       if (type === "recovery" || accessToken) {
-        console.log("Password recovery flow detected - showing reset dialog");
-        // Force sign out any existing session to prevent automatic login
-        supabase.auth.signOut().then(() => {
+        console.log("[Password Recovery] Recovery flow detected - signing out first");
+        
+        try {
+          // Force sign out FIRST to ensure clean state
+          await supabase.auth.signOut();
+          console.log("[Password Recovery] User signed out successfully");
+          
+          // THEN show the dialog
           setResetPasswordOpen(true);
           setIsAuthCheckComplete(true);
-        });
-        return true;
+          return true;
+        } catch (error) {
+          console.error("[Password Recovery] Error during sign out:", error);
+          setIsAuthCheckComplete(true);
+          return true;
+        }
       }
       return false;
     };
 
     // Only check session if not in recovery flow
-    const isRecoveryFlow = checkForRecoveryFlow();
-    if (!isRecoveryFlow) {
-      const checkSession = async () => {
-        try {
-          const { data } = await supabase.auth.getSession();
-          
-          if (data.session) {
-            navigate("/");
+    checkForRecoveryFlow().then(isRecoveryFlow => {
+      if (!isRecoveryFlow) {
+        const checkSession = async () => {
+          try {
+            const { data } = await supabase.auth.getSession();
+            
+            if (data.session) {
+              navigate("/");
+            }
+            setIsAuthCheckComplete(true);
+          } catch (error) {
+            console.error("[Password Recovery] Session check error:", error);
+            setIsAuthCheckComplete(true);
           }
-          setIsAuthCheckComplete(true);
-        } catch (error) {
-          console.error("Session check error:", error);
-          setIsAuthCheckComplete(true);
-        }
-      };
-      
-      checkSession();
-    }
+        };
+        
+        checkSession();
+      }
+    });
   }, [navigate, searchParams]);
 
   // Set up auth state listener to detect PASSWORD_RECOVERY events
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log("Auth event detected:", event);
+      async (event, session) => {
+        console.log("[Password Recovery] Auth event detected:", event);
         
         // Check for password recovery event
         if (event === "PASSWORD_RECOVERY") {
-          console.log("Password recovery event detected");
-          // Force sign out and show reset dialog
-          supabase.auth.signOut().then(() => {
+          console.log("[Password Recovery] PASSWORD_RECOVERY event detected - signing out first");
+          
+          try {
+            // Always sign out first
+            await supabase.auth.signOut();
+            console.log("[Password Recovery] User signed out successfully after PASSWORD_RECOVERY event");
+            
+            // Then show reset dialog
             setResetPasswordOpen(true);
-          });
-          return; // Don't proceed further for password recovery
+            return; // Don't proceed further for password recovery
+          } catch (error) {
+            console.error("[Password Recovery] Error during sign out after PASSWORD_RECOVERY event:", error);
+          }
         }
         
         // Check if we should ignore the session due to being in recovery flow
@@ -121,7 +138,7 @@ const AuthPage = () => {
     try {
       setLoading(true);
       
-      console.log("Attempting to update password");
+      console.log("[Password Recovery] Attempting to update password");
       
       // Update password using the Supabase API
       const { error } = await supabase.auth.updateUser({
@@ -129,7 +146,7 @@ const AuthPage = () => {
       });
       
       if (error) {
-        console.error("Password update error:", error);
+        console.error("[Password Recovery] Password update error:", error);
         throw error;
       }
       
@@ -145,13 +162,15 @@ const AuthPage = () => {
       
       // Important: Sign out the user after password reset
       // This ensures they need to log in with their new password
+      console.log("[Password Recovery] Password updated successfully, signing out user");
       await supabase.auth.signOut();
       
       // Clear the URL parameters and redirect to login
-      navigate("/auth");
+      console.log("[Password Recovery] Redirecting to login page");
+      navigate("/auth", { replace: true });
       
     } catch (error: any) {
-      console.error("Error during password reset:", error);
+      console.error("[Password Recovery] Error during password reset:", error);
       toast({
         title: "Error",
         description: error.message || "An error occurred while resetting your password. Please try again or request a new reset link.",
@@ -182,14 +201,20 @@ const AuthPage = () => {
       {/* Reset Password Dialog */}
       <Dialog 
         open={resetPasswordOpen} 
-        onOpenChange={(open) => {
+        onOpenChange={async (open) => {
           // If user is trying to close the dialog manually, sign them out first
           if (!open && resetPasswordOpen) {
-            supabase.auth.signOut().then(() => {
+            try {
+              console.log("[Password Recovery] Dialog closing, signing out user");
+              await supabase.auth.signOut();
               setResetPasswordOpen(false);
               // Clear URL params when closing the dialog
               navigate("/auth", { replace: true });
-            });
+            } catch (error) {
+              console.error("[Password Recovery] Error during sign out when closing dialog:", error);
+              setResetPasswordOpen(false);
+              navigate("/auth", { replace: true });
+            }
           } else {
             setResetPasswordOpen(open);
           }
