@@ -29,9 +29,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       
       try {
-        const { data } = await supabase.auth.getSession();
-        setSession(data.session);
-        setUser(data.session?.user || null);
+        // Check if this is a recovery flow from the URL
+        const hash = window.location.hash;
+        const isRecoveryFlow = hash.includes('type=recovery');
+        
+        // If not handling password recovery, proceed with session check
+        if (!isRecoveryFlow) {
+          const { data } = await supabase.auth.getSession();
+          setSession(data.session);
+          setUser(data.session?.user || null);
+        }
       } catch (error) {
         console.error("Error getting session:", error);
       } finally {
@@ -42,10 +49,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user || null);
-        setLoading(false);
+      (event, session) => {
+        console.log("[Auth] Auth state change event:", event);
+        
+        // Skip session updates during password recovery to prevent redirects
+        const isRecoveryFlow = window.location.hash.includes('type=recovery') || 
+                               event === 'PASSWORD_RECOVERY';
+        
+        if (!isRecoveryFlow) {
+          setSession(session);
+          setUser(session?.user || null);
+          setLoading(false);
+        } else {
+          console.log("[Auth] Skipping session update during recovery flow");
+        }
       }
     );
 

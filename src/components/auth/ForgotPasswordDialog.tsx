@@ -40,8 +40,8 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
       // Create a properly structured redirect URL with full origin
       const origin = window.location.origin;
       
-      // Use a specific hash pattern that our app can recognize
-      // This makes it easier to detect and handle the recovery flow
+      // Use a clear hash parameter with 'recovery' type
+      // This format ensures our detection logic will work properly
       const redirectUrl = `${origin}/auth#type=recovery`;
       console.log("[Password Recovery] Using redirect URL:", redirectUrl);
       

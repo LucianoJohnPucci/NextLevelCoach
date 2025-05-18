@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,7 +35,14 @@ const App = () => {
                 <Toaster />
                 <Sonner />
                 <Routes>
+                  {/* 
+                    Auth page route - keep this route outside the Layout to:
+                    1. Handle password recovery flow correctly 
+                    2. Prevent authenticated users from being redirected to home before password reset
+                  */}
                   <Route path="/auth" element={<AuthPage />} />
+                  
+                  {/* Protected routes inside Layout */}
                   <Route path="/" element={<Layout />}>
                     <Route index element={<Index />} />
                     <Route path="mind" element={<MindPage />} />

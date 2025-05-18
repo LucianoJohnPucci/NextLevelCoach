@@ -24,69 +24,66 @@ const AuthPage = () => {
   const [isProcessing, setIsProcessing] = useState(true);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [passwordError, setPasswordError] = useState("");
-
+  
   // STEP 1: Immediately check for recovery flow before anything else happens
   useEffect(() => {
-    const detectRecoveryAndSignOut = async () => {
+    const detectRecoveryFlow = async () => {
       setIsProcessing(true);
       
-      // Check for recovery indicators in URL query params and hash
-      const type = searchParams.get("type");
-      const accessToken = searchParams.get("access_token");
-      const hash = window.location.hash;
-      const hashParams = new URLSearchParams(hash.replace('#', ''));
-      const hashType = hashParams.get("type");
-      const hashAccessToken = hashParams.get("access_token");
-      
-      // Determine if this is a recovery flow from any source
-      const isRecoveryFlow = 
-        type === "recovery" || 
-        accessToken || 
-        hashType === "recovery" || 
-        hashAccessToken;
-      
-      console.log("[Password Recovery] Recovery detection:", {
-        urlType: type,
-        urlAccessToken: !!accessToken,
-        hashType,
-        hashAccessToken: !!hashAccessToken,
-        isRecoveryFlow
-      });
-      
-      // If this is a recovery flow, ALWAYS sign out first before anything else
-      if (isRecoveryFlow) {
-        console.log("[Password Recovery] Recovery flow detected - signing out user immediately");
+      try {
+        // First check URL parameters (query params and hash)
+        const type = searchParams.get("type");
+        const accessToken = searchParams.get("access_token");
+        const hash = window.location.hash;
+        const hashParams = new URLSearchParams(hash.replace('#', ''));
+        const hashType = hashParams.get("type");
+        const hashAccessToken = hashParams.get("access_token");
         
-        try {
-          // Force sign out all sessions to ensure clean state
-          await supabase.auth.signOut({ scope: 'global' });
-          console.log("[Password Recovery] User signed out successfully");
+        // Log all possible sources of recovery parameters for debugging
+        console.log("[Password Recovery] Detection parameters:", { 
+          urlType: type, 
+          urlToken: !!accessToken,
+          hashType,
+          hashToken: !!hashAccessToken,
+          hash,
+          url: window.location.href
+        });
+        
+        // Determine if this is a recovery flow from any possible source
+        const isRecoveryFlow = 
+          type === "recovery" || 
+          accessToken || 
+          hashType === "recovery" || 
+          hashAccessToken || 
+          hash.includes("type=recovery");
+        
+        console.log("[Password Recovery] Is recovery flow:", isRecoveryFlow);
+        
+        if (isRecoveryFlow) {
+          console.log("[Password Recovery] RECOVERY FLOW DETECTED - Signing out all sessions immediately");
           
-          // After signing out, show the reset dialog
+          // CRITICAL: Sign out ALL sessions globally before proceeding
+          await supabase.auth.signOut({ scope: 'global' });
+          console.log("[Password Recovery] All sessions signed out successfully");
+          
+          // Show the password reset dialog
           setResetPasswordOpen(true);
           setIsAuthCheckComplete(true);
           setIsProcessing(false);
-          return true; // Recovery flow handled
-        } catch (error) {
-          console.error("[Password Recovery] Error during sign out before showing reset dialog:", error);
-          toast({
-            title: "Error",
-            description: "There was a problem preparing for password reset. Please try again.",
-            variant: "destructive",
-          });
-          setIsAuthCheckComplete(true);
-          setIsProcessing(false);
-          return true; // Still consider it handled even if there was an error
+          return true;
         }
+      } catch (error) {
+        console.error("[Password Recovery] Error during recovery detection:", error);
       }
       
       setIsProcessing(false);
-      return false; // Not a recovery flow
+      return false;
     };
 
-    // Only proceed to check session if it's not a recovery flow
-    detectRecoveryAndSignOut().then(isRecoveryFlow => {
-      if (!isRecoveryFlow) {
+    // Check for recovery flow first, then proceed to normal auth check if it's not a recovery
+    detectRecoveryFlow().then(isRecovery => {
+      if (!isRecovery) {
+        // Normal authentication check
         const checkSession = async () => {
           try {
             const { data } = await supabase.auth.getSession();
@@ -114,7 +111,7 @@ const AuthPage = () => {
       async (event, session) => {
         console.log("[Password Recovery] Auth event detected:", event);
         
-        // If we're already showing the reset dialog or just updated the password, don't handle login events
+        // If we're already showing the reset dialog or just updated the password, don't handle more events
         if (resetPasswordOpen || isPasswordUpdated) return;
         
         // Handle PASSWORD_RECOVERY event
@@ -122,7 +119,7 @@ const AuthPage = () => {
           console.log("[Password Recovery] PASSWORD_RECOVERY event detected - signing out first");
           
           try {
-            // Always sign out first to ensure a clean state
+            // CRITICAL: Always sign out ALL sessions globally before showing reset dialog
             await supabase.auth.signOut({ scope: 'global' });
             console.log("[Password Recovery] User signed out successfully after PASSWORD_RECOVERY event");
             
@@ -147,7 +144,8 @@ const AuthPage = () => {
           const hashParams = new URLSearchParams(hash.replace('#', ''));
           const isRecoveryFlow = 
             type === "recovery" || 
-            hashParams.get("type") === "recovery";
+            hashParams.get("type") === "recovery" ||
+            hash.includes("type=recovery");
           
           // Only redirect to home if definitely not in recovery flow
           if (!isRecoveryFlow) {
