@@ -12,13 +12,14 @@ import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
 const ProfilePage = () => {
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [profileExists, setProfileExists] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [phone, setPhone] = useState("");
   
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fix: Only redirect when we're sure authentication is complete and user is not logged in
+  // Only redirect when we're sure authentication is complete and user is not logged in
   useEffect(() => {
     if (!authLoading && !user) {
       console.log("[ProfilePage] No authenticated user found, redirecting to auth");
@@ -34,39 +35,37 @@ const ProfilePage = () => {
         setLoading(true);
         console.log("[ProfilePage] Fetching profile for user:", user.id);
         
+        // First, check if the profile exists
         const { data, error } = await supabase
           .from("profiles")
           .select("f_name, sms")
           .eq("id", user.id)
-          .maybeSingle(); // Use maybeSingle instead of expecting an array
+          .maybeSingle();
           
-        if (error) throw error;
+        if (error) {
+          console.error("[ProfilePage] Error checking profile:", error);
+          // Don't throw here, just log the error
+        }
         
-        if (!data) {
-          console.log("[ProfilePage] No profile found, creating new profile");
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .insert({
-              id: user.id,
-              f_name: user.user_metadata?.f_name || "",
-              sms: user.user_metadata?.sms || "",
-              updated_at: new Date().toISOString()
-            });
-            
-          if (insertError) throw insertError;
-          
-          setFirstName(user.user_metadata?.f_name || "");
-          setPhone(user.user_metadata?.sms || "");
-        } else {
+        if (data) {
+          // Profile exists, set the data
           console.log("[ProfilePage] Profile found:", data);
+          setProfileExists(true);
           setFirstName(data.f_name || "");
           setPhone(data.sms || "");
+        } else {
+          console.log("[ProfilePage] No profile found, using user metadata");
+          // No profile found, use metadata from auth user
+          setProfileExists(false);
+          setFirstName(user.user_metadata?.f_name || "");
+          setPhone(user.user_metadata?.sms || "");
         }
       } catch (error: any) {
-        console.error("[ProfilePage] Error fetching profile:", error);
+        console.error("[ProfilePage] Error in profile fetch flow:", error);
+        // Show toast but don't redirect
         toast({
-          title: "Error",
-          description: "Failed to load profile data",
+          title: "Warning",
+          description: "Could not load complete profile data. Some information may be missing.",
           variant: "destructive",
         });
       } finally {
@@ -86,17 +85,21 @@ const ProfilePage = () => {
       setLoading(true);
       console.log("[ProfilePage] Updating profile for user:", user.id);
       
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          f_name: firstName,
-          sms: phone,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-        
-      if (error) throw error;
+      // Only attempt to update the profile in the database if it exists
+      if (profileExists) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            f_name: firstName,
+            sms: phone,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", user.id);
+          
+        if (error) throw error;
+      }
       
+      // Always update the user metadata in auth
       const { error: authError } = await supabase.auth.updateUser({
         data: { 
           f_name: firstName, 
@@ -112,6 +115,7 @@ const ProfilePage = () => {
       });
       
     } catch (error: any) {
+      console.error("[ProfilePage] Error updating profile:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to update profile",
