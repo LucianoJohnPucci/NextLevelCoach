@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, AlertTriangle } from "lucide-react";
 
 interface SignupFormProps {
   onSuccess?: () => void;
@@ -20,22 +20,22 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
   const [firstName, setFirstName] = useState("");
   const [sms, setSms] = useState("");
   const [emailSent, setEmailSent] = useState(false);
+  const [formError, setFormError] = useState("");
   const { toast } = useToast();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
     
     if (!email || !password || !firstName) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
+      setFormError("Please fill in all required fields");
       return;
     }
     
     try {
       setLoading(true);
+      
+      console.log("Starting signup process for:", email);
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -45,23 +45,58 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
             f_name: firstName,
             sms: sms || null,
           },
+          // Make sure this redirects back to the app's auth page with verification flag
           emailRedirectTo: `${window.location.origin}/auth?verified=true`,
         },
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Signup error:", error);
+        throw error;
+      }
       
-      setEmailSent(true);
+      console.log("Signup response:", data);
       
-      toast({
-        title: "Verification email sent!",
-        description: "Please check your email to verify your account before logging in",
-      });
+      // Check if confirmation was sent
+      if (data?.user?.identities?.length === 0) {
+        throw new Error("This email is already registered. Please log in instead.");
+      }
+      
+      // Check if email confirmation is enabled in Supabase
+      if (data?.user?.email_confirmed_at) {
+        // Email confirmation is disabled in Supabase settings
+        console.log("Email confirmation is disabled in Supabase. User is already confirmed.");
+        toast({
+          title: "Account created!",
+          description: "Email confirmation is disabled. You can now log in.",
+        });
+        if (onSuccess) onSuccess();
+      } else {
+        // Email confirmation is enabled, show the verification message
+        console.log("Verification email sent. Awaiting confirmation.");
+        setEmailSent(true);
+        
+        toast({
+          title: "Verification email sent!",
+          description: "Please check your email to verify your account before logging in",
+        });
+      }
       
     } catch (error: any) {
+      console.error("Error during signup:", error);
+      
+      let errorMessage = error.message || "An error occurred during sign up";
+      
+      // Handle Supabase specific errors with more user-friendly messages
+      if (errorMessage.includes("User already registered")) {
+        errorMessage = "This email is already registered. Please log in instead.";
+      }
+      
+      setFormError(errorMessage);
+      
       toast({
         title: "Error",
-        description: error.message || "An error occurred during sign up",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -92,6 +127,15 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
   return (
     <form onSubmit={handleSignUp}>
       <CardContent className="space-y-4 pt-4">
+        {formError && (
+          <Alert className="bg-red-50 border-red-200">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+            <AlertDescription className="ml-2 text-red-800">
+              {formError}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="space-y-2">
           <Label htmlFor="signup-name">First Name</Label>
           <Input 
