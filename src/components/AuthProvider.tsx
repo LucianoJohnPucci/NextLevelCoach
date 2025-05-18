@@ -31,16 +31,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         // Check if this is a recovery flow from the URL
         const hash = window.location.hash;
-        const isRecoveryFlow = hash.includes('type=recovery');
+        const cleanHash = hash.startsWith('#') ? hash.substring(1) : hash;
+        const hashParams = new URLSearchParams(cleanHash);
+        
+        const isRecoveryFlow = 
+          hashParams.get("type") === "recovery" ||
+          hash.includes('type=recovery') ||
+          hash.includes('access_token');
+        
+        console.log("[Auth] Checking for recovery flow:", { isRecoveryFlow, hash });
         
         // If not handling password recovery, proceed with session check
         if (!isRecoveryFlow) {
           const { data } = await supabase.auth.getSession();
           setSession(data.session);
           setUser(data.session?.user || null);
+        } else {
+          console.log("[Auth] Recovery flow detected, skipping session check");
         }
       } catch (error) {
-        console.error("Error getting session:", error);
+        console.error("[Auth] Error getting session:", error);
       } finally {
         setLoading(false);
       }
@@ -53,10 +63,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("[Auth] Auth state change event:", event);
         
         // Skip session updates during password recovery to prevent redirects
-        const isRecoveryFlow = window.location.hash.includes('type=recovery') || 
-                               event === 'PASSWORD_RECOVERY';
+        const hash = window.location.hash;
+        const cleanHash = hash.startsWith('#') ? hash.substring(1) : hash;
+        const hashParams = new URLSearchParams(cleanHash);
+        
+        const isRecoveryFlow = 
+          hashParams.get("type") === "recovery" || 
+          hash.includes('type=recovery') || 
+          hash.includes('access_token') ||
+          event === 'PASSWORD_RECOVERY';
         
         if (!isRecoveryFlow) {
+          console.log("[Auth] Updating session state for event:", event);
           setSession(session);
           setUser(session?.user || null);
           setLoading(false);

@@ -31,40 +31,56 @@ const AuthPage = () => {
       setIsProcessing(true);
       
       try {
-        // First check URL parameters (query params and hash)
+        // Get all possible sources for recovery parameters
+        // IMPORTANT: Check hash first, as Supabase often puts recovery tokens there
+        const hash = window.location.hash;
+        // Clean up the hash properly - sometimes the # is followed by another character
+        const cleanHash = hash.startsWith('#') ? hash.substring(1) : hash;
+        const hashParams = new URLSearchParams(cleanHash);
+        
+        // Also check query parameters
         const type = searchParams.get("type");
         const accessToken = searchParams.get("access_token");
-        const hash = window.location.hash;
-        const hashParams = new URLSearchParams(hash.replace('#', ''));
+        
+        // Get parameters from hash
         const hashType = hashParams.get("type");
         const hashAccessToken = hashParams.get("access_token");
         
-        // Log all possible sources of recovery parameters for debugging
         console.log("[Password Recovery] Detection parameters:", { 
           urlType: type, 
           urlToken: !!accessToken,
           hashType,
           hashToken: !!hashAccessToken,
           hash,
+          cleanHash,
           url: window.location.href
         });
         
-        // Determine if this is a recovery flow from any possible source
+        // CRITICAL: Check for ANY indication of recovery flow
         const isRecoveryFlow = 
           type === "recovery" || 
           accessToken || 
           hashType === "recovery" || 
           hashAccessToken || 
-          hash.includes("type=recovery");
+          hash.includes("type=recovery") ||
+          hash.includes("access_token");
         
         console.log("[Password Recovery] Is recovery flow:", isRecoveryFlow);
         
         if (isRecoveryFlow) {
           console.log("[Password Recovery] RECOVERY FLOW DETECTED - Signing out all sessions immediately");
           
-          // CRITICAL: Sign out ALL sessions globally before proceeding
+          // Force sign out BEFORE checking auth state, with await to ensure it completes
           await supabase.auth.signOut({ scope: 'global' });
+          
+          // Short delay to ensure sign-out completes
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
           console.log("[Password Recovery] All sessions signed out successfully");
+          
+          // Clear URL parameters but preserve the hash for Supabase to process
+          const cleanUrl = window.location.pathname;
+          // Don't modify history yet - we need the tokens for password reset to work
           
           // Show the password reset dialog
           setResetPasswordOpen(true);
@@ -80,15 +96,14 @@ const AuthPage = () => {
       return false;
     };
 
-    // Check for recovery flow first, then proceed to normal auth check if it's not a recovery
+    // CRITICAL: Make this function run synchronously without any delay
     detectRecoveryFlow().then(isRecovery => {
       if (!isRecovery) {
-        // Normal authentication check
+        // Only check auth session if we're definitely not in recovery flow
         const checkSession = async () => {
           try {
             const { data } = await supabase.auth.getSession();
             
-            // If user is already authenticated and not in recovery flow, redirect to home
             if (data.session) {
               navigate("/");
             } else {
@@ -103,7 +118,10 @@ const AuthPage = () => {
         checkSession();
       }
     });
-  }, [navigate, searchParams, toast]);
+    
+    // Disable all dependencies to ensure this only runs once on initial mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Set up auth state listener to detect PASSWORD_RECOVERY events
   useEffect(() => {
