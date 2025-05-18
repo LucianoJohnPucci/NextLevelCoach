@@ -94,6 +94,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoFocus
               />
             </div>
           </div>

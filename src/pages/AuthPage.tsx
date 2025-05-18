@@ -23,7 +23,14 @@ const AuthPage = () => {
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
-      if (data.session) {
+      
+      // Check for the recovery type parameter which is sent by Supabase
+      const type = searchParams.get("type");
+      const accessToken = searchParams.get("access_token");
+      const isRecoveryFlow = type === "recovery" || accessToken;
+      
+      // Don't redirect to home if this is a password recovery flow
+      if (data.session && !isRecoveryFlow) {
         navigate("/");
       }
     };
@@ -32,8 +39,16 @@ const AuthPage = () => {
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (session) {
+      (event, session) => {
+        // Only navigate to home if this isn't a recovery flow
+        const type = searchParams.get("type");
+        const accessToken = searchParams.get("access_token");
+        const isRecoveryFlow = type === "recovery" || accessToken;
+        
+        if (event === "PASSWORD_RECOVERY") {
+          console.log("Password recovery event detected");
+          setResetPasswordOpen(true);
+        } else if (session && !isRecoveryFlow) {
           navigate("/");
         }
       }
@@ -42,7 +57,7 @@ const AuthPage = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   // Check if there's a password reset token
   useEffect(() => {
@@ -60,6 +75,9 @@ const AuthPage = () => {
       
       if (type === "recovery" || accessToken || token) {
         console.log("Recovery detected, opening password reset dialog");
+        
+        // In case the user got signed in automatically (which Supabase might do),
+        // we still want to show the password reset dialog
         setResetPasswordOpen(true);
       } else {
         console.log("No recovery parameters detected in URL");
@@ -171,6 +189,7 @@ const AuthPage = () => {
                   placeholder="••••••••"
                   required
                   minLength={8}
+                  autoFocus
                 />
               </div>
               
