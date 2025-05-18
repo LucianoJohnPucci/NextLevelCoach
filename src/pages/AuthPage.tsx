@@ -20,7 +20,7 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [isAuthCheckComplete, setIsAuthCheckComplete] = useState(false);
 
-  // Check for password reset flow
+  // Check for password reset flow first, before anything else
   useEffect(() => {
     const checkForRecoveryFlow = () => {
       // Check parameters that indicate a recovery flow
@@ -30,11 +30,14 @@ const AuthPage = () => {
       console.log("URL type parameter:", type);
       console.log("URL contains access_token:", !!accessToken);
       
-      // If this is a recovery flow, show the reset dialog
+      // If this is a recovery flow, show the reset dialog and sign out any current session
       if (type === "recovery" || accessToken) {
         console.log("Password recovery flow detected - showing reset dialog");
-        setResetPasswordOpen(true);
-        setIsAuthCheckComplete(true);
+        // Force sign out any existing session to prevent automatic login
+        supabase.auth.signOut().then(() => {
+          setResetPasswordOpen(true);
+          setIsAuthCheckComplete(true);
+        });
         return true;
       }
       return false;
@@ -61,7 +64,7 @@ const AuthPage = () => {
     }
   }, [navigate, searchParams]);
 
-  // Set up auth state listener
+  // Set up auth state listener to detect PASSWORD_RECOVERY events
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -70,7 +73,10 @@ const AuthPage = () => {
         // Check for password recovery event
         if (event === "PASSWORD_RECOVERY") {
           console.log("Password recovery event detected");
-          setResetPasswordOpen(true);
+          // Force sign out and show reset dialog
+          supabase.auth.signOut().then(() => {
+            setResetPasswordOpen(true);
+          });
           return; // Don't proceed further for password recovery
         }
         
@@ -132,9 +138,13 @@ const AuthPage = () => {
         description: "Your password has been successfully updated. Please log in with your new password.",
       });
       
+      // Clear the form and close the dialog
+      setNewPassword("");
+      setConfirmPassword("");
       setResetPasswordOpen(false);
       
-      // Sign out the user after password reset
+      // Important: Sign out the user after password reset
+      // This ensures they need to log in with their new password
       await supabase.auth.signOut();
       
       // Clear the URL parameters and redirect to login
@@ -170,16 +180,21 @@ const AuthPage = () => {
       </div>
       
       {/* Reset Password Dialog */}
-      <Dialog open={resetPasswordOpen} onOpenChange={(open) => {
-        // If user is trying to close the dialog manually, sign them out first
-        if (!open && resetPasswordOpen) {
-          supabase.auth.signOut().then(() => {
-            setResetPasswordOpen(false);
-          });
-        } else {
-          setResetPasswordOpen(open);
-        }
-      }}>
+      <Dialog 
+        open={resetPasswordOpen} 
+        onOpenChange={(open) => {
+          // If user is trying to close the dialog manually, sign them out first
+          if (!open && resetPasswordOpen) {
+            supabase.auth.signOut().then(() => {
+              setResetPasswordOpen(false);
+              // Clear URL params when closing the dialog
+              navigate("/auth", { replace: true });
+            });
+          } else {
+            setResetPasswordOpen(open);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <form onSubmit={handleResetPassword}>
             <DialogHeader>
