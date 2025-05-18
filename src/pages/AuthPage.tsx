@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -9,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CheckCircle2 } from "lucide-react";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -26,6 +29,7 @@ const AuthPage = () => {
   const [isProcessing, setIsProcessing] = useState(true);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [emailVerified, setEmailVerified] = useState(false);
   
   // Use refs to track critical state across rerenders
   const recoveryDetectedRef = useRef(false);
@@ -64,6 +68,16 @@ const AuthPage = () => {
   
   // Main initialization effect - runs once on component mount
   useEffect(() => {
+    // Check if user has just verified their email
+    const verified = searchParams.get("verified") === "true";
+    if (verified) {
+      console.log("[Auth] Email verification success detected");
+      setEmailVerified(true);
+      
+      // Update URL without the query parameter to avoid repeated state
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
     // Immediately check if this is a recovery flow
     const isRecoveryFlow = checkForRecoveryFlow();
     
@@ -124,6 +138,15 @@ const AuthPage = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("[Auth Event]", event, session ? "User session exists" : "No session");
+        
+        // Handle email confirmation events
+        if (event === "USER_UPDATED" || event === "SIGNED_IN") {
+          // Check if the user has confirmed their email
+          if (session?.user?.email_confirmed_at) {
+            console.log("[Auth] Email confirmed, user is verified");
+            // User has confirmed email, they can now log in
+          }
+        }
         
         // Handle PASSWORD_RECOVERY event from Supabase
         if (event === "PASSWORD_RECOVERY") {
@@ -287,6 +310,16 @@ const AuthPage = () => {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
+          {emailVerified && (
+            <Alert className="mb-4 bg-green-50 border-green-200">
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              <AlertTitle className="text-green-800">Email verified!</AlertTitle>
+              <AlertDescription className="text-green-700">
+                Your email has been verified. You can now log in to your account.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {isAuthCheckComplete && !resetPasswordOpen && <AuthCard onAuthSuccess={handleAuthSuccess} />}
         </motion.div>
       </div>
