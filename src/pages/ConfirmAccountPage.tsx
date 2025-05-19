@@ -4,9 +4,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Loader2, Mail } from "lucide-react";
 
 const ConfirmAccountPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -50,7 +50,7 @@ const ConfirmAccountPage: React.FC = () => {
         
         toast({
           title: "Account confirmed!",
-          description: "Your account has been successfully confirmed. You can now proceed with onboarding.",
+          description: "Your account has been successfully confirmed. You can now log in.",
         });
         
       } catch (err: any) {
@@ -70,76 +70,54 @@ const ConfirmAccountPage: React.FC = () => {
     verifyAccount();
   }, [searchParams, toast]);
 
-  const handleStartOnboarding = () => {
-    navigate("/onboarding");
+  const handleGoToLogin = () => {
+    navigate("/auth");
   };
 
   return (
-    <div className="container flex h-screen items-center justify-center">
+    <div className="container flex h-screen items-center justify-center bg-black text-white">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md text-center"
       >
-        <Card className="border shadow-lg">
-          <CardHeader className="text-center pb-6">
-            <CardTitle className="text-2xl">Account confirmation</CardTitle>
-            <CardDescription>
-              {loading ? "Confirming your account..." : (
-                confirmed ? "Your account has been confirmed" : "We couldn't confirm your account"
-              )}
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent>
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : confirmed ? (
-              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                <div className="flex gap-3">
-                  <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0" />
-                  <div>
-                    <p className="text-green-800 font-medium">
-                      To confirm your account, please click the button below.
-                    </p>
-                    <p className="text-green-700 mt-2 text-sm">
-                      You'll be taken to our onboarding process to complete your profile setup.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                <div className="flex gap-3">
-                  <AlertTriangle className="h-6 w-6 text-red-500 flex-shrink-0" />
-                  <div>
-                    <p className="text-red-800 font-medium">
-                      {error || "There was a problem confirming your account"}
-                    </p>
-                    <p className="text-red-700 mt-2 text-sm">
-                      Please try again or contact <a href="mailto:support@example.com" className="underline">support@example.com</a> for assistance.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-          
-          <CardFooter className="flex justify-center pb-6">
-            {confirmed && (
-              <Button
-                onClick={handleStartOnboarding}
-                size="lg"
-                className="w-full"
-              >
-                Confirm account
+        {loading ? (
+          <Card className="border-0 bg-transparent shadow-none">
+            <CardContent className="flex flex-col items-center justify-center space-y-4 pt-6">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              <p className="text-lg">Verifying your account...</p>
+            </CardContent>
+          </Card>
+        ) : error ? (
+          <Card className="border border-red-800 bg-black shadow-lg">
+            <CardContent className="flex flex-col items-center justify-center space-y-4 p-6">
+              <AlertTriangle className="h-12 w-12 text-red-500" />
+              <h2 className="text-xl font-semibold">Verification Failed</h2>
+              <p className="text-gray-400">{error}</p>
+              <Button onClick={handleGoToLogin} variant="outline" className="mt-4">
+                Return to Login
               </Button>
-            )}
-          </CardFooter>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-0 bg-transparent shadow-none">
+            <CardContent className="flex flex-col items-center justify-center space-y-6 pt-6">
+              <Mail className="h-16 w-16 text-white" />
+              <h2 className="text-2xl font-semibold">Check your email</h2>
+              <p className="text-gray-400">
+                We just sent a verification link to your email.
+              </p>
+              <Button 
+                onClick={handleGoToLogin} 
+                size="lg" 
+                className="mt-6 px-8"
+              >
+                Go to login →
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </motion.div>
     </div>
   );
