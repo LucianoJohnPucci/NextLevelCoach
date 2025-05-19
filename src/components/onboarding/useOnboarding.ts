@@ -5,6 +5,9 @@ import { useAuth } from "@/components/AuthProvider";
 export const useOnboarding = () => {
   const { user } = useAuth();
 
+  /**
+   * Fetch the user's onboarding answers
+   */
   const getUserAnswers = async () => {
     if (!user) return null;
 
@@ -14,7 +17,7 @@ export const useOnboarding = () => {
       .eq("user_id", user.id)
       .single();
 
-    if (error && error.code !== "PGRST116") {
+    if (error && error.code !== "PGRST116") { // PGRST116 is the error code for "No rows returned"
       console.error("Error fetching user onboarding answers:", error);
       throw error;
     }
@@ -22,7 +25,10 @@ export const useOnboarding = () => {
     return data;
   };
 
-  const saveAnswers = async (answers: Record<string, string>) => {
+  /**
+   * Save answers to the onboarding_answers table
+   */
+  const saveAnswers = async (questionAnswerPairs: Record<string, string>) => {
     if (!user) throw new Error("User must be logged in");
 
     const existingAnswers = await getUserAnswers();
@@ -31,9 +37,7 @@ export const useOnboarding = () => {
       // Update existing answers
       const { error } = await supabase
         .from("onboarding_answers")
-        .update({
-          ...answers,
-        })
+        .update(questionAnswerPairs)
         .eq("user_id", user.id);
 
       if (error) {
@@ -47,7 +51,7 @@ export const useOnboarding = () => {
         .insert([
           {
             user_id: user.id,
-            ...answers,
+            ...questionAnswerPairs,
           },
         ]);
 

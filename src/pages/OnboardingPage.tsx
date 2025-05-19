@@ -4,40 +4,71 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 
-const questions = [
+type Question = {
+  id: string;
+  text: string;
+  placeholder: string;
+};
+
+const questions: Question[] = [
   {
-    id: "goals",
-    question: "What are your primary goals for the next 5 years?",
-    placeholder: "Share your main objectives and aspirations..."
+    id: "focus",
+    text: "What is your primary focus for self-improvement right now (e.g., physical health, mental clarity, emotional balance, or spiritual growth)?",
+    placeholder: "Share your main focus area for self-improvement..."
   },
   {
-    id: "habits",
-    question: "What habits would you like to develop in the next 3 months?",
-    placeholder: "List the habits you want to cultivate..."
+    id: "habit",
+    text: "What specific habit would you like to build or break in the next 60 days to improve your body, mind, or spirit?",
+    placeholder: "Describe a habit you want to develop or break..."
   },
   {
-    id: "obstacles",
-    question: "What is your biggest obstacle to achieving your goals?",
-    placeholder: "Describe any challenges you face..."
+    id: "measurable_goal",
+    text: "Describe one measurable goal you want to achieve in the next 1-2 years to enhance your overall well-being.",
+    placeholder: "Share a specific, measurable goal..."
   },
   {
-    id: "improvements",
-    question: "What areas of your life would you like to improve the most?",
-    placeholder: "Share which aspects you want to focus on..."
+    id: "ideal_self",
+    text: "What does your ideal self look like in 5 years, considering your physical health, mental state, and spiritual fulfillment?",
+    placeholder: "Describe your vision of your ideal future self..."
+  },
+  {
+    id: "challenges",
+    text: "What challenges or obstacles have prevented you from achieving your self-improvement goals in the past?",
+    placeholder: "Share what has blocked your progress previously..."
+  },
+  {
+    id: "time_commitment",
+    text: "How much time can you realistically commit each day or week to working on your body, mind, or spirit goals?",
+    placeholder: "Describe your available time commitment..."
   },
   {
     id: "motivation",
-    question: "What motivates you the most in life?",
-    placeholder: "Tell us what drives you forward..."
+    text: "What motivates you most to improve yourself (e.g., better health, personal growth, relationships, or inner peace)?",
+    placeholder: "Share what drives your desire for self-improvement..."
+  },
+  {
+    id: "practices",
+    text: "Are there specific practices (e.g., meditation, exercise, journaling) you already do or want to incorporate into your routine?",
+    placeholder: "List practices you currently do or want to start..."
+  },
+  {
+    id: "satisfaction",
+    text: "How would you rate your current satisfaction with your physical health, mental well-being, and spiritual life on a scale of 1-10?",
+    placeholder: "Share your ratings and brief explanation..."
+  },
+  {
+    id: "support",
+    text: "What kind of support do you hope to receive from the app's AI (e.g., daily reminders, personalized plans, progress tracking)",
+    placeholder: "Describe what support would be most helpful..."
   }
 ];
 
@@ -48,10 +79,24 @@ const OnboardingPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const form = useForm<{answer: string}>();
 
   const handleNext = () => {
+    // Get the current answer
+    const currentAnswer = form.getValues().answer || "";
+    
+    // Save the answer
+    setAnswers({
+      ...answers,
+      [questions[currentStep].id]: currentAnswer
+    });
+    
+    // Move to next question or submit if last question
     if (currentStep < questions.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Reset form value for next question
+      form.reset({ answer: "" });
     } else {
       handleSubmit();
     }
@@ -59,15 +104,21 @@ const OnboardingPage: React.FC = () => {
 
   const handlePrevious = () => {
     if (currentStep > 0) {
+      // Get the current answer before moving back
+      const currentAnswer = form.getValues().answer || "";
+      
+      // Save the current answer
+      setAnswers({
+        ...answers,
+        [questions[currentStep].id]: currentAnswer
+      });
+      
+      // Move to previous question
       setCurrentStep(currentStep - 1);
+      
+      // Set form value to the previous answer
+      form.setValue("answer", answers[questions[currentStep - 1].id] || "");
     }
-  };
-
-  const handleInputChange = (value: string) => {
-    setAnswers({
-      ...answers,
-      [questions[currentStep].id]: value,
-    });
   };
 
   const handleSubmit = async () => {
@@ -84,20 +135,28 @@ const OnboardingPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      // Prepare data for database insertion with questions as well
+      const questionAnswerPairs: Record<string, string> = {};
+      
+      questions.forEach((question, index) => {
+        const answerKey = question.id;
+        questionAnswerPairs[`question_${index + 1}`] = question.text;
+        questionAnswerPairs[`answer_${index + 1}`] = answers[answerKey] || "";
+      });
+
       // Store answers in the onboarding_answers table
       const { error } = await supabase
         .from("onboarding_answers")
         .insert({
           user_id: user.id,
-          answers: answers,
-          signup_date: new Date().toISOString(),
+          ...questionAnswerPairs,
         });
 
       if (error) throw error;
 
       toast({
         title: "Onboarding Complete",
-        description: "Thank you for sharing your goals. Your journey starts now!",
+        description: "Thank you for sharing your goals. Your journey begins now!",
       });
 
       // Redirect to dashboard or home page
@@ -117,19 +176,24 @@ const OnboardingPage: React.FC = () => {
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
 
+  // If answer for current question exists in state, populate the form
+  React.useEffect(() => {
+    form.setValue("answer", answers[currentQuestion.id] || "");
+  }, [currentStep, currentQuestion.id]);
+
   return (
     <div className="container mx-auto py-16 px-4">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-2xl mx-auto"
+        className="max-w-3xl mx-auto"
       >
         <Card className="border shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-2xl">Welcome to Your 5-Year Transformation Journey</CardTitle>
+            <CardTitle className="text-2xl">Your 5-Year Transformation Journey</CardTitle>
             <CardDescription>
-              Help us customize your experience by answering a few questions
+              Help us personalize your experience by answering a few questions
             </CardDescription>
           </CardHeader>
           
@@ -142,29 +206,29 @@ const OnboardingPage: React.FC = () => {
               <Progress value={progress} className="h-2" />
             </div>
             
-            <div className="space-y-4">
-              <Label htmlFor="question" className="text-lg font-medium">
-                {currentQuestion.question}
-              </Label>
-              
-              {currentQuestion.question.length > 100 ? (
-                <Textarea
-                  id="question"
-                  className="min-h-[150px]"
-                  placeholder={currentQuestion.placeholder}
-                  value={answers[currentQuestion.id] || ""}
-                  onChange={(e) => handleInputChange(e.target.value)}
+            <Form {...form}>
+              <form className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="answer"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-lg font-medium">
+                        {currentQuestion.text}
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder={currentQuestion.placeholder}
+                          className="min-h-[150px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              ) : (
-                <Textarea
-                  id="question"
-                  className="min-h-[120px]"
-                  placeholder={currentQuestion.placeholder}
-                  value={answers[currentQuestion.id] || ""}
-                  onChange={(e) => handleInputChange(e.target.value)}
-                />
-              )}
-            </div>
+              </form>
+            </Form>
           </CardContent>
           
           <CardFooter className="flex justify-between pt-2">
