@@ -35,24 +35,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const cleanHash = hash.startsWith('#') ? hash.substring(1) : hash;
         const hashParams = new URLSearchParams(cleanHash);
         
-        // Multiple ways to detect a recovery flow
+        // Multiple ways to detect a recovery flow or confirmation flow
         const isResetPasswordRoute = path.includes('/reset-password');
+        const isConfirmAccountRoute = path.includes('/confirm-account');
+        const isOnboardingRoute = path.includes('/onboarding');
         const isRecoveryFlow = 
           hashParams.get("type") === "recovery" ||
           hash.includes('type=recovery') ||
           hash.includes('access_token') ||
-          isResetPasswordRoute;
+          isResetPasswordRoute ||
+          isConfirmAccountRoute;
         
-        console.log("[Auth Provider] Checking for recovery flow:", { isRecoveryFlow, path, hash });
+        console.log("[Auth Provider] Checking for special flow:", { 
+          isRecoveryFlow, 
+          isConfirmAccountRoute, 
+          isOnboardingRoute, 
+          path, 
+          hash 
+        });
         
-        // Skip session updates for reset password route to prevent redirect loops
-        if (isResetPasswordRoute) {
-          console.log("[Auth Provider] On reset password route, skipping session check");
+        // Skip session updates for routes that should handle their own sessions
+        if (isResetPasswordRoute || isConfirmAccountRoute || isOnboardingRoute) {
+          console.log("[Auth Provider] On special route, skipping automatic redirects");
           setLoading(false);
           return;
         }
         
-        // If not handling password recovery, proceed with session check
+        // If not handling special routes, proceed with session check
         if (!isRecoveryFlow) {
           const { data } = await supabase.auth.getSession();
           setSession(data.session);
@@ -73,15 +82,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (event, session) => {
         console.log("[Auth Provider] Auth state change event:", event);
         
-        // Check for password recovery or reset routes
+        // Check for special routes
         const path = window.location.pathname;
-        const hash = window.location.hash;
         const isResetPasswordRoute = path.includes('/reset-password');
+        const isConfirmAccountRoute = path.includes('/confirm-account');
+        const isOnboardingRoute = path.includes('/onboarding');
         const isRecoveryEvent = event === 'PASSWORD_RECOVERY';
         
-        // Skip session updates during password recovery to prevent redirects
-        if (isResetPasswordRoute || isRecoveryEvent) {
-          console.log("[Auth Provider] Skipping session update during recovery flow");
+        // Skip session updates for special routes
+        if (isResetPasswordRoute || isConfirmAccountRoute || isOnboardingRoute || isRecoveryEvent) {
+          console.log("[Auth Provider] Skipping session update during special flow");
           return;
         }
         

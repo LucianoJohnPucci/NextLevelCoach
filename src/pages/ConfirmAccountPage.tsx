@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, AlertTriangle, Loader2, Mail } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
 
 const ConfirmAccountPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -50,7 +50,7 @@ const ConfirmAccountPage: React.FC = () => {
         
         toast({
           title: "Account confirmed!",
-          description: "Your account has been successfully confirmed. You can now log in.",
+          description: "Your account has been successfully confirmed. Continue to complete your profile.",
         });
         
       } catch (err: any) {
@@ -69,6 +69,10 @@ const ConfirmAccountPage: React.FC = () => {
 
     verifyAccount();
   }, [searchParams, toast]);
+
+  const handleContinueToOnboarding = () => {
+    navigate("/onboarding");
+  };
 
   const handleGoToLogin = () => {
     navigate("/auth");
@@ -101,20 +105,23 @@ const ConfirmAccountPage: React.FC = () => {
             </CardContent>
           </Card>
         ) : (
-          <Card className="border-0 bg-transparent shadow-none">
-            <CardContent className="flex flex-col items-center justify-center space-y-6 pt-6">
-              <Mail className="h-16 w-16 text-white" />
-              <h2 className="text-2xl font-semibold">Check your email</h2>
+          <Card className="border border-gray-800 bg-black shadow-lg">
+            <CardContent className="flex flex-col items-center justify-center space-y-6 p-6">
+              <CheckCircle2 className="h-16 w-16 text-green-500" />
+              <h2 className="text-2xl font-semibold">Account confirmation</h2>
               <p className="text-gray-400">
-                We just sent a verification link to your email.
+                To confirm your account, please click the button below.
               </p>
               <Button 
-                onClick={handleGoToLogin} 
+                onClick={handleContinueToOnboarding} 
                 size="lg" 
-                className="mt-6 px-8"
+                className="mt-6 px-8 w-full"
               >
-                Go to login →
+                Confirm account
               </Button>
+              <p className="text-sm text-gray-500 mt-4">
+                If you have any issue confirming your account please, contact support.
+              </p>
             </CardContent>
           </Card>
         )}

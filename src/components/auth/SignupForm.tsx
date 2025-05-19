@@ -45,7 +45,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
             f_name: firstName,
             sms: sms || null,
           },
-          // Change redirect to new confirmation page
+          // Redirect to confirmation page
           emailRedirectTo: `${window.location.origin}/confirm-account`,
         },
       });
