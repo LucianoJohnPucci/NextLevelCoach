@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Volume2, VolumeX } from "lucide-react";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { useAudio } from "@/hooks/useAudio";
+import welcomeAudio from "@/assets/audio/onboarding/welcome.mp3";
 
 type Question = {
   id: string;
@@ -79,8 +81,17 @@ const OnboardingPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isPlaying, toggle } = useAudio(welcomeAudio, { autoplay: true });
   
   const form = useForm<{answer: string}>();
+
+  // Show a welcome message with audio on first render
+  useEffect(() => {
+    toast({
+      title: "Welcome to your transformation journey!",
+      description: "Audio is now playing to enhance your experience."
+    });
+  }, [toast]);
 
   const handleNext = () => {
     // Get the current answer
@@ -191,7 +202,18 @@ const OnboardingPage: React.FC = () => {
       >
         <Card className="border shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-2xl">Your 5-Year Transformation Journey</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-2xl">Your 5-Year Transformation Journey</CardTitle>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggle} 
+                className="ml-auto"
+                title={isPlaying ? "Mute audio" : "Play audio"}
+              >
+                {isPlaying ? <Volume2 /> : <VolumeX />}
+              </Button>
+            </div>
             <CardDescription>
               Help us personalize your experience by answering a few questions
             </CardDescription>
