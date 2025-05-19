@@ -45,8 +45,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
             f_name: firstName,
             sms: sms || null,
           },
-          // Make sure this redirects back to the app's auth page with verification flag
-          emailRedirectTo: `${window.location.origin}/auth?verified=true`,
+          // Change redirect to new confirmation page
+          emailRedirectTo: `${window.location.origin}/confirm-account`,
         },
       });
       

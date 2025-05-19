@@ -17,6 +17,8 @@ import GoalsPage from "@/pages/GoalsPage";
 import WisdomPage from "@/pages/WisdomPage";
 import NotesPage from "@/pages/NotesPage";
 import AuthPage from "@/pages/AuthPage";
+import ConfirmAccountPage from "@/pages/ConfirmAccountPage";
+import OnboardingPage from "@/pages/OnboardingPage";
 import ProfilePage from "@/pages/ProfilePage";
 import NotFound from "@/pages/NotFound";
 import PasswordResetPage from "@/pages/PasswordResetPage";
@@ -43,6 +45,8 @@ const App = () => {
                   */}
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/reset-password" element={<PasswordResetPage />} />
+                  <Route path="/confirm-account" element={<ConfirmAccountPage />} />
+                  <Route path="/onboarding" element={<OnboardingPage />} />
                   
                   {/* Protected routes inside Layout */}
                   <Route path="/" element={<Layout />}>
