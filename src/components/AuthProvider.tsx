@@ -32,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       
       try {
-        // Check if this is a recovery flow from the URL or hash
+        // Check if this is a special flow from the URL or hash
         const path = window.location.pathname;
         const hash = window.location.hash;
         const cleanHash = hash.startsWith('#') ? hash.substring(1) : hash;
@@ -42,6 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const isResetPasswordRoute = path.includes('/reset-password');
         const isConfirmAccountRoute = path.includes('/confirm-account');
         const isOnboardingRoute = path.includes('/onboarding');
+        const isAuthRoute = path.includes('/auth');
         const isRecoveryFlow = 
           hashParams.get("type") === "recovery" ||
           hash.includes('type=recovery') ||
@@ -52,13 +53,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("[Auth Provider] Checking for special flow:", { 
           isRecoveryFlow, 
           isConfirmAccountRoute, 
-          isOnboardingRoute, 
+          isOnboardingRoute,
+          isAuthRoute,
           path, 
           hash 
         });
         
         // Skip session updates for routes that should handle their own sessions
-        if (isResetPasswordRoute || isConfirmAccountRoute || isOnboardingRoute) {
+        if (isResetPasswordRoute || isConfirmAccountRoute || isOnboardingRoute || isAuthRoute) {
           console.log("[Auth Provider] On special route, skipping automatic redirects");
           setLoading(false);
           return;
@@ -101,10 +103,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const isResetPasswordRoute = path.includes('/reset-password');
         const isConfirmAccountRoute = path.includes('/confirm-account');
         const isOnboardingRoute = path.includes('/onboarding');
+        const isAuthRoute = path.includes('/auth');
         const isRecoveryEvent = event === 'PASSWORD_RECOVERY';
         
         // Skip session updates for special routes
-        if (isResetPasswordRoute || isConfirmAccountRoute || isOnboardingRoute || isRecoveryEvent) {
+        if (isResetPasswordRoute || isConfirmAccountRoute || isOnboardingRoute || isAuthRoute || isRecoveryEvent) {
           console.log("[Auth Provider] Skipping session update during special flow");
           return;
         }

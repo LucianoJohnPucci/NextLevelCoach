@@ -50,8 +50,13 @@ const ConfirmAccountPage: React.FC = () => {
         
         toast({
           title: "Account confirmed!",
-          description: "Your account has been successfully confirmed. Continue to complete your profile.",
+          description: "Your account has been successfully confirmed. Continue to complete your onboarding.",
         });
+        
+        // Auto redirect to onboarding after a short delay
+        setTimeout(() => {
+          navigate("/onboarding");
+        }, 1500);
         
       } catch (err: any) {
         console.error("Error during confirmation:", err);
@@ -68,7 +73,7 @@ const ConfirmAccountPage: React.FC = () => {
     };
 
     verifyAccount();
-  }, [searchParams, toast]);
+  }, [searchParams, toast, navigate]);
 
   const handleContinueToOnboarding = () => {
     navigate("/onboarding");
@@ -110,7 +115,7 @@ const ConfirmAccountPage: React.FC = () => {
               <CheckCircle2 className="h-16 w-16 text-green-500" />
               <h2 className="text-2xl font-semibold">Account confirmation</h2>
               <p className="text-gray-400">
-                Your account has been confirmed. Click below to continue to the onboarding process.
+                Your account has been confirmed. You'll be redirected to the onboarding process in a moment...
               </p>
               <Button 
                 onClick={handleContinueToOnboarding} 
