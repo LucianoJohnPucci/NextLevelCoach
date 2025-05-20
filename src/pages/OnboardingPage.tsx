@@ -76,7 +76,7 @@ const questions: Question[] = [
 
 const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isVerified, loading } = useAuth();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -85,13 +85,48 @@ const OnboardingPage: React.FC = () => {
   
   const form = useForm<{answer: string}>();
 
+  // Redirect if user is not authenticated or email is not verified
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to access the onboarding process.",
+          variant: "destructive",
+        });
+        navigate("/auth");
+      } else if (!isVerified) {
+        toast({
+          title: "Email verification required",
+          description: "Please verify your email before continuing to onboarding.",
+          variant: "destructive",
+        });
+        navigate("/auth");
+      }
+    }
+  }, [user, isVerified, loading, navigate, toast]);
+
   // Show a welcome message with audio on first render
   useEffect(() => {
-    toast({
-      title: "Welcome to your transformation journey!",
-      description: "Audio is now playing to enhance your experience."
-    });
-  }, [toast]);
+    if (user && isVerified) {
+      toast({
+        title: "Welcome to your transformation journey!",
+        description: "Audio is now playing to enhance your experience."
+      });
+    }
+  }, [toast, user, isVerified]);
+
+  // If still loading or not authenticated/verified, show loading state
+  if (loading || !user || !isVerified) {
+    return (
+      <div className="container flex h-screen items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+          <p className="mt-4 text-lg">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleNext = () => {
     // Get the current answer

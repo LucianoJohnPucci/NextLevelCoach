@@ -110,17 +110,17 @@ const ConfirmAccountPage: React.FC = () => {
               <CheckCircle2 className="h-16 w-16 text-green-500" />
               <h2 className="text-2xl font-semibold">Account confirmation</h2>
               <p className="text-gray-400">
-                To confirm your account, please click the button below.
+                Your account has been confirmed. Click below to continue to the onboarding process.
               </p>
               <Button 
                 onClick={handleContinueToOnboarding} 
                 size="lg" 
                 className="mt-6 px-8 w-full"
               >
-                Confirm account
+                Continue to Onboarding
               </Button>
               <p className="text-sm text-gray-500 mt-4">
-                If you have any issue confirming your account please, contact support.
+                This will start your personalized 5-year transformation journey.
               </p>
             </CardContent>
           </Card>

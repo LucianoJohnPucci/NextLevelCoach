@@ -7,6 +7,7 @@ type AuthContextType = {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  isVerified: boolean;
   signOut: () => Promise<void>;
 };
 
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
   loading: true,
+  isVerified: false,
   signOut: async () => {},
 });
 
@@ -23,6 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     const getSession = async () => {
@@ -65,7 +68,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!isRecoveryFlow) {
           const { data } = await supabase.auth.getSession();
           setSession(data.session);
-          setUser(data.session?.user || null);
+          
+          if (data.session?.user) {
+            setUser(data.session.user);
+            
+            // Check if email is verified
+            const isEmailVerified = data.session.user.email_confirmed_at !== null;
+            setIsVerified(isEmailVerified);
+            console.log("[Auth Provider] Email verification status:", isEmailVerified);
+          } else {
+            setUser(null);
+            setIsVerified(false);
+          }
         } else {
           console.log("[Auth Provider] Recovery flow detected, skipping session check");
         }
@@ -98,7 +112,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // For all other events, update the session state
         console.log("[Auth Provider] Updating session state for event:", event);
         setSession(session);
-        setUser(session?.user || null);
+        
+        if (session?.user) {
+          setUser(session.user);
+          
+          // Update email verification status on auth state change
+          const isEmailVerified = session.user.email_confirmed_at !== null;
+          setIsVerified(isEmailVerified);
+          console.log("[Auth Provider] Updated email verification status:", isEmailVerified);
+        } else {
+          setUser(null);
+          setIsVerified(false);
+        }
+        
         setLoading(false);
       }
     );
@@ -120,6 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     user,
     loading,
+    isVerified,
     signOut,
   };
 
