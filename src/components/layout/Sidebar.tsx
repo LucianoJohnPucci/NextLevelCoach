@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "./SidebarProvider";
 import { 
@@ -13,7 +12,9 @@ import {
   Target, 
   MessageCircle,
   BookOpen,
-  MessageSquare
+  MessageSquare,
+  PanelLeftClose,
+  PanelLeftOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -58,14 +59,28 @@ const Sidebar = () => {
           <span className="text-xl font-medium">Next Level Coach</span>
         </Link>
         
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={toggle} 
-          className="md:hidden"
-        >
-          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Desktop collapse button */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggle} 
+            className="hidden md:flex"
+            title={isOpen ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {isOpen ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeftOpen className="h-5 w-5" />}
+          </Button>
+          
+          {/* Mobile menu button */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggle} 
+            className="md:hidden"
+          >
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
       
       <div className="mt-8 flex flex-col gap-1">
