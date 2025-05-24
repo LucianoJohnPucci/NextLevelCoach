@@ -501,6 +501,8 @@ export type Database = {
           id: string
           mind_focus_goal: number | null
           mind_meditation_goal: number | null
+          notify_by_email: boolean | null
+          notify_by_sms: boolean | null
           sms: string | null
           soul_gratitude_frequency: string | null
           soul_reflection_goal: number | null
@@ -517,6 +519,8 @@ export type Database = {
           id: string
           mind_focus_goal?: number | null
           mind_meditation_goal?: number | null
+          notify_by_email?: boolean | null
+          notify_by_sms?: boolean | null
           sms?: string | null
           soul_gratitude_frequency?: string | null
           soul_reflection_goal?: number | null
@@ -533,6 +537,8 @@ export type Database = {
           id?: string
           mind_focus_goal?: number | null
           mind_meditation_goal?: number | null
+          notify_by_email?: boolean | null
+          notify_by_sms?: boolean | null
           sms?: string | null
           soul_gratitude_frequency?: string | null
           soul_reflection_goal?: number | null

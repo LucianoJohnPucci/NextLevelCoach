@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { motion } from "framer-motion";
 import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
+import { NotificationSection } from "@/components/profile/NotificationSection";
 
 const ProfilePage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -14,45 +14,46 @@ const ProfilePage = () => {
   const [profileExists, setProfileExists] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [phone, setPhone] = useState("");
+  const [notifyByEmail, setNotifyByEmail] = useState(true);
+  const [notifyBySms, setNotifyBySms] = useState(false);
   
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user) return; // Don't fetch if no user, but DON'T redirect
+      if (!user) return;
       
       try {
         setLoading(true);
         console.log("[ProfilePage] Fetching profile for user:", user.id);
         
-        // First, check if the profile exists
         const { data, error } = await supabase
           .from("profiles")
-          .select("f_name, sms")
+          .select("f_name, sms, notify_by_email, notify_by_sms")
           .eq("id", user.id)
           .maybeSingle();
           
         if (error) {
           console.error("[ProfilePage] Error checking profile:", error);
-          // Don't throw here, just log the error
         }
         
         if (data) {
-          // Profile exists, set the data
           console.log("[ProfilePage] Profile found:", data);
           setProfileExists(true);
           setFirstName(data.f_name || "");
           setPhone(data.sms || "");
+          setNotifyByEmail(data.notify_by_email ?? true);
+          setNotifyBySms(data.notify_by_sms ?? false);
         } else {
           console.log("[ProfilePage] No profile found, using user metadata");
-          // No profile found, use metadata from auth user
           setProfileExists(false);
           setFirstName(user.user_metadata?.f_name || "");
           setPhone(user.user_metadata?.sms || "");
+          setNotifyByEmail(true);
+          setNotifyBySms(false);
         }
       } catch (error: any) {
         console.error("[ProfilePage] Error in profile fetch flow:", error);
-        // Show toast but don't redirect
         toast({
           title: "Warning",
           description: "Could not load complete profile data. Some information may be missing.",
@@ -77,13 +78,14 @@ const ProfilePage = () => {
       setLoading(true);
       console.log("[ProfilePage] Updating profile for user:", user.id);
       
-      // Only attempt to update the profile in the database if it exists
       if (profileExists) {
         const { error } = await supabase
           .from("profiles")
           .update({
             f_name: firstName,
             sms: phone,
+            notify_by_email: notifyByEmail,
+            notify_by_sms: notifyBySms,
             updated_at: new Date().toISOString(),
           })
           .eq("id", user.id);
@@ -91,7 +93,6 @@ const ProfilePage = () => {
         if (error) throw error;
       }
       
-      // Always update the user metadata in auth
       const { error: authError } = await supabase.auth.updateUser({
         data: { 
           f_name: firstName, 
@@ -162,17 +163,24 @@ const ProfilePage = () => {
           <CardHeader>
             <CardTitle>Your Profile</CardTitle>
             <CardDescription>
-              Update your personal information
+              Update your personal information and preferences
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleUpdateProfile}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <PersonalInfoSection 
                 user={user}
                 firstName={firstName}
                 setFirstName={setFirstName}
                 phone={phone}
                 setPhone={setPhone}
+              />
+              
+              <NotificationSection
+                notifyByEmail={notifyByEmail}
+                setNotifyByEmail={setNotifyByEmail}
+                notifyBySms={notifyBySms}
+                setNotifyBySms={setNotifyBySms}
               />
             </CardContent>
             <CardFooter>
