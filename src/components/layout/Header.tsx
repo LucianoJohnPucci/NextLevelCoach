@@ -1,40 +1,37 @@
 
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { useSidebar } from "./SidebarProvider";
-import { Menu } from "lucide-react";
-import { ThemeToggle } from "../ThemeToggle";
-import { UserProfileButton } from "../UserProfileButton";
+import { useAuth } from "@/components/AuthProvider";
+import { UserProfileButton } from "@/components/UserProfileButton";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 const Header = () => {
-  const { toggle } = useSidebar();
-  const location = useLocation();
+  const { user } = useAuth();
+  const { isOpen, toggle } = useSidebar();
+
+  // Don't show header for non-authenticated users
+  if (!user) {
+    return null;
+  }
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background">
-      <div className="container flex h-16 items-center justify-between py-4">
-        <div className="flex items-center gap-2 md:gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={toggle}
-          >
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
-          </Button>
-          <Link to="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold">
-              <span className="text-black">Next Level</span>
-              <span className="text-primary"> Coach</span>
-            </span>
-          </Link>
-        </div>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <UserProfileButton />
-        </div>
+    <header className="flex h-14 items-center justify-between border-b bg-background px-4 lg:px-6">
+      <div className="flex items-center gap-2">
+        {/* Sidebar toggle button - always visible */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={toggle}
+          title={isOpen ? "Collapse sidebar" : "Expand sidebar"}
+        >
+          {isOpen ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeftOpen className="h-5 w-5" />}
+        </Button>
+      </div>
+      
+      <div className="flex items-center gap-4">
+        <ThemeToggle />
+        <UserProfileButton />
       </div>
     </header>
   );

@@ -12,9 +12,7 @@ import {
   Target, 
   MessageCircle,
   BookOpen,
-  MessageSquare,
-  PanelLeftClose,
-  PanelLeftOpen
+  MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -59,28 +57,15 @@ const Sidebar = () => {
           <span className="text-xl font-medium">Next Level Coach</span>
         </Link>
         
-        <div className="flex items-center gap-2">
-          {/* Desktop collapse button */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggle} 
-            className="hidden md:flex"
-            title={isOpen ? "Collapse sidebar" : "Expand sidebar"}
-          >
-            {isOpen ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeftOpen className="h-5 w-5" />}
-          </Button>
-          
-          {/* Mobile menu button */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggle} 
-            className="md:hidden"
-          >
-            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        </div>
+        {/* Mobile menu button only */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={toggle} 
+          className="md:hidden"
+        >
+          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
       </div>
       
       <div className="mt-8 flex flex-col gap-1">
