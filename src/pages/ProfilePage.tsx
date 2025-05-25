@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { motion } from "framer-motion";
 import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
 import { NotificationSection } from "@/components/profile/NotificationSection";
+import { ProfileImageSection } from "@/components/profile/ProfileImageSection";
 
 const ProfilePage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -14,6 +16,7 @@ const ProfilePage = () => {
   const [profileExists, setProfileExists] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [phone, setPhone] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [notifyByEmail, setNotifyByEmail] = useState(true);
   const [notifyBySms, setNotifyBySms] = useState(false);
   
@@ -29,7 +32,7 @@ const ProfilePage = () => {
         
         const { data, error } = await supabase
           .from("profiles")
-          .select("f_name, sms, notify_by_email, notify_by_sms")
+          .select("f_name, sms, avatar_url, notify_by_email, notify_by_sms")
           .eq("id", user.id)
           .maybeSingle();
           
@@ -42,6 +45,7 @@ const ProfilePage = () => {
           setProfileExists(true);
           setFirstName(data.f_name || "");
           setPhone(data.sms || "");
+          setAvatarUrl(data.avatar_url);
           setNotifyByEmail(data.notify_by_email ?? true);
           setNotifyBySms(data.notify_by_sms ?? false);
         } else {
@@ -49,6 +53,7 @@ const ProfilePage = () => {
           setProfileExists(false);
           setFirstName(user.user_metadata?.f_name || "");
           setPhone(user.user_metadata?.sms || "");
+          setAvatarUrl(user.user_metadata?.avatar_url || null);
           setNotifyByEmail(true);
           setNotifyBySms(false);
         }
@@ -84,6 +89,7 @@ const ProfilePage = () => {
           .update({
             f_name: firstName,
             sms: phone,
+            avatar_url: avatarUrl,
             notify_by_email: notifyByEmail,
             notify_by_sms: notifyBySms,
             updated_at: new Date().toISOString(),
@@ -96,7 +102,8 @@ const ProfilePage = () => {
       const { error: authError } = await supabase.auth.updateUser({
         data: { 
           f_name: firstName, 
-          sms: phone
+          sms: phone,
+          avatar_url: avatarUrl
         }
       });
       
@@ -168,6 +175,12 @@ const ProfilePage = () => {
           </CardHeader>
           <form onSubmit={handleUpdateProfile}>
             <CardContent className="space-y-6">
+              <ProfileImageSection 
+                user={user}
+                avatarUrl={avatarUrl}
+                setAvatarUrl={setAvatarUrl}
+              />
+              
               <PersonalInfoSection 
                 user={user}
                 firstName={firstName}

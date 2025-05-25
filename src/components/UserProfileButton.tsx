@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/AuthProvider";
 import { LogOut, User as UserIcon } from "lucide-react";
 
@@ -34,11 +34,14 @@ export function UserProfileButtonNoRouter() {
     ? user.user_metadata.f_name.charAt(0).toUpperCase() 
     : user.email?.charAt(0).toUpperCase() || "U";
 
+  const avatarUrl = user.user_metadata?.avatar_url;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-9 w-9 rounded-full p-0" aria-label="User menu">
           <Avatar className="h-9 w-9">
+            <AvatarImage src={avatarUrl || undefined} />
             <AvatarFallback className="bg-primary/10 text-primary">
               {userInitial}
             </AvatarFallback>
@@ -101,11 +104,14 @@ export function UserProfileButton() {
     ? user.user_metadata.f_name.charAt(0).toUpperCase() 
     : user.email?.charAt(0).toUpperCase() || "U";
 
+  const avatarUrl = user.user_metadata?.avatar_url;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-9 w-9 rounded-full p-0" aria-label="User menu">
           <Avatar className="h-9 w-9">
+            <AvatarImage src={avatarUrl || undefined} />
             <AvatarFallback className="bg-primary/10 text-primary">
               {userInitial}
             </AvatarFallback>
