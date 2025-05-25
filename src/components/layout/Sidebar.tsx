@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "./SidebarProvider";
 import { 
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { DiscordCommunityDialog } from "./DiscordCommunityDialog";
 
 interface NavItemProps {
   to: string;
@@ -117,9 +119,17 @@ const Sidebar = () => {
           Wisdom
         </NavItem>
         
-        <NavItem to="https://discord.com/invite/nextlevelcoach" icon={MessageSquare} onClick={() => close()}>
-          Discord Community
-        </NavItem>
+        <DiscordCommunityDialog>
+          <button
+            onClick={() => close()}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200 hover:bg-accent text-foreground w-full text-left"
+            )}
+          >
+            <MessageSquare className="h-5 w-5 text-muted-foreground" />
+            <span>Discord Community</span>
+          </button>
+        </DiscordCommunityDialog>
       </div>
       
       <div className="mt-auto">
