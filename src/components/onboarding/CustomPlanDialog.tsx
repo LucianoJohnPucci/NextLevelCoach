@@ -27,19 +27,17 @@ export const CustomPlanDialog: React.FC<CustomPlanDialogProps> = ({
   open, 
   onOpenChange 
 }) => {
-  const { isPlaying, toggle } = useAudio(welcomeAudio, { autoplay: true });
+  const { isPlaying, toggle, play } = useAudio(welcomeAudio, { autoplay: false });
 
-  // Play audio when dialog opens
+  // Play audio when dialog opens (only when button is clicked)
   useEffect(() => {
     if (open) {
       // Small delay to ensure dialog is fully rendered
       setTimeout(() => {
-        if (!isPlaying) {
-          toggle();
-        }
+        play();
       }, 500);
     }
-  }, [open]);
+  }, [open, play]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
