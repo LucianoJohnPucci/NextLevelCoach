@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Brain, Heart, Sparkles, Target, BarChart2, Calendar, LogIn } from "lucide-react";
@@ -8,6 +7,7 @@ import { useAuth } from "@/components/AuthProvider";
 import LandingPage from "@/components/landing/LandingPage";
 import { useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
+import { CustomPlanDialog } from "@/components/onboarding/CustomPlanDialog";
 import GoalsProgress from "@/components/goals/GoalsProgress";
 import OnboardingGoalsSummary from "@/components/goals/OnboardingGoalsSummary";
 
@@ -51,6 +51,7 @@ const FeatureCard = ({
 const AuthenticatedHome = () => {
   const { user } = useAuth();
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showCustomPlan, setShowCustomPlan] = useState(false);
   
   const features = [
     {
@@ -126,13 +127,18 @@ const AuthenticatedHome = () => {
         <Button asChild size="lg">
           <Link to="/daily">Start Today's Input</Link>
         </Button>
-        <Button 
-          variant="outline" 
-          size="lg" 
-          onClick={() => setShowOnboarding(true)}
+        <CustomPlanDialog 
+          open={showCustomPlan} 
+          onOpenChange={setShowCustomPlan}
         >
-          Custom Plan Building
-        </Button>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={() => setShowCustomPlan(true)}
+          >
+            Custom Plan Building
+          </Button>
+        </CustomPlanDialog>
       </motion.div>
 
       {/* Onboarding Goals Summary */}
