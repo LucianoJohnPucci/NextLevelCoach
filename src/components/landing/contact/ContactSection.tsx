@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail } from "lucide-react";
+import { Mail, MessageSquare, ExternalLink } from "lucide-react";
 
 const ContactSection = () => {
   return (
@@ -28,14 +28,31 @@ const ContactSection = () => {
               </div>
               <div>
                 <h3 className="font-bold">Email Us</h3>
-                <p className="text-muted-foreground">support@corecultivate.com</p>
+                <p className="text-muted-foreground">support@nextlevelcoach.app</p>
               </div>
             </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold">Office Hours</h3>
-              <p className="text-muted-foreground">Monday - Friday: 9am - 5pm EST</p>
-              <p className="text-muted-foreground">Saturday: 10am - 2pm EST</p>
-              <p className="text-muted-foreground">Sunday: Closed</p>
+            <div className="flex items-start gap-4">
+              <div className="rounded-full bg-primary/10 p-2">
+                <MessageSquare className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold">Join Our Discord Community</h3>
+                <Button 
+                  variant="link" 
+                  asChild 
+                  className="p-0 h-auto text-muted-foreground hover:text-primary"
+                >
+                  <a 
+                    href="https://discord.gg/NS7q4knQ" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1"
+                  >
+                    Join Discord Server
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold">Support</h3>
