@@ -18,13 +18,6 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 
-const scrollToSection = (sectionId: string) => {
-  const element = document.getElementById(sectionId);
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' });
-  }
-};
-
 const Header = () => {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -48,14 +41,9 @@ const Header = () => {
                 <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                   <li className="row-span-3">
                     <NavigationMenuLink asChild>
-                      <button
-                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/10 to-primary/5 p-6 no-underline outline-none focus:shadow-md hover:bg-gradient-to-b hover:from-primary/15 hover:to-primary/10 transition-colors"
-                        onClick={() => {
-                          const element = document.querySelector('section');
-                          if (element) {
-                            element.scrollIntoView({ behavior: 'smooth' });
-                          }
-                        }}
+                      <a
+                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/10 to-primary/5 p-6 no-underline outline-none focus:shadow-md"
+                        href="#about"
                       >
                         <Sparkles className="h-6 w-6 text-primary" />
                         <div className="mb-2 mt-4 text-lg font-medium">
@@ -64,43 +52,33 @@ const Header = () => {
                         <p className="text-sm leading-tight text-muted-foreground">
                           A holistic wellness platform to nurture your mind, body, and soul through mindfulness, habits, and personal growth.
                         </p>
-                      </button>
+                      </a>
                     </NavigationMenuLink>
                   </li>
                   <li>
                     <NavigationMenuLink asChild>
-                      <button
-                        className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        onClick={() => {
-                          const sections = document.querySelectorAll('section');
-                          if (sections.length > 2) {
-                            sections[2].scrollIntoView({ behavior: 'smooth' });
-                          }
-                        }}
+                      <a
+                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        href="#philosophy"
                       >
                         <div className="text-sm font-medium leading-none">Philosophy</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                           Our core beliefs and approach to wellbeing
                         </p>
-                      </button>
+                      </a>
                     </NavigationMenuLink>
                   </li>
                   <li>
                     <NavigationMenuLink asChild>
-                      <button
-                        className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        onClick={() => {
-                          const sections = document.querySelectorAll('section');
-                          if (sections.length > 3) {
-                            sections[3].scrollIntoView({ behavior: 'smooth' });
-                          }
-                        }}
+                      <a
+                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        href="#team"
                       >
                         <div className="text-sm font-medium leading-none">Our Team</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Meet the experts behind Next Level Coach
+                          Meet the experts behind CoreCultivate
                         </p>
-                      </button>
+                      </a>
                     </NavigationMenuLink>
                   </li>
                 </ul>
@@ -115,14 +93,9 @@ const Header = () => {
                 <ul className="grid gap-3 p-4 md:w-[500px] lg:w-[600px] lg:grid-cols-[.75fr_1fr]">
                   <li className="row-span-3">
                     <NavigationMenuLink asChild>
-                      <button
-                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/10 to-primary/5 p-6 no-underline outline-none focus:shadow-md hover:bg-gradient-to-b hover:from-primary/15 hover:to-primary/10 transition-colors"
-                        onClick={() => {
-                          const sections = document.querySelectorAll('section');
-                          if (sections.length > 1) {
-                            sections[1].scrollIntoView({ behavior: 'smooth' });
-                          }
-                        }}
+                      <a
+                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/10 to-primary/5 p-6 no-underline outline-none focus:shadow-md"
+                        href="#features"
                       >
                         <div className="mb-2 mt-4 text-lg font-medium">
                           Powerful Features
@@ -130,61 +103,46 @@ const Header = () => {
                         <p className="text-sm leading-tight text-muted-foreground">
                           Explore the tools that will help you cultivate a better life through mind, body, and soul balance.
                         </p>
-                      </button>
+                      </a>
                     </NavigationMenuLink>
                   </li>
                   <li>
                     <NavigationMenuLink asChild>
-                      <button
-                        className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        onClick={() => {
-                          const sections = document.querySelectorAll('section');
-                          if (sections.length > 1) {
-                            sections[1].scrollIntoView({ behavior: 'smooth' });
-                          }
-                        }}
+                      <a
+                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        href="#mind"
                       >
                         <div className="text-sm font-medium leading-none">Mind</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                           Mental exercises, meditation guides, and personal journaling
                         </p>
-                      </button>
+                      </a>
                     </NavigationMenuLink>
                   </li>
                   <li>
                     <NavigationMenuLink asChild>
-                      <button
-                        className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        onClick={() => {
-                          const sections = document.querySelectorAll('section');
-                          if (sections.length > 1) {
-                            sections[1].scrollIntoView({ behavior: 'smooth' });
-                          }
-                        }}
+                      <a
+                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        href="#body"
                       >
                         <div className="text-sm font-medium leading-none">Body</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                           Workout routines, nutrition tracking, and health scheduling tools
                         </p>
-                      </button>
+                      </a>
                     </NavigationMenuLink>
                   </li>
                   <li>
                     <NavigationMenuLink asChild>
-                      <button
-                        className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        onClick={() => {
-                          const sections = document.querySelectorAll('section');
-                          if (sections.length > 1) {
-                            sections[1].scrollIntoView({ behavior: 'smooth' });
-                          }
-                        }}
+                      <a
+                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        href="#soul"
                       >
                         <div className="text-sm font-medium leading-none">Soul</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                           Inspirational content, spiritual exercises, and community connections
                         </p>
-                      </button>
+                      </a>
                     </NavigationMenuLink>
                   </li>
                 </ul>
@@ -199,18 +157,18 @@ const Header = () => {
                 <ul className="grid gap-3 p-4 w-[400px]">
                   <li>
                     <NavigationMenuLink asChild>
-                      <button
-                        className="flex w-full select-none items-center gap-3 rounded-md p-3 text-sm leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        onClick={() => scrollToSection('contact')}
+                      <a
+                        className="flex select-none items-center gap-3 rounded-md p-3 text-sm leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        href="#contact"
                       >
                         <Mail className="h-5 w-5 text-primary" />
-                        <div className="text-left">
+                        <div>
                           <p className="text-sm font-medium leading-none">Contact</p>
                           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                             Get in touch with our support team
                           </p>
                         </div>
-                      </button>
+                      </a>
                     </NavigationMenuLink>
                   </li>
                 </ul>
