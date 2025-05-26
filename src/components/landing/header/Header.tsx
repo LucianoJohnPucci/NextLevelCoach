@@ -50,7 +50,12 @@ const Header = () => {
                     <NavigationMenuLink asChild>
                       <button
                         className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/10 to-primary/5 p-6 no-underline outline-none focus:shadow-md hover:bg-gradient-to-b hover:from-primary/15 hover:to-primary/10 transition-colors"
-                        onClick={() => scrollToSection('hero')}
+                        onClick={() => {
+                          const element = document.querySelector('section');
+                          if (element) {
+                            element.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
                       >
                         <Sparkles className="h-6 w-6 text-primary" />
                         <div className="mb-2 mt-4 text-lg font-medium">
@@ -66,7 +71,12 @@ const Header = () => {
                     <NavigationMenuLink asChild>
                       <button
                         className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        onClick={() => scrollToSection('methodology')}
+                        onClick={() => {
+                          const sections = document.querySelectorAll('section');
+                          if (sections.length > 2) {
+                            sections[2].scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
                       >
                         <div className="text-sm font-medium leading-none">Philosophy</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
@@ -79,7 +89,12 @@ const Header = () => {
                     <NavigationMenuLink asChild>
                       <button
                         className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        onClick={() => scrollToSection('testimonials')}
+                        onClick={() => {
+                          const sections = document.querySelectorAll('section');
+                          if (sections.length > 3) {
+                            sections[3].scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
                       >
                         <div className="text-sm font-medium leading-none">Our Team</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
@@ -102,7 +117,12 @@ const Header = () => {
                     <NavigationMenuLink asChild>
                       <button
                         className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/10 to-primary/5 p-6 no-underline outline-none focus:shadow-md hover:bg-gradient-to-b hover:from-primary/15 hover:to-primary/10 transition-colors"
-                        onClick={() => scrollToSection('features')}
+                        onClick={() => {
+                          const sections = document.querySelectorAll('section');
+                          if (sections.length > 1) {
+                            sections[1].scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
                       >
                         <div className="mb-2 mt-4 text-lg font-medium">
                           Powerful Features
@@ -117,7 +137,12 @@ const Header = () => {
                     <NavigationMenuLink asChild>
                       <button
                         className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        onClick={() => scrollToSection('features')}
+                        onClick={() => {
+                          const sections = document.querySelectorAll('section');
+                          if (sections.length > 1) {
+                            sections[1].scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
                       >
                         <div className="text-sm font-medium leading-none">Mind</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
@@ -130,7 +155,12 @@ const Header = () => {
                     <NavigationMenuLink asChild>
                       <button
                         className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        onClick={() => scrollToSection('features')}
+                        onClick={() => {
+                          const sections = document.querySelectorAll('section');
+                          if (sections.length > 1) {
+                            sections[1].scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
                       >
                         <div className="text-sm font-medium leading-none">Body</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
@@ -143,7 +173,12 @@ const Header = () => {
                     <NavigationMenuLink asChild>
                       <button
                         className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        onClick={() => scrollToSection('features')}
+                        onClick={() => {
+                          const sections = document.querySelectorAll('section');
+                          if (sections.length > 1) {
+                            sections[1].scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
                       >
                         <div className="text-sm font-medium leading-none">Soul</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
