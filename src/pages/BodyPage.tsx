@@ -12,10 +12,10 @@ import { Workout } from "@/components/body/WorkoutsSection";
 import { Meal } from "@/components/body/NutritionSection";
 
 const BodyPage = () => {
-  const [sitUpsCount, setSitUpsCount] = useState(0);
-  const [pushUpsCount, setPushUpsCount] = useState(0);
-  const [benchPressCount, setBenchPressCount] = useState(0);
-  const [armCurlsCount, setArmCurlsCount] = useState(0);
+  const [yogaCount, setYogaCount] = useState(0);
+  const [cardioCount, setCardioCount] = useState(0);
+  const [strengthCount, setStrengthCount] = useState(0);
+  const [stretchCount, setStretchCount] = useState(0);
   
   const [nutritionStats, setNutritionStats] = useState({
     calories: { value: 0, total: 2000 },
@@ -83,28 +83,28 @@ const BodyPage = () => {
     }
   ];
   
-  const handleSitUpsClick = () => {
-    const newCount = sitUpsCount + 1;
-    setSitUpsCount(newCount);
-    toast.success("Sit-ups set recorded!");
+  const handleYogaClick = () => {
+    const newCount = yogaCount + 1;
+    setYogaCount(newCount);
+    toast.success("Yoga session recorded!");
   };
   
-  const handlePushUpsClick = () => {
-    const newCount = pushUpsCount + 1;
-    setPushUpsCount(newCount);
-    toast.success("Push-ups set recorded!");
+  const handleCardioClick = () => {
+    const newCount = cardioCount + 1;
+    setCardioCount(newCount);
+    toast.success("Cardio workout recorded!");
   };
   
-  const handleBenchPressClick = () => {
-    const newCount = benchPressCount + 1;
-    setBenchPressCount(newCount);
-    toast.success("Bench press set recorded!");
+  const handleStrengthClick = () => {
+    const newCount = strengthCount + 1;
+    setStrengthCount(newCount);
+    toast.success("Strength training recorded!");
   };
   
-  const handleArmCurlsClick = () => {
-    const newCount = armCurlsCount + 1;
-    setArmCurlsCount(newCount);
-    toast.success("Arm curls set recorded!");
+  const handleStretchClick = () => {
+    const newCount = stretchCount + 1;
+    setStretchCount(newCount);
+    toast.success("Stretching session recorded!");
   };
   
   const handleAddWorkout = (minutes: number) => {
@@ -156,7 +156,7 @@ const BodyPage = () => {
       >
         <h1 className="text-3xl font-bold tracking-tight">Body</h1>
         <p className="text-muted-foreground">
-          Track your daily gym exercises and nutrition.
+          Daily check-ins for physical health and wellness.
         </p>
       </motion.div>
       
@@ -166,29 +166,29 @@ const BodyPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleSitUpsClick}>
+          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleYogaClick}>
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto mb-4 w-fit rounded-lg bg-orange-100 p-3 text-orange-600">
+              <div className="mx-auto mb-4 w-fit rounded-lg bg-purple-100 p-3 text-purple-600">
                 <Activity className="h-8 w-8" />
               </div>
-              <CardTitle className="text-xl">Sit-ups</CardTitle>
+              <CardTitle className="text-xl">Yoga</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-4xl font-bold text-orange-600 mb-2">
-                {sitUpsCount}
+              <div className="text-4xl font-bold text-purple-600 mb-2">
+                {yogaCount}
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Sets completed today
+                Sessions completed today
               </p>
               <Button 
                 className="w-full" 
                 variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleSitUpsClick();
+                  handleYogaClick();
                 }}
               >
-                + Add Set
+                + Add Session
               </Button>
             </CardContent>
           </Card>
@@ -199,29 +199,29 @@ const BodyPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handlePushUpsClick}>
+          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleCardioClick}>
             <CardHeader className="text-center pb-4">
               <div className="mx-auto mb-4 w-fit rounded-lg bg-red-100 p-3 text-red-600">
                 <Zap className="h-8 w-8" />
               </div>
-              <CardTitle className="text-xl">Push-ups</CardTitle>
+              <CardTitle className="text-xl">Cardio</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <div className="text-4xl font-bold text-red-600 mb-2">
-                {pushUpsCount}
+                {cardioCount}
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Sets completed today
+                Workouts completed today
               </p>
               <Button 
                 className="w-full" 
                 variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handlePushUpsClick();
+                  handleCardioClick();
                 }}
               >
-                + Add Set
+                + Add Workout
               </Button>
             </CardContent>
           </Card>
@@ -232,29 +232,29 @@ const BodyPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleBenchPressClick}>
+          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleStrengthClick}>
             <CardHeader className="text-center pb-4">
               <div className="mx-auto mb-4 w-fit rounded-lg bg-blue-100 p-3 text-blue-600">
                 <Dumbbell className="h-8 w-8" />
               </div>
-              <CardTitle className="text-xl">Bench Press</CardTitle>
+              <CardTitle className="text-xl">Strength Training</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <div className="text-4xl font-bold text-blue-600 mb-2">
-                {benchPressCount}
+                {strengthCount}
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Sets completed today
+                Sessions completed today
               </p>
               <Button 
                 className="w-full" 
                 variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleBenchPressClick();
+                  handleStrengthClick();
                 }}
               >
-                + Add Set
+                + Add Session
               </Button>
             </CardContent>
           </Card>
@@ -265,29 +265,29 @@ const BodyPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleArmCurlsClick}>
+          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleStretchClick}>
             <CardHeader className="text-center pb-4">
               <div className="mx-auto mb-4 w-fit rounded-lg bg-green-100 p-3 text-green-600">
-                <Heart className="h-8 w-8" />
+                <StretchHorizontal className="h-8 w-8" />
               </div>
-              <CardTitle className="text-xl">Arm Curls</CardTitle>
+              <CardTitle className="text-xl">Stretch</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <div className="text-4xl font-bold text-green-600 mb-2">
-                {armCurlsCount}
+                {stretchCount}
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Sets completed today
+                Sessions completed today
               </p>
               <Button 
                 className="w-full" 
                 variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleArmCurlsClick();
+                  handleStretchClick();
                 }}
               >
-                + Add Set
+                + Add Session
               </Button>
             </CardContent>
           </Card>
