@@ -1,98 +1,47 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Brain, Timer, Calendar, BarChart2 } from "lucide-react";
+import { BookOpen, GraduationCap, PenTool } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
-import { useMeditationSessions } from "@/services/meditationService";
-import { useMindMetrics } from "@/services/mindMetricsService";
-import MindMetricsCard from "@/components/mind/MindMetricsCard";
-import FeatureCard from "@/components/mind/FeatureCard";
-import MeditationSessionsList from "@/components/mind/MeditationSessionsList";
-import DailyQuote from "@/components/mind/DailyQuote";
-import type { MeditationSession } from "@/services/meditationService";
 
 const MindPage = () => {
   const { user } = useAuth();
-  const { 
-    sessions: meditations, 
-    isLoading: isMeditationsLoading,
-    isError: isMeditationsError,
-    toggleSession,
-    isToggling
-  } = useMeditationSessions();
-
-  const {
-    weeklyMinutes,
-    currentStreak,
-    focusScore,
-    isLoading: isMetricsLoading,
-    recordSession,
-    isRecording
-  } = useMindMetrics();
+  const [readCount, setReadCount] = useState(0);
+  const [learnCount, setLearnCount] = useState(0);
+  const [journalCount, setJournalCount] = useState(0);
   
-  const handlePlayMeditation = (session: MeditationSession) => {
-    if (!user) {
-      toast.info(`Playing ${session.title}`, {
-        description: "This feature is under development"
-      });
-      return;
+  const handleReadClick = () => {
+    const newCount = readCount + 1;
+    setReadCount(newCount);
+    if (user) {
+      toast.success("Reading session recorded!");
+    } else {
+      toast.error("Please log in to save your progress");
     }
-
-    // Demo: Record a meditation session (in a real app, we'd time the actual session)
-    const minutes = parseInt(session.duration.split(' ')[0]);
-    
-    if (isNaN(minutes)) {
-      toast.info(`Playing ${session.title}`, {
-        description: "Session started"
-      });
-      return;
-    }
-    
-    recordSession({ minutes }, {
-      onSuccess: () => {
-        toast.success(`Meditation completed`, {
-          description: `${minutes} minutes added to your progress`
-        });
-      },
-      onError: (error) => {
-        toast.error("Failed to record session", {
-          description: error.message
-        });
-      }
-    });
-  };
-
-  const handleToggleFavorite = (session: MeditationSession, enabled: boolean) => {
-    if (!user) {
-      toast.error("You must be logged in to save sessions", {
-        description: "Please sign in to save your favorite meditation sessions."
-      });
-      return;
-    }
-
-    toggleSession({ 
-      sessionId: session.id, 
-      isEnabled: enabled 
-    }, {
-      onSuccess: () => {
-        toast.success(enabled ? "Added to favorites" : "Removed from favorites", {
-          description: enabled 
-            ? `${session.title} has been added to your favorites`
-            : `${session.title} has been removed from your favorites`
-        });
-      },
-      onError: (error) => {
-        toast.error("Failed to update session", {
-          description: error.message
-        });
-      }
-    });
   };
   
-  // Calculate weekly goal percentage
-  const weeklyGoalMinutes = 200;
-  const weeklyProgressPercentage = Math.min(Math.round((weeklyMinutes / weeklyGoalMinutes) * 100), 100);
+  const handleLearnClick = () => {
+    const newCount = learnCount + 1;
+    setLearnCount(newCount);
+    if (user) {
+      toast.success("Learning session recorded!");
+    } else {
+      toast.error("Please log in to save your progress");
+    }
+  };
+  
+  const handleJournalClick = () => {
+    const newCount = journalCount + 1;
+    setJournalCount(newCount);
+    if (user) {
+      toast.success("Journal entry recorded!");
+    } else {
+      toast.error("Please log in to save your progress");
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -104,71 +53,124 @@ const MindPage = () => {
       >
         <h1 className="text-3xl font-bold tracking-tight">Mind</h1>
         <p className="text-muted-foreground">
-          Tools and exercises to nurture your mental wellbeing.
+          Daily check-ins for mental growth and learning.
         </p>
       </motion.div>
       
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <MindMetricsCard
-          title="Meditation Progress"
-          icon={<Brain className="h-4 w-4" />}
-          value={weeklyMinutes}
-          unit="Minutes"
-          progress={weeklyProgressPercentage}
-          description={`${weeklyProgressPercentage}% of weekly goal (${weeklyGoalMinutes})`}
-          isLoading={isMetricsLoading}
-          delay={0.1}
-        />
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3 max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleReadClick}>
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto mb-4 w-fit rounded-lg bg-blue-100 p-3 text-blue-600">
+                <BookOpen className="h-8 w-8" />
+              </div>
+              <CardTitle className="text-xl">Read</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="text-4xl font-bold text-blue-600 mb-2">
+                {readCount}
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Reading sessions today
+              </p>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleReadClick();
+                }}
+              >
+                + Add Reading
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
         
-        <MindMetricsCard
-          title="Current Streak"
-          icon={<Calendar className="h-4 w-4" />}
-          value={currentStreak}
-          unit="Days"
-          progress={Math.min(currentStreak * 10, 100)}
-          description={`Consistent meditation for ${currentStreak} days`}
-          isLoading={isMetricsLoading}
-          delay={0.2}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleLearnClick}>
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto mb-4 w-fit rounded-lg bg-green-100 p-3 text-green-600">
+                <GraduationCap className="h-8 w-8" />
+              </div>
+              <CardTitle className="text-xl">Learned</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="text-4xl font-bold text-green-600 mb-2">
+                {learnCount}
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Learning sessions today
+              </p>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLearnClick();
+                }}
+              >
+                + Add Learning
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
         
-        <MindMetricsCard
-          title="Focus Score"
-          icon={<Timer className="h-4 w-4" />}
-          value={focusScore}
-          unit="Score"
-          progress={focusScore}
-          description="Based on recent sessions"
-          isLoading={isMetricsLoading}
-          delay={0.3}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleJournalClick}>
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto mb-4 w-fit rounded-lg bg-purple-100 p-3 text-purple-600">
+                <PenTool className="h-8 w-8" />
+              </div>
+              <CardTitle className="text-xl">Journal</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="text-4xl font-bold text-purple-600 mb-2">
+                {journalCount}
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Journal entries today
+              </p>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleJournalClick();
+                }}
+              >
+                + Add Entry
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
       
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <FeatureCard
-          title="Guided Meditation"
-          description="Follow along with expert-led meditation sessions."
-          icon={Brain}
-          action="Explore Sessions"
-          delay={0.1}
-        />
-        
-        <div className="md:col-span-2">
-          <MeditationSessionsList
-            sessions={meditations}
-            isAuthenticated={!!user}
-            isLoading={isMeditationsLoading}
-            isError={isMeditationsError}
-            isToggling={isToggling}
-            onToggleFavorite={handleToggleFavorite}
-            onPlayMeditation={handlePlayMeditation}
-          />
+      <motion.div
+        className="max-w-2xl mx-auto text-center mt-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <div className="rounded-lg bg-primary/5 p-6">
+          <h3 className="text-lg font-semibold mb-2">Today's Mind Progress</h3>
+          <p className="text-muted-foreground">
+            Keep nurturing your mental growth through daily reading, learning, and journaling.
+          </p>
         </div>
-      </div>
-      
-      <DailyQuote
-        quote="The mind that is anxious about future events is miserable."
-        author="Seneca"
-      />
+      </motion.div>
     </div>
   );
 };
