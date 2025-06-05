@@ -13,6 +13,7 @@ export interface WorkoutItemProps {
   index: number;
   onAdd: () => void;
   onToggleFavorite: () => void;
+  buttonLabel?: string;
 }
 
 export const WorkoutItem = ({
@@ -23,13 +24,9 @@ export const WorkoutItem = ({
   favorite,
   index,
   onAdd,
-  onToggleFavorite
+  onToggleFavorite,
+  buttonLabel = "Add"
 }: WorkoutItemProps) => {
-  const getMinutes = () => {
-    const match = duration.match(/(\d+)/);
-    return match ? parseInt(match[0], 10) : 0;
-  };
-  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -67,7 +64,7 @@ export const WorkoutItem = ({
         </Toggle>
         <Button size="default" className="flex items-center gap-2" onClick={onAdd}>
           <Plus className="h-4 w-4" />
-          Add
+          {buttonLabel}
         </Button>
       </div>
     </motion.div>

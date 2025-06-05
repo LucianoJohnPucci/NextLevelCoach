@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { Activity, Utensils, Calendar, Dumbbell, Heart, Zap, StretchHorizontal } from "lucide-react";
@@ -27,31 +26,31 @@ const BodyPage = () => {
   
   const initialWorkouts: Workout[] = [
     {
-      title: "Morning Yoga",
-      category: "Flexibility",
-      duration: "20 min",
-      difficulty: "Easy" as const,
+      title: "Leg Day",
+      category: "Lower Body",
+      duration: "60 min",
+      difficulty: "Hard" as const,
       favorite: true
     },
     {
-      title: "HIIT Cardio",
-      category: "Cardio",
-      duration: "30 min",
-      difficulty: "Hard" as const,
+      title: "Chest Day",
+      category: "Upper Body",
+      duration: "45 min",
+      difficulty: "Medium" as const,
       favorite: false
     },
     {
-      title: "Strength Training",
-      category: "Strength",
-      duration: "45 min",
-      difficulty: "Medium" as const,
+      title: "Back Day",
+      category: "Upper Body",
+      duration: "50 min",
+      difficulty: "Hard" as const,
       favorite: true
     },
     {
-      title: "Evening Stretch",
-      category: "Recovery",
-      duration: "15 min",
-      difficulty: "Easy" as const,
+      title: "Arm Day",
+      category: "Upper Body",
+      duration: "40 min",
+      difficulty: "Medium" as const,
       favorite: false
     }
   ];
