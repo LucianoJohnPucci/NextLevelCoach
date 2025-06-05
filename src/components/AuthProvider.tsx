@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
+import { useNavigate } from "react-router-dom";
 
 type AuthContextType = {
   session: Session | null;
@@ -26,6 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getSession = async () => {
@@ -123,6 +125,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const isEmailVerified = session.user.email_confirmed_at !== null;
           setIsVerified(isEmailVerified);
           console.log("[Auth Provider] Updated email verification status:", isEmailVerified);
+          
+          // Redirect authenticated users to dashboard if they're on the home page
+          if (window.location.pathname === "/") {
+            console.log("[Auth Provider] Redirecting authenticated user to dashboard");
+            navigate("/dashboard");
+          }
         } else {
           setUser(null);
           setIsVerified(false);
@@ -135,11 +143,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      // Redirect to auth page after sign out
+      navigate("/auth");
     } catch (error) {
       console.error("Error signing out:", error);
     }

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface SignupFormProps {
   onSuccess?: () => void;
@@ -22,6 +23,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
   const [emailSent, setEmailSent] = useState(false);
   const [formError, setFormError] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,8 +70,12 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
         console.log("Email confirmation is disabled in Supabase. User is already confirmed.");
         toast({
           title: "Account created!",
-          description: "Email confirmation is disabled. You can now log in.",
+          description: "Welcome! Redirecting to your dashboard.",
         });
+        
+        // Redirect to dashboard after successful signup (if email confirmation is disabled)
+        navigate("/dashboard");
+        
         if (onSuccess) onSuccess();
       } else {
         // Email confirmation is enabled, show the verification message

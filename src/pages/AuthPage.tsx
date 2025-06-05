@@ -112,8 +112,8 @@ const AuthPage = () => {
           const { data } = await supabase.auth.getSession();
           
           if (data.session) {
-            console.log("[Auth] User is authenticated, redirecting to home");
-            navigate("/");
+            console.log("[Auth] User is authenticated, redirecting to dashboard");
+            navigate("/dashboard");
           } else {
             console.log("[Auth] No active session, showing login");
             setIsAuthCheckComplete(true);
@@ -178,8 +178,8 @@ const AuthPage = () => {
         
         // Handle user login events, but not during password reset
         if (event === "SIGNED_IN" && !recoveryDetectedRef.current && !resetPasswordOpen) {
-          console.log("[Auth] User signed in, redirecting to home");
-          navigate("/");
+          console.log("[Auth] User signed in, redirecting to dashboard");
+          navigate("/dashboard");
         }
       }
     );
@@ -265,7 +265,7 @@ const AuthPage = () => {
   };
 
   const handleAuthSuccess = () => {
-    navigate("/");
+    navigate("/dashboard");
   };
 
   // Handle manual dialog closing

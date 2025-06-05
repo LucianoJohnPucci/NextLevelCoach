@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import ForgotPasswordDialog from "./ForgotPasswordDialog";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -18,6 +19,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [password, setPassword] = useState("");
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +47,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         title: "Welcome back!",
         description: "You've successfully signed in",
       });
+      
+      // Redirect to dashboard after successful login
+      navigate("/dashboard");
       
       if (onSuccess) onSuccess();
       
