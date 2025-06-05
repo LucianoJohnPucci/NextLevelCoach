@@ -33,8 +33,8 @@ const App = () => {
       <ThemeProvider>
         <TooltipProvider>
           <SidebarProvider>
-            <AuthProvider>
-              <BrowserRouter>
+            <BrowserRouter>
+              <AuthProvider>
                 <Toaster />
                 <Sonner />
                 <Routes>
@@ -63,8 +63,8 @@ const App = () => {
                     <Route path="*" element={<NotFound />} />
                   </Route>
                 </Routes>
-              </BrowserRouter>
-            </AuthProvider>
+              </AuthProvider>
+            </BrowserRouter>
           </SidebarProvider>
         </TooltipProvider>
       </ThemeProvider>
