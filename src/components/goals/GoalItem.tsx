@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Trash2, CalendarIcon, Target, Calendar, CalendarCheck } from "lucide-react";
 import { format } from "date-fns";
-import { Goal } from "@/pages/GoalsPage";
+import { Goal } from "@/types/goals";
 import {
   Dialog,
   DialogContent,

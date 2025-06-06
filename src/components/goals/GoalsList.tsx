@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { Goal } from "@/pages/GoalsPage";
+import { Goal } from "@/types/goals";
 import GoalItem from "./GoalItem";
 import { CardContent } from "@/components/ui/card";
 

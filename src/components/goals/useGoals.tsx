@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { Goal } from "@/pages/GoalsPage";
+import { Goal } from "@/types/goals";
 
 export const useGoals = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
