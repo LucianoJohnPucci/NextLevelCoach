@@ -810,6 +810,34 @@ export type Database = {
         Args: { p_id: string }
         Returns: undefined
       }
+      get_habit_streak_history: {
+        Args: { p_habit_id: string; p_days?: number }
+        Returns: {
+          date: string
+          completed: boolean
+          avoided_old_habit: boolean
+          practiced_new_habit: boolean
+          notes: string
+        }[]
+      }
+      get_habit_tracking_with_streaks: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          habit_id: string
+          habit_title: string
+          habit_frequency: string
+          habit_old_habit: string
+          habit_new_habit: string
+          habit_rating: number
+          current_streak: number
+          total_completions: number
+          completion_rate: number
+          last_completed_date: string
+          today_completed: boolean
+          today_avoided_old_habit: boolean
+          today_practiced_new_habit: boolean
+        }[]
+      }
       get_habits: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -822,6 +850,17 @@ export type Database = {
           created_at: string
           user_id: string
         }[]
+      }
+      track_habit_progress: {
+        Args: {
+          p_habit_id: string
+          p_date?: string
+          p_completed?: boolean
+          p_avoided_old_habit?: boolean
+          p_practiced_new_habit?: boolean
+          p_notes?: string
+        }
+        Returns: undefined
       }
       update_habit: {
         Args: {

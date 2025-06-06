@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Habit, HabitFrequency, HabitUpdateData } from "../types/habitTypes";
 
@@ -89,28 +90,34 @@ export const updateHabitInSupabase = async (id: string, updates: HabitUpdateData
  */
 export const fetchHabitsWithTracking = async (): Promise<any[]> => {
   const { data, error } = await supabase
-    .rpc('get_habit_tracking_with_streaks') as any;
+    .from('habits')
+    .select(`
+      *,
+      habit_tracking!inner(*)
+    `)
+    .eq('habit_tracking.date', new Date().toISOString().split('T')[0]);
 
   if (error) {
     console.error("Error fetching habits with tracking:", error);
-    throw error;
+    // Fallback to regular habits fetch if the complex query fails
+    return await fetchHabitsFromSupabase();
   }
 
   if (!data) return [];
 
   return data.map((habit: any) => ({
-    id: habit.habit_id,
-    title: habit.habit_title,
-    old_habit: habit.habit_old_habit || undefined,
-    new_habit: habit.habit_new_habit || undefined,
-    frequency: habit.habit_frequency as HabitFrequency,
-    rating: habit.habit_rating || undefined,
-    created_at: new Date(),
-    current_streak: habit.current_streak || 0,
-    today_completed: habit.today_completed || false,
-    today_avoided_old_habit: habit.today_avoided_old_habit,
-    today_practiced_new_habit: habit.today_practiced_new_habit,
-    completion_rate: habit.completion_rate || 0,
+    id: habit.id,
+    title: habit.title,
+    old_habit: habit.old_habit || undefined,
+    new_habit: habit.new_habit || undefined,
+    frequency: habit.frequency as HabitFrequency,
+    rating: habit.rating || undefined,
+    created_at: new Date(habit.created_at),
+    current_streak: 0, // We'll calculate this on the frontend for now
+    today_completed: habit.habit_tracking?.[0]?.completed || false,
+    today_avoided_old_habit: habit.habit_tracking?.[0]?.avoided_old_habit,
+    today_practiced_new_habit: habit.habit_tracking?.[0]?.practiced_new_habit,
+    completion_rate: 0, // We'll calculate this on the frontend for now
   }));
 };
 
@@ -125,16 +132,19 @@ export const trackHabitProgress = async (
   notes?: string,
   date?: Date
 ): Promise<void> => {
-  const trackingDate = date ? date.toISOString().split('T')[0] : undefined;
+  const trackingDate = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
   
-  const { error } = await supabase.rpc('track_habit_progress', {
-    p_habit_id: habitId,
-    p_date: trackingDate,
-    p_completed: completed,
-    p_avoided_old_habit: avoidedOldHabit,
-    p_practiced_new_habit: practicedNewHabit,
-    p_notes: notes
-  }) as any;
+  const { error } = await supabase
+    .from('habit_tracking')
+    .upsert({
+      habit_id: habitId,
+      date: trackingDate,
+      completed: completed,
+      avoided_old_habit: avoidedOldHabit,
+      practiced_new_habit: practicedNewHabit,
+      notes: notes,
+      user_id: (await supabase.auth.getUser()).data.user?.id
+    });
 
   if (error) {
     console.error("Error tracking habit progress:", error);
@@ -149,10 +159,15 @@ export const getHabitStreakHistory = async (
   habitId: string,
   days: number = 30
 ): Promise<any[]> => {
-  const { data, error } = await supabase.rpc('get_habit_streak_history', {
-    p_habit_id: habitId,
-    p_days: days
-  }) as any;
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+  
+  const { data, error } = await supabase
+    .from('habit_tracking')
+    .select('*')
+    .eq('habit_id', habitId)
+    .gte('date', startDate.toISOString().split('T')[0])
+    .order('date', { ascending: false });
 
   if (error) {
     console.error("Error fetching habit streak history:", error);
@@ -174,9 +189,6 @@ export const getDefaultHabits = (): Habit[] => {
   ];
 };
 
-/**
- * Load habits from localStorage
- */
 export const loadHabitsFromLocalStorage = (): Habit[] | null => {
   const savedHabits = localStorage.getItem("userHabits");
   if (!savedHabits) return null;
@@ -193,9 +205,6 @@ export const loadHabitsFromLocalStorage = (): Habit[] | null => {
   }
 };
 
-/**
- * Save habits to localStorage
- */
 export const saveHabitsToLocalStorage = (habits: Habit[]): void => {
   localStorage.setItem("userHabits", JSON.stringify(habits));
 };
