@@ -207,6 +207,45 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_goals: {
+        Row: {
+          category: string
+          completed: boolean
+          created_at: string
+          date: string
+          duration: number
+          id: string
+          start_time: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          completed?: boolean
+          created_at?: string
+          date?: string
+          duration?: number
+          id?: string
+          start_time?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          completed?: boolean
+          created_at?: string
+          date?: string
+          duration?: number
+          id?: string
+          start_time?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
           created_at: string | null
@@ -242,6 +281,53 @@ export type Database = {
           why?: string | null
         }
         Relationships: []
+      }
+      habit_tracking: {
+        Row: {
+          avoided_old_habit: boolean | null
+          completed: boolean
+          created_at: string
+          date: string
+          habit_id: string
+          id: string
+          notes: string | null
+          practiced_new_habit: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avoided_old_habit?: boolean | null
+          completed?: boolean
+          created_at?: string
+          date?: string
+          habit_id: string
+          id?: string
+          notes?: string | null
+          practiced_new_habit?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avoided_old_habit?: boolean | null
+          completed?: boolean
+          created_at?: string
+          date?: string
+          habit_id?: string
+          id?: string
+          notes?: string | null
+          practiced_new_habit?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_tracking_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       habits: {
         Row: {

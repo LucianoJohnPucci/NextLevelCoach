@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Habit, HabitFrequency, HabitUpdateData } from "../types/habitTypes";
 
@@ -83,6 +82,84 @@ export const updateHabitInSupabase = async (id: string, updates: HabitUpdateData
     console.error("Error updating habit:", error);
     throw error;
   }
+};
+
+/**
+ * Get habits with tracking data and streaks
+ */
+export const fetchHabitsWithTracking = async (): Promise<any[]> => {
+  const { data, error } = await supabase
+    .rpc('get_habit_tracking_with_streaks') as any;
+
+  if (error) {
+    console.error("Error fetching habits with tracking:", error);
+    throw error;
+  }
+
+  if (!data) return [];
+
+  return data.map((habit: any) => ({
+    id: habit.habit_id,
+    title: habit.habit_title,
+    old_habit: habit.habit_old_habit || undefined,
+    new_habit: habit.habit_new_habit || undefined,
+    frequency: habit.habit_frequency as HabitFrequency,
+    rating: habit.habit_rating || undefined,
+    created_at: new Date(),
+    current_streak: habit.current_streak || 0,
+    today_completed: habit.today_completed || false,
+    today_avoided_old_habit: habit.today_avoided_old_habit,
+    today_practiced_new_habit: habit.today_practiced_new_habit,
+    completion_rate: habit.completion_rate || 0,
+  }));
+};
+
+/**
+ * Track habit progress for a specific date
+ */
+export const trackHabitProgress = async (
+  habitId: string,
+  completed: boolean,
+  avoidedOldHabit?: boolean,
+  practicedNewHabit?: boolean,
+  notes?: string,
+  date?: Date
+): Promise<void> => {
+  const trackingDate = date ? date.toISOString().split('T')[0] : undefined;
+  
+  const { error } = await supabase.rpc('track_habit_progress', {
+    p_habit_id: habitId,
+    p_date: trackingDate,
+    p_completed: completed,
+    p_avoided_old_habit: avoidedOldHabit,
+    p_practiced_new_habit: practicedNewHabit,
+    p_notes: notes
+  }) as any;
+
+  if (error) {
+    console.error("Error tracking habit progress:", error);
+    throw error;
+  }
+};
+
+/**
+ * Get habit streak history
+ */
+export const getHabitStreakHistory = async (
+  habitId: string,
+  days: number = 30
+): Promise<any[]> => {
+  const { data, error } = await supabase.rpc('get_habit_streak_history', {
+    p_habit_id: habitId,
+    p_days: days
+  }) as any;
+
+  if (error) {
+    console.error("Error fetching habit streak history:", error);
+    throw error;
+  }
+
+  return data || [];
 };
 
 /**

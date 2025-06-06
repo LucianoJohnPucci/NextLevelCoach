@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Target, Clock, Zap } from "lucide-react";
@@ -48,7 +47,8 @@ const GoalsPage = () => {
     isLoading: habitsLoading,
     addHabit,
     removeHabit,
-    updateHabit
+    updateHabit,
+    trackProgress: trackHabitProgress
   } = useHabits();
 
   const handleAddGoal = async () => {
@@ -145,13 +145,14 @@ const GoalsPage = () => {
             <Zap className="h-5 w-5 text-primary" />
             <CardTitle>Habit Transformation</CardTitle>
           </div>
-          <CardDescription>Replace bad habits with good ones and track your progress</CardDescription>
+          <CardDescription>Replace bad habits with good ones and track your progress with streaks</CardDescription>
         </CardHeader>
         <HabitsList 
           habits={habits}
           onAddHabit={() => setOpenHabitDialog(true)}
           onEditHabit={handleEditHabit}
           onDeleteHabit={removeHabit}
+          onTrackProgress={trackHabitProgress}
         />
       </Card>
 

@@ -7,13 +7,20 @@ import HabitItem from "./HabitItem";
 import { Habit } from "./hooks";
 
 interface HabitsListProps {
-  habits: Habit[];
+  habits: any[];
   onAddHabit: () => void;
   onEditHabit: (habit: Habit) => void;
   onDeleteHabit: (id: string) => void;
+  onTrackProgress?: (habitId: string, completed: boolean, avoidedOld?: boolean, practicedNew?: boolean, notes?: string) => void;
 }
 
-const HabitsList = ({ habits, onAddHabit, onEditHabit, onDeleteHabit }: HabitsListProps) => {
+const HabitsList = ({ 
+  habits, 
+  onAddHabit, 
+  onEditHabit, 
+  onDeleteHabit,
+  onTrackProgress 
+}: HabitsListProps) => {
   return (
     <CardContent className="space-y-6">
       <div className="space-y-4">
@@ -22,9 +29,16 @@ const HabitsList = ({ habits, onAddHabit, onEditHabit, onDeleteHabit }: HabitsLi
             key={habit.id} 
             habit={habit} 
             onEdit={onEditHabit} 
-            onDelete={onDeleteHabit} 
+            onDelete={onDeleteHabit}
+            onTrackProgress={onTrackProgress}
           />
         ))}
+        
+        {habits.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <p>No habits created yet. Start building positive habits today!</p>
+          </div>
+        )}
       </div>
       
       <Button className="w-full gap-2" onClick={onAddHabit}>
