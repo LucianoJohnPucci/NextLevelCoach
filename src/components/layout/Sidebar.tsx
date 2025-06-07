@@ -112,7 +112,7 @@ const Sidebar = () => {
         </NavItem>
         
         <NavItem to="/notes" icon={BookOpen} onClick={() => close()}>
-          My Notes
+          My Notes & Tasks
         </NavItem>
         
         <NavItem to="/wisdom" icon={MessageCircle} onClick={() => close()}>
