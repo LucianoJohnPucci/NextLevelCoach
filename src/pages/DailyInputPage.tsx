@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
@@ -42,7 +41,6 @@ interface DailyEntry {
   mood: number;
   energy: number;
   emotions: string[];
-  accomplishments: string | null;
   gratitude: string | null;
   challenges: string | null;
 }
@@ -51,7 +49,6 @@ const defaultEntry = {
   mood: [5],
   energy: [5],
   emotions: [] as string[],
-  accomplishments: "",
   gratitude: "",
   challenges: ""
 };
@@ -66,7 +63,6 @@ const DailyInputPage = () => {
   
   const [mood, setMood] = useState<number[]>([5]);
   const [energy, setEnergy] = useState<number[]>([5]);
-  const [accomplishments, setAccomplishments] = useState("");
   const [gratitude, setGratitude] = useState("");
   const [challenges, setChallenges] = useState("");
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
@@ -111,7 +107,6 @@ const DailyInputPage = () => {
         setMood([data.mood]);
         setEnergy([data.energy]);
         setSelectedEmotions(data.emotions || []);
-        setAccomplishments(data.accomplishments || '');
         setGratitude(data.gratitude || '');
         setChallenges(data.challenges || '');
       } else {
@@ -132,7 +127,6 @@ const DailyInputPage = () => {
     setMood(defaultEntry.mood);
     setEnergy(defaultEntry.energy);
     setSelectedEmotions(defaultEntry.emotions);
-    setAccomplishments(defaultEntry.accomplishments);
     setGratitude(defaultEntry.gratitude);
     setChallenges(defaultEntry.challenges);
   };
@@ -189,7 +183,6 @@ const DailyInputPage = () => {
         mood: mood[0],
         energy: energy[0],
         emotions: selectedEmotions,
-        accomplishments,
         gratitude,
         challenges,
         updated_at: new Date().toISOString()
@@ -324,10 +317,9 @@ const DailyInputPage = () => {
       ) : (
         <>
           <Tabs defaultValue="mood" className="w-full" id="daily-input-tabs">
-            <TabsList className="flex flex-col sm:grid sm:grid-cols-3 w-full gap-2 sm:gap-0 h-auto">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="mood" className="px-2 py-2 text-sm">Mood & Energy</TabsTrigger>
               <TabsTrigger value="emotions" className="px-2 py-2 text-sm">Emotions</TabsTrigger>
-              <TabsTrigger value="accomplishments" className="px-2 py-2 text-sm">Accomplishments</TabsTrigger>
             </TabsList>
             
             <TabsContent value="mood" className="mt-6">
@@ -416,31 +408,6 @@ const DailyInputPage = () => {
                         />
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </TabsContent>
-            
-            <TabsContent value="accomplishments" className="mt-6">
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }} 
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Accomplishments</CardTitle>
-                    <CardDescription>
-                      What did you accomplish today, big or small?
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Textarea 
-                      placeholder="Today I..."
-                      className="min-h-[200px] resize-none"
-                      value={accomplishments}
-                      onChange={(e) => setAccomplishments(e.target.value)}
-                    />
                   </CardContent>
                 </Card>
               </motion.div>
