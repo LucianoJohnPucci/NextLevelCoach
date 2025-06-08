@@ -324,11 +324,10 @@ const DailyInputPage = () => {
       ) : (
         <>
           <Tabs defaultValue="mood" className="w-full" id="daily-input-tabs">
-            <TabsList className="flex flex-col sm:grid sm:grid-cols-4 w-full gap-2 sm:gap-0 h-auto">
+            <TabsList className="flex flex-col sm:grid sm:grid-cols-3 w-full gap-2 sm:gap-0 h-auto">
               <TabsTrigger value="mood" className="px-2 py-2 text-sm">Mood & Energy</TabsTrigger>
               <TabsTrigger value="emotions" className="px-2 py-2 text-sm">Emotions</TabsTrigger>
               <TabsTrigger value="accomplishments" className="px-2 py-2 text-sm">Accomplishments</TabsTrigger>
-              <TabsTrigger value="reflections" className="px-2 py-2 text-sm">Reflections</TabsTrigger>
             </TabsList>
             
             <TabsContent value="mood" className="mt-6">
@@ -441,49 +440,6 @@ const DailyInputPage = () => {
                       className="min-h-[200px] resize-none"
                       value={accomplishments}
                       onChange={(e) => setAccomplishments(e.target.value)}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </TabsContent>
-            
-            <TabsContent value="reflections" className="mt-6">
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }} 
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="grid gap-6"
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Gratitude</CardTitle>
-                    <CardDescription>
-                      What are you grateful for today?
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Textarea 
-                      placeholder="I'm grateful for..."
-                      className="min-h-[120px] resize-none"
-                      value={gratitude}
-                      onChange={(e) => setGratitude(e.target.value)}
-                    />
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Challenges</CardTitle>
-                    <CardDescription>
-                      What challenges did you face today?
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Textarea 
-                      placeholder="Today I found it difficult to..."
-                      className="min-h-[120px] resize-none"
-                      value={challenges}
-                      onChange={(e) => setChallenges(e.target.value)}
                     />
                   </CardContent>
                 </Card>

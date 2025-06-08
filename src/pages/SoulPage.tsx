@@ -7,6 +7,7 @@ import { Brain, Heart, Users } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useSoulMetrics } from "@/services/soulMetricsService";
 import { toast } from "sonner";
+import ReflectionsSection from "@/components/soul/ReflectionsSection";
 
 const SoulPage = () => {
   const { user } = useAuth();
@@ -202,6 +203,11 @@ const SoulPage = () => {
           </p>
         </div>
       </motion.div>
+
+      {/* Reflections section moved from Daily Input page */}
+      <div className="max-w-4xl mx-auto">
+        <ReflectionsSection />
+      </div>
     </div>
   );
 };
