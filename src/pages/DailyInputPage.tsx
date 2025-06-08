@@ -1,21 +1,13 @@
+
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
-import { Check, Save, Calendar, ArrowLeft, ArrowRight, Database } from "lucide-react";
-import { format, parseISO, startOfToday, subDays, addDays } from "date-fns";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/AuthProvider";
-import DailyChecklist from "@/components/daily/DailyChecklist";
-import { Label } from "@/components/ui/label";
+import { Calendar, ArrowLeft, ArrowRight } from "lucide-react";
+import { format, startOfToday, subDays, addDays } from "date-fns";
+import { Button } from "@/components/ui/button";
 
 const DailyInputPage = () => {
-  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isToday, setIsToday] = useState(true);
-  const [recordsEnabled, setRecordsEnabled] = useState(true);
   
   useEffect(() => {
     checkIfToday();
@@ -48,14 +40,6 @@ const DailyInputPage = () => {
     }
   };
   
-  const handleRecordsToggle = (enabled: boolean) => {
-    setRecordsEnabled(enabled);
-    toast(enabled ? 'Database records enabled' : 'Database records disabled', {
-      description: enabled ? 'Your entries will be saved to the database.' : 'Your entries will not be saved to the database.',
-      icon: <Database className="h-4 w-4" />,
-    });
-  };
-  
   return (
     <div className="space-y-6">
       <motion.div 
@@ -69,40 +53,6 @@ const DailyInputPage = () => {
           Track your well-being and reflect on your day.
         </p>
       </motion.div>
-      
-      {/* Records Keeping Toggle */}
-      <Card className="mb-6 overflow-hidden">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2">
-            <Database className="h-5 w-5" /> Database Records
-          </CardTitle>
-          <CardDescription>
-            Control whether your daily entries are saved to the database
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-4 space-y-6">
-            <div className="flex items-center justify-center space-x-4 w-full max-w-md">
-              <Label htmlFor="database-toggle" className="text-lg font-medium text-muted-foreground">Off</Label>
-              <Switch 
-                id="database-toggle" 
-                className="scale-150 data-[state=checked]:bg-green-500" 
-                checked={recordsEnabled} 
-                onCheckedChange={handleRecordsToggle} 
-              />
-              <Label htmlFor="database-toggle" className="text-lg font-medium text-muted-foreground">On</Label>
-            </div>
-            <p className="text-center text-sm text-muted-foreground">
-              {recordsEnabled 
-                ? "Database records are enabled. Your entries will be saved." 
-                : "Database records are disabled. Your entries will not be saved."}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Daily Checklist Component */}
-      <DailyChecklist recordsEnabled={recordsEnabled} />
       
       <div className="flex items-center justify-between border-b pb-4">
         <Button

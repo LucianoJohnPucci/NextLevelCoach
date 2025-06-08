@@ -1,19 +1,24 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, CheckSquare } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, CheckSquare, Database } from "lucide-react";
 import { format } from "date-fns";
 import NoteForm from "@/components/notes/NoteForm";
 import NoteItem from "@/components/notes/NoteItem";
 import TaskForm from "@/components/tasks/TaskForm";
 import TaskItem from "@/components/tasks/TaskItem";
+import DailyChecklist from "@/components/daily/DailyChecklist";
 import { useNotes } from "@/components/notes/useNotes";
 import { useTasks } from "@/components/tasks/useTasks";
 import { useAuth } from "@/components/AuthProvider";
 import { Link } from "react-router-dom";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export interface Note {
   id: string;
@@ -27,6 +32,7 @@ const NotesPage = () => {
   const [openNoteForm, setOpenNoteForm] = useState(false);
   const [openTaskForm, setOpenTaskForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [recordsEnabled, setRecordsEnabled] = useState(true);
   const { notes, addNote, deleteNote, loading: notesLoading } = useNotes();
   const { tasks, addTask, deleteTask, toggleTaskComplete, loading: tasksLoading } = useTasks();
   const { user } = useAuth();
@@ -39,6 +45,14 @@ const NotesPage = () => {
   const filteredTasks = tasks.filter((task) =>
     task.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleRecordsToggle = (enabled: boolean) => {
+    setRecordsEnabled(enabled);
+    toast(enabled ? 'Database records enabled' : 'Database records disabled', {
+      description: enabled ? 'Your entries will be saved to the database.' : 'Your entries will not be saved to the database.',
+      icon: <Database className="h-4 w-4" />,
+    });
+  };
   
   return (
     <div className="space-y-8">
@@ -320,6 +334,40 @@ const NotesPage = () => {
           </TabsContent>
         ))}
       </Tabs>
+      
+      {/* Database Records Toggle */}
+      <Card className="mb-6 overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" /> Database Records
+          </CardTitle>
+          <CardDescription>
+            Control whether your daily entries are saved to the database
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-4 space-y-6">
+            <div className="flex items-center justify-center space-x-4 w-full max-w-md">
+              <Label htmlFor="database-toggle" className="text-lg font-medium text-muted-foreground">Off</Label>
+              <Switch 
+                id="database-toggle" 
+                className="scale-150 data-[state=checked]:bg-green-500" 
+                checked={recordsEnabled} 
+                onCheckedChange={handleRecordsToggle} 
+              />
+              <Label htmlFor="database-toggle" className="text-lg font-medium text-muted-foreground">On</Label>
+            </div>
+            <p className="text-center text-sm text-muted-foreground">
+              {recordsEnabled 
+                ? "Database records are enabled. Your entries will be saved." 
+                : "Database records are disabled. Your entries will not be saved."}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Daily Checklist Component */}
+      <DailyChecklist recordsEnabled={recordsEnabled} />
       
       <NoteForm
         open={openNoteForm}
