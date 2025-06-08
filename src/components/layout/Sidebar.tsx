@@ -8,7 +8,6 @@ import {
   X, 
   Heart, 
   Sparkles, 
-  Calendar, 
   BarChart2, 
   Target, 
   MessageCircle,
@@ -79,30 +78,6 @@ const Sidebar = () => {
           Home
         </NavItem>
         
-        <div className="mb-2 mt-6 px-4 text-xs font-semibold uppercase text-muted-foreground">
-          Core Sections
-        </div>
-        
-        <NavItem to="/mind" icon={Brain} onClick={() => close()}>
-          Mind
-        </NavItem>
-        
-        <NavItem to="/body" icon={Heart} onClick={() => close()}>
-          Body
-        </NavItem>
-        
-        <NavItem to="/soul" icon={Sparkles} onClick={() => close()}>
-          Soul
-        </NavItem>
-        
-        <div className="mb-2 mt-6 px-4 text-xs font-semibold uppercase text-muted-foreground">
-          Tracking & Growth
-        </div>
-        
-        <NavItem to="/daily" icon={Calendar} onClick={() => close()}>
-          Daily Input
-        </NavItem>
-        
         <NavItem to="/dashboard" icon={BarChart2} onClick={() => close()}>
           Dashboard
         </NavItem>
@@ -110,6 +85,26 @@ const Sidebar = () => {
         <NavItem to="/goals" icon={Target} onClick={() => close()}>
           Goals & Habits
         </NavItem>
+        
+        <div className="mb-2 mt-6 px-4 text-xs font-semibold uppercase text-muted-foreground">
+          Daily Vitals
+        </div>
+        
+        <NavItem to="/mind" icon={Brain} onClick={() => close()}>
+          Mind Vitals
+        </NavItem>
+        
+        <NavItem to="/body" icon={Heart} onClick={() => close()}>
+          Body Vitals
+        </NavItem>
+        
+        <NavItem to="/soul" icon={Sparkles} onClick={() => close()}>
+          Soul Vitals
+        </NavItem>
+        
+        <div className="mb-2 mt-6 px-4 text-xs font-semibold uppercase text-muted-foreground">
+          Tracking & Growth
+        </div>
         
         <NavItem to="/notes" icon={BookOpen} onClick={() => close()}>
           My Notes & Tasks
