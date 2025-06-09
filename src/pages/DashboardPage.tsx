@@ -58,25 +58,25 @@ const StatCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
     >
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">{title}</CardTitle>
-          <div className="rounded-full bg-primary/10 p-2 text-primary">
-            <Icon className="h-4 w-4" />
+      <Card className="h-full">
+        <CardHeader className="flex flex-row items-center justify-between pb-4">
+          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+          <div className="rounded-full bg-primary/10 p-3 text-primary">
+            <Icon className="h-6 w-6" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{value}</div>
-          <p className="text-xs text-muted-foreground">{description}</p>
+          <div className="text-5xl font-bold mb-2">{value}</div>
+          <p className="text-base text-muted-foreground mb-3">{description}</p>
           {trend && (
-            <div className={`mt-2 flex items-center text-xs ${
+            <div className={`flex items-center text-sm font-medium ${
               trend.direction === "up" ? "text-green-500" : 
               trend.direction === "down" ? "text-red-500" : 
               "text-yellow-500"
             }`}>
-              {trend.direction === "up" ? <TrendingUp className="mr-1 h-3 w-3" /> : 
-               trend.direction === "down" ? <TrendingUp className="mr-1 h-3 w-3 rotate-180" /> : 
-               <TrendingUp className="mr-1 h-3 w-3 rotate-90" />}
+              {trend.direction === "up" ? <TrendingUp className="mr-1 h-4 w-4" /> : 
+               trend.direction === "down" ? <TrendingUp className="mr-1 h-4 w-4 rotate-180" /> : 
+               <TrendingUp className="mr-1 h-4 w-4 rotate-90" />}
               {trend.value}
             </div>
           )}
