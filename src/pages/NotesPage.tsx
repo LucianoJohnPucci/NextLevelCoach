@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, CheckSquare, Database } from "lucide-react";
+import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, CheckSquare, Database, ListCheck } from "lucide-react";
 import { format } from "date-fns";
 import NoteForm from "@/components/notes/NoteForm";
 import NoteItem from "@/components/notes/NoteItem";
@@ -103,10 +103,10 @@ const NotesPage = () => {
         </div>
       </div>
       
-      <Tabs defaultValue="all" className="w-full">
+      <Tabs defaultValue="checklist" className="w-full">
         <TabsList>
-          <TabsTrigger value="all">
-            <BookOpen className="mr-2 h-4 w-4" /> All Items
+          <TabsTrigger value="checklist">
+            <ListCheck className="mr-2 h-4 w-4" /> Daily Process Checklist
           </TabsTrigger>
           <TabsTrigger value="tasks">
             <CheckSquare className="mr-2 h-4 w-4" /> Tasks
@@ -125,7 +125,9 @@ const NotesPage = () => {
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="all" className="mt-6 space-y-6">
+        <TabsContent value="checklist" className="mt-6 space-y-6">
+          <DailyChecklist recordsEnabled={recordsEnabled} />
+          
           {/* Tasks Section */}
           <Card>
             <CardHeader>
@@ -333,9 +335,6 @@ const NotesPage = () => {
           </TabsContent>
         ))}
       </Tabs>
-      
-      {/* Daily Checklist Component - Moved up to appear after Notes section */}
-      <DailyChecklist recordsEnabled={recordsEnabled} />
       
       {/* Database Records Toggle */}
       <Card className="mb-6 overflow-hidden">
