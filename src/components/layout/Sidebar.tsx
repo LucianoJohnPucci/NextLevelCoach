@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "./SidebarProvider";
 import { 
@@ -73,10 +72,6 @@ const Sidebar = () => {
         <div className="mb-2 px-4 text-xs font-semibold uppercase text-muted-foreground">
           Navigation
         </div>
-        
-        <NavItem to="/" icon={Home} onClick={() => close()}>
-          Home
-        </NavItem>
         
         <NavItem to="/dashboard" icon={BarChart2} onClick={() => close()}>
           Dashboard
