@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -335,6 +334,9 @@ const NotesPage = () => {
         ))}
       </Tabs>
       
+      {/* Daily Checklist Component - Moved up to appear after Notes section */}
+      <DailyChecklist recordsEnabled={recordsEnabled} />
+      
       {/* Database Records Toggle */}
       <Card className="mb-6 overflow-hidden">
         <CardHeader className="pb-3">
@@ -365,9 +367,6 @@ const NotesPage = () => {
           </div>
         </CardContent>
       </Card>
-      
-      {/* Daily Checklist Component */}
-      <DailyChecklist recordsEnabled={recordsEnabled} />
       
       <NoteForm
         open={openNoteForm}
