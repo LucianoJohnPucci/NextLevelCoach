@@ -12,7 +12,6 @@ import Index from "@/pages/Index";
 import MindPage from "@/pages/MindPage";
 import BodyPage from "@/pages/BodyPage";
 import SoulPage from "@/pages/SoulPage";
-import DailyInputPage from "@/pages/DailyInputPage";
 import DashboardPage from "@/pages/DashboardPage";
 import GoalsPage from "@/pages/GoalsPage";
 import WisdomPage from "@/pages/WisdomPage";
@@ -54,7 +53,6 @@ const App = () => {
                     <Route path="mind" element={<MindPage />} />
                     <Route path="body" element={<BodyPage />} />
                     <Route path="soul" element={<SoulPage />} />
-                    <Route path="daily" element={<DailyInputPage />} />
                     <Route path="dashboard" element={<DashboardPage />} />
                     <Route path="goals" element={<GoalsPage />} />
                     <Route path="notes" element={<NotesPage />} />
