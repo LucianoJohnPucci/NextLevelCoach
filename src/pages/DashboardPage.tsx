@@ -1,9 +1,9 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Activity, Calendar, Heart, Target, TrendingUp } from "lucide-react";
+import { Activity, Calendar, Heart, Target, TrendingUp, CheckSquare } from "lucide-react";
+import { useTasks } from "@/components/tasks/useTasks";
 
 // Sample data - In a real application, this would come from your backend
 const moodData = [
@@ -87,6 +87,11 @@ const StatCard = ({
 };
 
 const DashboardPage = () => {
+  const { tasks } = useTasks();
+  const completedTasks = tasks.filter(task => task.completed).length;
+  const totalTasks = tasks.length;
+  const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
   return (
     <div className="space-y-6">
       <motion.div 
@@ -119,11 +124,11 @@ const DashboardPage = () => {
           delay={0.2}
         />
         <StatCard
-          title="Entries Completed"
-          value="7"
-          description="Out of 7 in the past week"
-          icon={Calendar}
-          trend={{ value: "100% completion", direction: "neutral" }}
+          title="Tasks Completed"
+          value={completedTasks.toString()}
+          description={`Out of ${totalTasks} total tasks`}
+          icon={CheckSquare}
+          trend={{ value: `${completionPercentage}% completion`, direction: "neutral" }}
           delay={0.3}
         />
         <StatCard
