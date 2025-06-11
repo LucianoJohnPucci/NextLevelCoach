@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "./SidebarProvider";
 import { 
@@ -77,6 +78,10 @@ const Sidebar = () => {
           Dashboard
         </NavItem>
         
+        <NavItem to="/notes" icon={BookOpen} onClick={() => close()}>
+          Tasks & Notes
+        </NavItem>
+        
         <NavItem to="/goals" icon={Target} onClick={() => close()}>
           Goals & Habits
         </NavItem>
@@ -100,10 +105,6 @@ const Sidebar = () => {
         <div className="mb-2 mt-6 px-4 text-xs font-semibold uppercase text-muted-foreground">
           Tracking & Growth
         </div>
-        
-        <NavItem to="/notes" icon={BookOpen} onClick={() => close()}>
-          My Notes & Tasks
-        </NavItem>
         
         <NavItem to="/wisdom" icon={MessageCircle} onClick={() => close()}>
           Wisdom
