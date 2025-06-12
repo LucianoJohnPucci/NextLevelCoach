@@ -32,6 +32,7 @@ export const useTasks = () => {
         due_date: task.due_date ? new Date(task.due_date) : undefined,
         importance_level: task.importance_level as "low" | "medium" | "high",
         completed: task.completed,
+        status: (task.status || "new") as "new" | "in_progress" | "hurdles" | "completed",
         created_at: new Date(task.created_at),
       }));
 
@@ -56,6 +57,7 @@ export const useTasks = () => {
         title: taskData.title,
         due_date: taskData.due_date ? taskData.due_date.toISOString().split('T')[0] : null,
         importance_level: taskData.importance_level,
+        status: "new",
       });
 
       if (error) throw error;
@@ -87,9 +89,16 @@ export const useTasks = () => {
 
   const toggleTaskComplete = async (id: string, completed: boolean) => {
     try {
+      const updateData: any = { completed };
+      
+      // If marking as completed, also update status
+      if (completed) {
+        updateData.status = "completed";
+      }
+
       const { error } = await supabase
         .from("user_tasks")
-        .update({ completed })
+        .update(updateData)
         .eq("id", id);
 
       if (error) throw error;
@@ -99,6 +108,32 @@ export const useTasks = () => {
     } catch (error) {
       console.error("Error updating task:", error);
       toast.error("Failed to update task");
+    }
+  };
+
+  const updateTaskStatus = async (id: string, status: string) => {
+    try {
+      const updateData: any = { status };
+      
+      // If status is completed, also mark as completed
+      if (status === "completed") {
+        updateData.completed = true;
+      } else if (status !== "completed") {
+        updateData.completed = false;
+      }
+
+      const { error } = await supabase
+        .from("user_tasks")
+        .update(updateData)
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast.success("Task status updated!");
+      fetchTasks();
+    } catch (error) {
+      console.error("Error updating task status:", error);
+      toast.error("Failed to update task status");
     }
   };
 
@@ -112,5 +147,6 @@ export const useTasks = () => {
     addTask,
     deleteTask,
     toggleTaskComplete,
+    updateTaskStatus,
   };
 };

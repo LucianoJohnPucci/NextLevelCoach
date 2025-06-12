@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -13,6 +14,7 @@ export interface Task {
   due_date?: Date;
   importance_level: "low" | "medium" | "high";
   completed: boolean;
+  status: "new" | "in_progress" | "hurdles" | "completed";
   created_at: Date;
 }
 
@@ -20,9 +22,10 @@ interface TaskItemProps {
   task: Task;
   onDelete: (id: string) => void;
   onToggleComplete: (id: string, completed: boolean) => void;
+  onStatusChange: (id: string, status: string) => void;
 }
 
-const TaskItem = ({ task, onDelete, onToggleComplete }: TaskItemProps) => {
+const TaskItem = ({ task, onDelete, onToggleComplete, onStatusChange }: TaskItemProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -47,6 +50,36 @@ const TaskItem = ({ task, onDelete, onToggleComplete }: TaskItemProps) => {
     }
   };
 
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case "new":
+        return "secondary";
+      case "in_progress":
+        return "default";
+      case "hurdles":
+        return "destructive";
+      case "completed":
+        return "outline";
+      default:
+        return "secondary";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "new":
+        return "New";
+      case "in_progress":
+        return "In Progress";
+      case "hurdles":
+        return "Hurdles";
+      case "completed":
+        return "Completed";
+      default:
+        return "New";
+    }
+  };
+
   const isOverdue = task.due_date && new Date(task.due_date) < new Date() && !task.completed;
 
   return (
@@ -64,6 +97,19 @@ const TaskItem = ({ task, onDelete, onToggleComplete }: TaskItemProps) => {
         <Badge variant={getImportanceBadgeVariant(task.importance_level)}>
           {task.importance_level}
         </Badge>
+      </TableCell>
+      <TableCell>
+        <Select value={task.status} onValueChange={(value) => onStatusChange(task.id, value)}>
+          <SelectTrigger className="w-32">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="new">New</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="hurdles">Hurdles</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+          </SelectContent>
+        </Select>
       </TableCell>
       <TableCell>
         {task.due_date ? (

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,12 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, CheckSquare, Database, ListCheck } from "lucide-react";
+import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, CheckSquare, Database, ListCheck, List, Kanban } from "lucide-react";
 import { format } from "date-fns";
 import NoteForm from "@/components/notes/NoteForm";
 import NoteItem from "@/components/notes/NoteItem";
 import TaskForm from "@/components/tasks/TaskForm";
 import TaskItem from "@/components/tasks/TaskItem";
+import TaskKanbanBoard from "@/components/tasks/TaskKanbanBoard";
 import DailyChecklist from "@/components/daily/DailyChecklist";
 import { useNotes } from "@/components/notes/useNotes";
 import { useTasks } from "@/components/tasks/useTasks";
@@ -33,8 +33,9 @@ const NotesPage = () => {
   const [openTaskForm, setOpenTaskForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [recordsEnabled, setRecordsEnabled] = useState(true);
+  const [taskViewMode, setTaskViewMode] = useState<"list" | "kanban">("list");
   const { notes, addNote, deleteNote, loading: notesLoading } = useNotes();
-  const { tasks, addTask, deleteTask, toggleTaskComplete, loading: tasksLoading } = useTasks();
+  const { tasks, addTask, deleteTask, toggleTaskComplete, updateTaskStatus, loading: tasksLoading } = useTasks();
   const { user } = useAuth();
   
   const filteredNotes = notes.filter((note) => 
@@ -129,8 +130,28 @@ const NotesPage = () => {
         <TabsContent value="tasks" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>My Tasks</CardTitle>
-              <CardDescription>Track your important tasks and deadlines</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>My Tasks</CardTitle>
+                  <CardDescription>Track your important tasks and deadlines</CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={taskViewMode === "list" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setTaskViewMode("list")}
+                  >
+                    <List className="mr-2 h-4 w-4" /> List
+                  </Button>
+                  <Button
+                    variant={taskViewMode === "kanban" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setTaskViewMode("kanban")}
+                  >
+                    <Kanban className="mr-2 h-4 w-4" /> Board
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {tasksLoading ? (
@@ -138,27 +159,37 @@ const NotesPage = () => {
                   <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
                 </div>
               ) : filteredTasks.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">Done</TableHead>
-                      <TableHead>Task</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Due Date</TableHead>
-                      <TableHead className="w-[100px]">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTasks.map((task) => (
-                      <TaskItem 
-                        key={task.id} 
-                        task={task}
-                        onDelete={deleteTask}
-                        onToggleComplete={toggleTaskComplete}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
+                taskViewMode === "list" ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[50px]">Done</TableHead>
+                        <TableHead>Task</TableHead>
+                        <TableHead>Priority</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Due Date</TableHead>
+                        <TableHead className="w-[100px]">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredTasks.map((task) => (
+                        <TaskItem 
+                          key={task.id} 
+                          task={task}
+                          onDelete={deleteTask}
+                          onToggleComplete={toggleTaskComplete}
+                          onStatusChange={updateTaskStatus}
+                        />
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <TaskKanbanBoard
+                    tasks={filteredTasks}
+                    onDelete={deleteTask}
+                    onStatusChange={updateTaskStatus}
+                  />
+                )
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   {searchQuery ? "No matching tasks found" : "No tasks yet. Create your first task!"}
@@ -229,6 +260,7 @@ const NotesPage = () => {
                       <TableHead className="w-[50px]">Done</TableHead>
                       <TableHead>Task</TableHead>
                       <TableHead>Priority</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead>Due Date</TableHead>
                       <TableHead className="w-[100px]">Action</TableHead>
                     </TableRow>
@@ -240,6 +272,7 @@ const NotesPage = () => {
                         task={task}
                         onDelete={deleteTask}
                         onToggleComplete={toggleTaskComplete}
+                        onStatusChange={updateTaskStatus}
                       />
                     ))}
                   </TableBody>
