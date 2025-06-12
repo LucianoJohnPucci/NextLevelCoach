@@ -3,20 +3,18 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Check, Calendar, MessageSquare, ListCheck, BookOpen } from "lucide-react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/AuthProvider";
+import { Badge } from "@/components/ui/badge";
+import { Brain, Heart, Sparkles, Target, Calendar, Plus } from "lucide-react";
 import { toast } from "sonner";
+import DailyChecklistDialog from "./DailyChecklistDialog";
 
 interface ChecklistItem {
   id: string;
-  text: string;
-  emoji: string;
-  linkTo: string;
-  icon: React.ElementType;
+  title: string;
+  description: string;
   completed: boolean;
+  category: string;
+  icon: string;
 }
 
 interface DailyChecklistProps {
@@ -24,237 +22,208 @@ interface DailyChecklistProps {
 }
 
 const DailyChecklist = ({ recordsEnabled }: DailyChecklistProps) => {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([
+  const [items, setItems] = useState<ChecklistItem[]>([
     {
-      id: "braindump",
-      text: "Braindump your tasks, ideas, and notes",
-      emoji: "🧠",
-      linkTo: "/notes",
-      icon: BookOpen,
+      id: "1",
+      title: "Braindump your tasks, ideas, and notes",
+      description: "Get everything out of your head and onto paper or digital format",
       completed: false,
+      category: "mind",
+      icon: "brain"
     },
     {
-      id: "prioritize",
-      text: "Prioritize tasks and get AI feedback",
-      emoji: "🤖",
-      linkTo: "/wisdom",
-      icon: MessageSquare,
+      id: "2", 
+      title: "Prioritize tasks and get AI feedback",
+      description: "Use AI to help organize and prioritize your daily tasks",
       completed: false,
+      category: "mind",
+      icon: "brain"
     },
     {
-      id: "complete",
-      text: "Mark completed items for AI optimization",
-      emoji: "✅",
-      linkTo: "/goals",
-      icon: ListCheck,
+      id: "3",
+      title: "Mark completed items for AI optimization",
+      description: "Track your progress to help AI learn your patterns",
       completed: false,
+      category: "general",
+      icon: "target"
     },
     {
-      id: "review",
-      text: "Review your progress and plan for tomorrow",
-      emoji: "📊",
-      linkTo: "/dashboard",
-      icon: Calendar,
+      id: "4",
+      title: "Review your progress and plan for tomorrow",
+      description: "Reflect on achievements and set intentions for the next day",
       completed: false,
-    },
+      category: "soul",
+      icon: "sparkles"
+    }
   ]);
 
-  // Fetch the checklist data from Supabase when the component mounts
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Load items from localStorage on mount
   useEffect(() => {
-    if (user && recordsEnabled) {
-      fetchChecklistData();
+    const saved = localStorage.getItem('dailyChecklistItems');
+    if (saved) {
+      try {
+        const parsedItems = JSON.parse(saved);
+        setItems(parsedItems);
+      } catch (error) {
+        console.error('Error loading checklist items:', error);
+      }
     }
-  }, [user, recordsEnabled]);
+  }, []);
 
-  // Save the checklist data to Supabase when the component unmounts or when window is closed
+  // Save items to localStorage whenever items change
   useEffect(() => {
-    // Save data when component unmounts
-    return () => {
-      if (user && recordsEnabled) {
-        saveChecklistData();
-      }
-    };
-  }, [user, recordsEnabled, checklistItems]);
+    localStorage.setItem('dailyChecklistItems', JSON.stringify(items));
+  }, [items]);
 
-  // Add event listener for beforeunload
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (user && recordsEnabled) {
-        saveChecklistData();
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [user, recordsEnabled, checklistItems]);
-
-  const fetchChecklistData = async () => {
-    if (!user) return;
-    
-    setLoading(true);
-    try {
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-      
-      const { data, error } = await supabase
-        .from('daily_checklist_tracking')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .single();
-      
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
-        throw error;
-      }
-      
-      if (data) {
-        // Update the checklist items with the saved state
-        setChecklistItems(prevItems => 
-          prevItems.map(item => ({
-            ...item,
-            completed: data[`${item.id}_completed`] || false
-          }))
-        );
-      }
-    } catch (error) {
-      console.error('Error fetching checklist data:', error);
-    } finally {
-      setLoading(false);
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case "brain": return <Brain className="h-4 w-4" />;
+      case "heart": return <Heart className="h-4 w-4" />;
+      case "sparkles": return <Sparkles className="h-4 w-4" />;
+      default: return <Target className="h-4 w-4" />;
     }
   };
 
-  const saveChecklistData = async () => {
-    if (!user || !recordsEnabled) return;
-    
-    try {
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-      
-      const checklistData = {
-        user_id: user.id,
-        date: today,
-        braindump_completed: checklistItems.find(item => item.id === 'braindump')?.completed || false,
-        prioritize_completed: checklistItems.find(item => item.id === 'prioritize')?.completed || false,
-        complete_completed: checklistItems.find(item => item.id === 'complete')?.completed || false,
-        review_completed: checklistItems.find(item => item.id === 'review')?.completed || false
-      };
-      
-      // Check if a record already exists for today
-      const { data, error: selectError } = await supabase
-        .from('daily_checklist_tracking')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .maybeSingle();
-      
-      if (selectError) throw selectError;
-      
-      if (data) {
-        // Update existing record
-        const { error: updateError } = await supabase
-          .from('daily_checklist_tracking')
-          .update(checklistData)
-          .eq('id', data.id);
-        
-        if (updateError) throw updateError;
-      } else {
-        // Insert new record
-        const { error: insertError } = await supabase
-          .from('daily_checklist_tracking')
-          .insert([checklistData]);
-        
-        if (insertError) throw insertError;
-      }
-    } catch (error) {
-      console.error('Error saving checklist data:', error);
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "mind": return "bg-blue-100 text-blue-800";
+      case "body": return "bg-green-100 text-green-800"; 
+      case "soul": return "bg-purple-100 text-purple-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
-  const toggleCompleted = (id: string) => {
-    setChecklistItems(
-      checklistItems.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      )
-    );
-    
-    // If database records are enabled, save immediately after toggling
-    if (user && recordsEnabled) {
-      saveChecklistData();
+  const toggleItem = (id: string) => {
+    setItems(prev => prev.map(item => 
+      item.id === id ? { ...item, completed: !item.completed } : item
+    ));
+
+    const item = items.find(i => i.id === id);
+    if (item && recordsEnabled) {
+      toast.success(
+        item.completed ? "Item unmarked" : "Great job! Item completed", 
+        {
+          description: `${item.title} ${item.completed ? "unmarked" : "completed"}`,
+        }
+      );
     }
   };
+
+  const addNewItem = (newItem: { title: string; description: string; category: string; icon: string }) => {
+    const item: ChecklistItem = {
+      id: Date.now().toString(),
+      title: newItem.title,
+      description: newItem.description,
+      completed: false,
+      category: newItem.category,
+      icon: newItem.icon
+    };
+    
+    setItems(prev => [...prev, item]);
+    
+    toast.success("New habit added to your daily routine!", {
+      description: "Remember: Daily check-ins with modifications allow new habits to be BORN 🌱"
+    });
+  };
+
+  const completedCount = items.filter(item => item.completed).length;
+  const totalCount = items.length;
+  const progressPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span className="text-xl">📋</span> Daily Process Checklist
-        </CardTitle>
-        <CardDescription>
-          Complete these steps to stay on track with your wellness journey
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {checklistItems.map((item, index) => (
-            <motion.div
+    <>
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Daily Process Checklist
+              </CardTitle>
+              <CardDescription>
+                Complete these steps to stay on track with your wellness journey
+              </CardDescription>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold">{completedCount}/{totalCount}</div>
+              <div className="text-sm text-muted-foreground">{Math.round(progressPercentage)}% Complete</div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {items.map((item) => (
+            <div
               key={item.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              className={`flex items-start rounded-lg border p-4 ${
-                item.completed ? "border-primary/20 bg-primary/5" : "border-border"
+              className={`flex items-start space-x-3 rounded-lg border p-4 transition-all duration-200 ${
+                item.completed 
+                  ? 'bg-green-50 border-green-200 opacity-75' 
+                  : 'bg-background hover:bg-muted/50'
               }`}
             >
-              <div className="flex h-5 w-5 items-center justify-center mr-4 mt-0.5">
-                <Checkbox
-                  checked={item.completed}
-                  onCheckedChange={() => toggleCompleted(item.id)}
-                  className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                />
-              </div>
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium">
-                    {index + 1}. {item.text}
-                  </span>
-                  <span className="text-xl" role="img" aria-label="emoji">
-                    {item.emoji}
-                  </span>
+              <Checkbox
+                id={item.id}
+                checked={item.completed}
+                onCheckedChange={() => toggleItem(item.id)}
+                className="mt-1"
+              />
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className={`p-1 rounded-full ${getCategoryColor(item.category)} bg-opacity-20`}>
+                    {getIcon(item.icon)}
+                  </div>
+                  <label
+                    htmlFor={item.id}
+                    className={`font-medium cursor-pointer ${
+                      item.completed ? 'line-through text-muted-foreground' : ''
+                    }`}
+                  >
+                    {item.title}
+                  </label>
+                  {item.category !== "general" && (
+                    <Badge variant="secondary" className={`text-xs ${getCategoryColor(item.category)}`}>
+                      {item.category}
+                    </Badge>
+                  )}
                 </div>
+                <p className={`text-sm ${item.completed ? 'text-muted-foreground line-through' : 'text-muted-foreground'}`}>
+                  {item.description}
+                </p>
               </div>
-              <Button asChild variant="ghost" size="sm" className="ml-auto">
-                <Link to={item.linkTo} className="flex items-center gap-1">
-                  <item.icon className="h-4 w-4" />
-                  <span>Go</span>
-                </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1"
+                onClick={() => console.log(`Navigate to ${item.title}`)}
+              >
+                Go
               </Button>
-            </motion.div>
-          ))}
-        </div>
-        <div className="mt-4 rounded-lg bg-primary/5 p-4 border border-primary/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-primary" />
-              <span className="font-medium">
-                Complete your daily input below
-              </span>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              onClick={() => document.getElementById("daily-input-tabs")?.scrollIntoView({ behavior: "smooth" })}
+          ))}
+
+          <div className="pt-4 border-t">
+            <Button 
+              variant="outline" 
+              className="w-full gap-2" 
+              onClick={() => setDialogOpen(true)}
             >
-              <Calendar className="h-4 w-4" />
-              <span>Go to inputs</span>
+              <Plus className="h-4 w-4" />
+              Go to inputs
             </Button>
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Add new habits to your daily routine. Daily check-ins with modifications allow new habits to be BORN! 🌱
+            </p>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <DailyChecklistDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onAddItem={addNewItem}
+      />
+    </>
   );
 };
 
