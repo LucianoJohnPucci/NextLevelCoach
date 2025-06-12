@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -103,16 +104,16 @@ const NotesPage = () => {
         </div>
       </div>
       
-      <Tabs defaultValue="checklist" className="w-full">
+      <Tabs defaultValue="tasks" className="w-full">
         <TabsList>
-          <TabsTrigger value="checklist">
-            <ListCheck className="mr-2 h-4 w-4" /> Daily Process Checklist
-          </TabsTrigger>
           <TabsTrigger value="tasks">
             <CheckSquare className="mr-2 h-4 w-4" /> Tasks
           </TabsTrigger>
           <TabsTrigger value="notes">
             <BookOpen className="mr-2 h-4 w-4" /> Notes
+          </TabsTrigger>
+          <TabsTrigger value="checklist">
+            <ListCheck className="mr-2 h-4 w-4" /> Daily Checklist
           </TabsTrigger>
           <TabsTrigger value="mind">
             <Brain className="mr-2 h-4 w-4" /> Mind
@@ -124,6 +125,88 @@ const NotesPage = () => {
             <Sparkles className="mr-2 h-4 w-4" /> Soul
           </TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="tasks" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>My Tasks</CardTitle>
+              <CardDescription>Track your important tasks and deadlines</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {tasksLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                </div>
+              ) : filteredTasks.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[50px]">Done</TableHead>
+                      <TableHead>Task</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Due Date</TableHead>
+                      <TableHead className="w-[100px]">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredTasks.map((task) => (
+                      <TaskItem 
+                        key={task.id} 
+                        task={task}
+                        onDelete={deleteTask}
+                        onToggleComplete={toggleTaskComplete}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  {searchQuery ? "No matching tasks found" : "No tasks yet. Create your first task!"}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notes" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Notes</CardTitle>
+              <CardDescription>All your collected notes across categories</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {notesLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                </div>
+              ) : filteredNotes.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="w-[100px]">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredNotes.map((note) => (
+                      <NoteItem 
+                        key={note.id} 
+                        note={note}
+                        onDelete={deleteNote}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  {searchQuery ? "No matching notes found" : "No notes yet. Create your first note!"}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
         
         <TabsContent value="checklist" className="mt-6 space-y-6">
           <DailyChecklist recordsEnabled={recordsEnabled} />
@@ -209,88 +292,6 @@ const NotesPage = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="tasks" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>My Tasks</CardTitle>
-              <CardDescription>Track your important tasks and deadlines</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {tasksLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                </div>
-              ) : filteredTasks.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">Done</TableHead>
-                      <TableHead>Task</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Due Date</TableHead>
-                      <TableHead className="w-[100px]">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTasks.map((task) => (
-                      <TaskItem 
-                        key={task.id} 
-                        task={task}
-                        onDelete={deleteTask}
-                        onToggleComplete={toggleTaskComplete}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  {searchQuery ? "No matching tasks found" : "No tasks yet. Create your first task!"}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="notes" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>All Notes</CardTitle>
-              <CardDescription>All your collected notes across categories</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {notesLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                </div>
-              ) : filteredNotes.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="w-[100px]">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredNotes.map((note) => (
-                      <NoteItem 
-                        key={note.id} 
-                        note={note}
-                        onDelete={deleteNote}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  {searchQuery ? "No matching notes found" : "No notes yet. Create your first note!"}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
         {["mind", "body", "soul"].map((category) => (
           <TabsContent key={category} value={category} className="mt-6">
             <Card>
