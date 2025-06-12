@@ -239,90 +239,8 @@ const NotesPage = () => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="checklist" className="mt-6 space-y-6">
+        <TabsContent value="checklist" className="mt-6">
           <DailyChecklist recordsEnabled={recordsEnabled} />
-          
-          {/* Tasks Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>My Tasks</CardTitle>
-              <CardDescription>Track your important tasks and deadlines</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {tasksLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                </div>
-              ) : filteredTasks.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">Done</TableHead>
-                      <TableHead>Task</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Due Date</TableHead>
-                      <TableHead className="w-[100px]">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTasks.map((task) => (
-                      <TaskItem 
-                        key={task.id} 
-                        task={task}
-                        onDelete={deleteTask}
-                        onToggleComplete={toggleTaskComplete}
-                        onStatusChange={updateTaskStatus}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  {searchQuery ? "No matching tasks found" : "No tasks yet. Create your first task!"}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Notes Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>My Notes</CardTitle>
-              <CardDescription>Your collected notes across categories</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {notesLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                </div>
-              ) : filteredNotes.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="w-[100px]">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredNotes.map((note) => (
-                      <NoteItem 
-                        key={note.id} 
-                        note={note}
-                        onDelete={deleteNote}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  {searchQuery ? "No matching notes found" : "No notes yet. Create your first note!"}
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {["mind", "body", "soul"].map((category) => (
@@ -370,7 +288,6 @@ const NotesPage = () => {
         ))}
       </Tabs>
       
-      {/* Database Records Toggle */}
       <Card className="mb-6 overflow-hidden">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
