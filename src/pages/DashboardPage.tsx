@@ -1,8 +1,9 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Activity, Calendar, Heart, Target, TrendingUp, ListCheck, CheckCircle2 } from "lucide-react";
+import { Activity, Calendar, Heart, Target, TrendingUp, ListCheck, CheckCircle2, Bed } from "lucide-react";
 import { useTasks } from "@/components/tasks/useTasks";
 import ProgressReportDialog from "@/components/email/ProgressReportDialog";
 import { useDailyGoals } from "@/components/goals/useDailyGoals";
@@ -135,10 +136,10 @@ const DashboardPage = () => {
       
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
         <StatCard
-          title="Average Mood"
+          title="Average Sleep"
           value="7.8"
           description="Over the past 7 days"
-          icon={Activity}
+          icon={Bed}
           trend={{ value: "12% increase", direction: "up" }}
           delay={0.1}
         />
