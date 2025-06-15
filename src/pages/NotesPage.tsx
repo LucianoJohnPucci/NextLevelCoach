@@ -6,15 +6,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, CheckSquare, Database, List, Kanban } from "lucide-react";
-import { format } from "date-fns";
+import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, Database } from "lucide-react";
 import NoteForm from "@/components/notes/NoteForm";
 import NoteItem from "@/components/notes/NoteItem";
-import TaskForm from "@/components/tasks/TaskForm";
-import TaskItem from "@/components/tasks/TaskItem";
-import TaskKanbanBoard from "@/components/tasks/TaskKanbanBoard";
 import { useNotes } from "@/components/notes/useNotes";
-import { useTasks } from "@/components/tasks/useTasks";
 import { useAuth } from "@/components/AuthProvider";
 import { Link } from "react-router-dom";
 import { Label } from "@/components/ui/label";
@@ -30,21 +25,14 @@ export interface Note {
 
 const NotesPage = () => {
   const [openNoteForm, setOpenNoteForm] = useState(false);
-  const [openTaskForm, setOpenTaskForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [recordsEnabled, setRecordsEnabled] = useState(true);
-  const [taskViewMode, setTaskViewMode] = useState<"list" | "kanban">("list");
   const { notes, addNote, deleteNote, loading: notesLoading } = useNotes();
-  const { tasks, addTask, deleteTask, toggleTaskComplete, updateTaskStatus, loading: tasksLoading } = useTasks();
   const { user } = useAuth();
   
   const filteredNotes = notes.filter((note) => 
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     note.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredTasks = tasks.filter((task) =>
-    task.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleRecordsToggle = (enabled: boolean) => {
@@ -58,9 +46,9 @@ const NotesPage = () => {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">My Notes & Tasks</h1>
+        <h1 className="text-3xl font-bold tracking-tight">My Notes</h1>
         <p className="text-muted-foreground">
-          Capture insights and manage tasks across mind, body, and soul.
+          Capture insights and knowledge across mind, body, and soul.
         </p>
       </div>
       
@@ -69,9 +57,9 @@ const NotesPage = () => {
           <CardContent className="p-6">
             <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
               <div>
-                <h3 className="text-lg font-medium">Sign in to sync your notes and tasks</h3>
+                <h3 className="text-lg font-medium">Sign in to sync your notes</h3>
                 <p className="text-sm text-muted-foreground">
-                  Your notes and tasks are currently stored locally. Sign in to access them from any device.
+                  Your notes are currently stored locally. Sign in to access them from any device.
                 </p>
               </div>
               <Button asChild className="sm:ml-auto">
@@ -89,7 +77,7 @@ const NotesPage = () => {
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search notes and tasks..."
+            placeholder="Search notes..."
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -99,17 +87,11 @@ const NotesPage = () => {
           <Button onClick={() => setOpenNoteForm(true)}>
             <Plus className="mr-2 h-4 w-4" /> New Note
           </Button>
-          <Button onClick={() => setOpenTaskForm(true)} variant="outline">
-            <Plus className="mr-2 h-4 w-4" /> New Task
-          </Button>
         </div>
       </div>
       
-      <Tabs defaultValue="tasks" className="w-full">
+      <Tabs defaultValue="notes" className="w-full">
         <TabsList>
-          <TabsTrigger value="tasks">
-            <CheckSquare className="mr-2 h-4 w-4" /> Tasks
-          </TabsTrigger>
           <TabsTrigger value="notes">
             <BookOpen className="mr-2 h-4 w-4" /> Notes
           </TabsTrigger>
@@ -123,78 +105,6 @@ const NotesPage = () => {
             <Sparkles className="mr-2 h-4 w-4" /> Soul
           </TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="tasks" className="mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>My Tasks</CardTitle>
-                  <CardDescription>Track your important tasks and deadlines</CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant={taskViewMode === "list" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setTaskViewMode("list")}
-                  >
-                    <List className="mr-2 h-4 w-4" /> List
-                  </Button>
-                  <Button
-                    variant={taskViewMode === "kanban" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setTaskViewMode("kanban")}
-                  >
-                    <Kanban className="mr-2 h-4 w-4" /> Board
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {tasksLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                </div>
-              ) : filteredTasks.length > 0 ? (
-                taskViewMode === "list" ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[50px]">Done</TableHead>
-                        <TableHead>Task</TableHead>
-                        <TableHead>Priority</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Due Date</TableHead>
-                        <TableHead className="w-[100px]">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredTasks.map((task) => (
-                        <TaskItem 
-                          key={task.id} 
-                          task={task}
-                          onDelete={deleteTask}
-                          onToggleComplete={toggleTaskComplete}
-                          onStatusChange={updateTaskStatus}
-                        />
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <TaskKanbanBoard
-                    tasks={filteredTasks}
-                    onDelete={deleteTask}
-                    onStatusChange={updateTaskStatus}
-                  />
-                )
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  {searchQuery ? "No matching tasks found" : "No tasks yet. Create your first task!"}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="notes" className="mt-6">
           <Card>
@@ -315,12 +225,6 @@ const NotesPage = () => {
         open={openNoteForm}
         onOpenChange={setOpenNoteForm}
         onSubmit={addNote}
-      />
-
-      <TaskForm
-        open={openTaskForm}
-        onOpenChange={setOpenTaskForm}
-        onSubmit={addTask}
       />
     </div>
   );

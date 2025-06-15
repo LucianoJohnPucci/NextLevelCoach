@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Target, Clock, Zap, ListCheck, CheckSquare } from "lucide-react";
@@ -38,6 +37,8 @@ const GoalsPage = () => {
   const [newHabit, setNewHabit] = useState("");
   const [habitRating, setHabitRating] = useState(3);
   const [editingHabit, setEditingHabit] = useState<any>(null);
+
+  const [openTaskForm, setOpenTaskForm] = useState(false);
 
   const { 
     goals, 
@@ -175,7 +176,6 @@ const GoalsPage = () => {
           
           <TabsContent value="tasks" className="mt-6">
             <div className="space-y-6">
-              <TaskForm onSubmit={addTask} />
               <TaskKanbanBoard
                 tasks={tasks}
                 onDelete={deleteTask}
@@ -240,6 +240,12 @@ const GoalsPage = () => {
         isLoading={habitsLoading}
         habit={editingHabit}
         isEditing={!!editingHabit}
+      />
+
+      <TaskForm
+        open={openTaskForm}
+        onOpenChange={setOpenTaskForm}
+        onSubmit={addTask}
       />
     </div>
   );
