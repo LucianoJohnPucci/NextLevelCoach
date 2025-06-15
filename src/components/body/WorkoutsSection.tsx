@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { BarChart2, Activity } from "lucide-react";
 import { toast } from "sonner";
@@ -7,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import WorkoutItem from "./WorkoutItem";
 import WorkoutDialog from "./WorkoutDialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import WorkoutHistoryDialog, { WorkoutHistoryItem } from "./WorkoutHistoryDialog";
 
 export interface Workout {
   title: string;
@@ -27,7 +29,47 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
   const [workouts, setWorkouts] = useState(initialWorkouts);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+  // Fetch the workout history (last 7 days)
+  const {
+    data: historyData = [],
+    isLoading: isHistoryLoading,
+    error: historyError,
+    refetch: refetchHistory,
+  } = useQuery({
+    queryKey: ["body-metrics", "workout-history"],
+    queryFn: async () => {
+      // Get current user id via supabase.auth (session required)
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) throw new Error("User not authenticated");
+
+      // 7 days ago
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const startDate = sevenDaysAgo.toISOString().split('T')[0];
+
+      const { data, error } = await supabase
+        .from("body_metrics")
+        .select("date, workout_minutes, calories_burned, streak_days")
+        .eq("user_id", user.id)
+        .gte("date", startDate)
+        .order("date", { ascending: false });
+
+      if (error) throw error;
+      if (!data) return [];
+
+      // Map results for table
+      return data.map((item: any) => ({
+        date: item.date,
+        workout_minutes: item.workout_minutes ?? 0,
+        calories_burned: item.calories_burned ?? 0,
+        streak_days: item.streak_days ?? 0,
+      })) as WorkoutHistoryItem[];
+    },
+    enabled: isHistoryOpen, // Only fetch when open
+  });
+
   const filteredWorkouts = workouts.filter(workout => 
     workoutFilter === "all" || (workoutFilter === "favorites" && workout.favorite)
   );
@@ -114,7 +156,11 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
           </div>
         </CardContent>
         <CardFooter>
-          <Button variant="outline" className="w-full gap-2">
+          <Button
+            variant="outline"
+            className="w-full gap-2"
+            onClick={() => setIsHistoryOpen(true)}
+          >
             <BarChart2 className="h-4 w-4" />
             View Workout History
           </Button>
@@ -126,6 +172,15 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onStartWorkout={handleStartWorkout}
+      />
+
+      {/* Workout History Dialog */}
+      <WorkoutHistoryDialog
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        data={historyData}
+        isLoading={isHistoryLoading}
+        error={historyError}
       />
     </>
   );
