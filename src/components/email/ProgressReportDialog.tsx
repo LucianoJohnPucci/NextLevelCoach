@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -30,6 +29,22 @@ const ProgressReportDialog = () => {
         </div>
         
         <div style="padding: 40px 20px;">
+          <!-- Key Insights - Moved to top -->
+          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 20px;">💡 Key Insights</h3>
+            <div style="space-y: 16px;">
+              <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                <strong>🎯 Progress Highlight:</strong> Your overall progress is at ${data.goalsProgress.overallProgress}%, showing consistent growth across all areas.
+              </div>
+              <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                <strong>📈 Trend Analysis:</strong> Your mood has improved by ${data.mindMetrics.moodTrend} and energy levels are up by ${data.bodyMetrics.energyTrend}.
+              </div>
+              <div style="background: #f3f4f6; padding: 16px; border-radius: 8px;">
+                <strong>🌟 Next Steps:</strong> Continue building on your ${data.taskMetrics.completionRate}% task completion rate to maintain momentum.
+              </div>
+            </div>
+          </div>
+
           <!-- Overall Progress -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 24px;">🎯 Overall Progress</h3>
@@ -127,22 +142,6 @@ const ProgressReportDialog = () => {
               </div>
               <div style="background: #e5e7eb; height: 12px; border-radius: 6px; overflow: hidden; max-width: 300px; margin: 0 auto;">
                 <div style="background: #059669; height: 100%; width: ${data.taskMetrics.completionRate}%;"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Insights -->
-          <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 20px;">💡 Key Insights</h3>
-            <div style="space-y: 16px;">
-              <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                <strong>🎯 Progress Highlight:</strong> Your overall progress is at ${data.goalsProgress.overallProgress}%, showing consistent growth across all areas.
-              </div>
-              <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                <strong>📈 Trend Analysis:</strong> Your mood has improved by ${data.mindMetrics.moodTrend} and energy levels are up by ${data.bodyMetrics.energyTrend}.
-              </div>
-              <div style="background: #f3f4f6; padding: 16px; border-radius: 8px;">
-                <strong>🌟 Next Steps:</strong> Continue building on your ${data.taskMetrics.completionRate}% task completion rate to maintain momentum.
               </div>
             </div>
           </div>
