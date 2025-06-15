@@ -9,13 +9,12 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Bed, Moon, Sun, Clock, Brain } from "lucide-react";
+import { Bed, Moon, Clock, Brain } from "lucide-react";
 import { toast } from "sonner";
 
 interface SleepEntry {
   date: Date;
   bedTime: string;
-  wakeTime: string;
   sleepDuration: number;
   sleepQuality: number;
   interrupted: boolean;
@@ -29,7 +28,6 @@ interface SleepEntry {
 
 const SleepTracker = () => {
   const [bedTime, setBedTime] = useState("");
-  const [wakeTime, setWakeTime] = useState("");
   const [sleepDuration, setSleepDuration] = useState([7.5]);
   const [sleepQuality, setSleepQuality] = useState([3]);
   const [interrupted, setInterrupted] = useState(false);
@@ -55,7 +53,6 @@ const SleepTracker = () => {
     const sleepEntry: SleepEntry = {
       date: new Date(),
       bedTime,
-      wakeTime,
       sleepDuration: sleepDuration[0],
       sleepQuality: sleepQuality[0],
       interrupted,
@@ -81,7 +78,6 @@ const SleepTracker = () => {
 
   const resetForm = () => {
     setBedTime("");
-    setWakeTime("");
     setSleepDuration([7.5]);
     setSleepQuality([3]);
     setInterrupted(false);
@@ -105,30 +101,17 @@ const SleepTracker = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Sleep Times */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="bedTime" className="flex items-center gap-2">
-              <Moon className="h-4 w-4" /> Bedtime
-            </Label>
-            <Input
-              id="bedTime"
-              type="time"
-              value={bedTime}
-              onChange={(e) => setBedTime(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="wakeTime" className="flex items-center gap-2">
-              <Sun className="h-4 w-4" /> Wake Time
-            </Label>
-            <Input
-              id="wakeTime"
-              type="time"
-              value={wakeTime}
-              onChange={(e) => setWakeTime(e.target.value)}
-            />
-          </div>
+        {/* Bedtime Only */}
+        <div className="space-y-2">
+          <Label htmlFor="bedTime" className="flex items-center gap-2">
+            <Moon className="h-4 w-4" /> Bedtime
+          </Label>
+          <Input
+            id="bedTime"
+            type="time"
+            value={bedTime}
+            onChange={(e) => setBedTime(e.target.value)}
+          />
         </div>
 
         {/* Sleep Duration */}
