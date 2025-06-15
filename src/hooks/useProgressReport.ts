@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +41,9 @@ export interface ProgressReportData {
     bodyProgress: number;
     soulProgress: number;
     overallProgress: number;
+  };
+  emotionDistribution: {
+    [emotion: string]: number;
   };
   timeframeGoals: TimeframedGoal[];
   timeframeHabits: TimeframedHabit[];
@@ -167,13 +169,34 @@ export const useProgressReport = () => {
         .in("date", dateStrings)
         .order("date", { ascending: false });
 
-      // Fetch daily entries for mood and energy data
+      // Fetch daily entries for mood, energy, and emotion data
       const { data: dailyEntries } = await supabase
         .from("daily_entries")
         .select("*")
         .eq("user_id", user.id)
         .in("date", dateStrings)
         .order("date", { ascending: false });
+
+      // Process emotion distribution
+      const emotionCounts: { [emotion: string]: number } = {};
+      let totalEmotions = 0;
+
+      dailyEntries?.forEach(entry => {
+        if (entry.emotions && Array.isArray(entry.emotions)) {
+          entry.emotions.forEach((emotion: string) => {
+            emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
+            totalEmotions++;
+          });
+        }
+      });
+
+      // Convert counts to percentages
+      const emotionDistribution: { [emotion: string]: number } = {};
+      Object.keys(emotionCounts).forEach(emotion => {
+        emotionDistribution[emotion] = totalEmotions > 0 
+          ? Math.round((emotionCounts[emotion] / totalEmotions) * 100) 
+          : 0;
+      });
 
       // Fetch goals for progress calculation
       const { data: mindGoals } = await supabase
@@ -278,6 +301,7 @@ export const useProgressReport = () => {
           soulProgress,
           overallProgress,
         },
+        emotionDistribution,
         timeframeGoals,
         timeframeHabits,
       };

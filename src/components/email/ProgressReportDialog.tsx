@@ -70,6 +70,70 @@ const ProgressReportDialog = () => {
       `;
     }).join("");
 
+    // Generate emotion distribution chart data
+    const emotionEntries = Object.entries(data.emotionDistribution);
+    const hasEmotionData = emotionEntries.length > 0 && emotionEntries.some(([_, value]) => value > 0);
+    
+    // Define colors for emotions
+    const emotionColors: { [key: string]: string } = {
+      'Happy': '#3b82f6',
+      'Content': '#60a5fa', 
+      'Neutral': '#e5e7eb',
+      'Sad': '#f87171',
+      'Anxious': '#fbbf24',
+      'Excited': '#10b981',
+      'Angry': '#ef4444',
+      'Peaceful': '#8b5cf6',
+      'Frustrated': '#f59e0b',
+      'Grateful': '#06d6a0'
+    };
+
+    // Create SVG pie chart
+    let pieChartSVG = '';
+    if (hasEmotionData) {
+      const radius = 80;
+      const centerX = 100;
+      const centerY = 100;
+      let currentAngle = 0;
+      
+      const sortedEmotions = emotionEntries
+        .filter(([_, value]) => value > 0)
+        .sort(([_, a], [__, b]) => b - a);
+
+      const paths = sortedEmotions.map(([emotion, percentage]) => {
+        const startAngle = currentAngle;
+        const endAngle = currentAngle + (percentage / 100) * 2 * Math.PI;
+        currentAngle = endAngle;
+
+        const x1 = centerX + radius * Math.cos(startAngle);
+        const y1 = centerY + radius * Math.sin(startAngle);
+        const x2 = centerX + radius * Math.cos(endAngle);
+        const y2 = centerY + radius * Math.sin(endAngle);
+
+        const largeArcFlag = endAngle - startAngle > Math.PI ? 1 : 0;
+        const color = emotionColors[emotion] || '#6b7280';
+
+        return `<path d="M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+      }).join('');
+
+      // Create legend
+      const legend = sortedEmotions.map(([emotion, percentage], index) => {
+        const color = emotionColors[emotion] || '#6b7280';
+        const y = 20 + index * 25;
+        return `
+          <rect x="220" y="${y}" width="12" height="12" fill="${color}"/>
+          <text x="240" y="${y + 9}" font-family="Arial, sans-serif" font-size="12" fill="#374151">${emotion} ${percentage}%</text>
+        `;
+      }).join('');
+
+      pieChartSVG = `
+        <svg width="400" height="200" viewBox="0 0 400 200" style="margin: 20px auto; display: block;">
+          ${paths}
+          ${legend}
+        </svg>
+      `;
+    }
+
     return `
       <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; background-color: #f8fafc;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center;">
@@ -93,6 +157,15 @@ const ProgressReportDialog = () => {
               </div>
             </div>
           </div>
+
+          <!-- Emotion Distribution Chart -->
+          ${hasEmotionData ? `
+          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: #8b5cf6; margin: 0 0 20px 0; font-size: 20px;">😊 Emotion Distribution</h3>
+            <p style="color: #6b7280; margin: 0 0 20px 0;">Breakdown of emotions recorded in the ${timeframeText.toLowerCase()}.</p>
+            ${pieChartSVG}
+          </div>
+          ` : ''}
 
           <!-- Tasks Section -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -174,11 +247,11 @@ const ProgressReportDialog = () => {
                 </td>
                 <td style="padding:0 18px;">
                   <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.readingSessions}</div>
-                  <div style="color:#6b7280; font-size:13px;">Reading Sessions</div>
+                  <div style="color:#6b7280;font-size:13px;">Reading Sessions</div>
                 </td>
                 <td style="padding:0 18px;">
                   <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.learningSessions}</div>
-                  <div style="color:#6b7280; font-size:13px;">Learning Sessions</div>
+                  <div style="color:#6b7280;font-size:13px;">Learning Sessions</div>
                 </td>
               </tr>
             </table>
