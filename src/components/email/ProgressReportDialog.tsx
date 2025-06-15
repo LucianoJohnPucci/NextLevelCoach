@@ -21,9 +21,6 @@ const ProgressReportDialog = () => {
   const generateEmailHTML = (data: ProgressReportData) => {
     const timeframeText = data.timeframeDays === 7 ? "Past Week" : "Past Month";
     const sortedDatesSet = new Set([...data.timeframeGoals.map(g => g.date)]);
-    data.timeframeHabits.forEach(h =>
-      Object.keys(h.statusByDate).forEach(date => sortedDatesSet.add(date))
-    );
     const sortedDates = Array.from(sortedDatesSet).sort();
 
     // Table rows for goals
@@ -47,30 +44,6 @@ const ProgressReportDialog = () => {
         </tr>
       `;
     }).filter(Boolean).join("");
-
-    // Table rows for habits
-    const habitsRows = data.timeframeHabits.map(habit => {
-      return `
-        <tr>
-          <td style="padding:8px;font-size:14px;color:#64748b;border-bottom:1px solid #e2e8f0;vertical-align:top;">
-            <strong>${habit.title}</strong><br>
-            <span style="color:#94a3b8;font-size:12px;">(${habit.frequency})</span>
-          </td>
-          <td style="padding:8px;font-size:14px;border-bottom:1px solid #e2e8f0;">
-            <div style="display:flex;flex-wrap:wrap;gap:8px;">
-              ${sortedDates.map(date => `
-                <div style="display:flex;flex-direction:column;align-items:center;padding:4px;background:#f8fafc;border-radius:4px;min-width:60px;">
-                  <span style="color:${habit.statusByDate[date] ? '#10b981' : '#d1d5db'};font-size:20px;line-height:1;">
-                    ${habit.statusByDate[date] ? "●" : "○"}
-                  </span>
-                  <span style="font-size:10px;color:#64748b;margin-top:2px;">${date.slice(-2)}</span>
-                </div>
-              `).join("")}
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join("");
 
     // Generate emotion distribution chart data
     const emotionEntries = Object.entries(data.emotionDistribution);
@@ -196,12 +169,12 @@ const ProgressReportDialog = () => {
             </div>
           </div>
 
-          <!-- GOALS & HABITS SECTION -->
+          <!-- GOALS SECTION -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h3 style="color: #0ea5e9; margin: 0 0 20px 0; font-size: 20px;">🏆 Goals & Habits</h3>
+            <h3 style="color: #0ea5e9; margin: 0 0 20px 0; font-size: 20px;">🏆 Daily Goals</h3>
             
             <div style="margin-bottom: 30px;">
-              <h4 style="color:#6366f1; font-size:18px; margin:0 0 15px 0;">Daily Goals</h4>
+              <h4 style="color:#6366f1; font-size:18px; margin:0 0 15px 0;">Goals Overview</h4>
               <table style="border-collapse:collapse;width:100%;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
                 <thead>
                   <tr style="background:#f8fafc;">
@@ -213,22 +186,6 @@ const ProgressReportDialog = () => {
                   ${goalsRows || `<tr><td colspan="2" style="color:#94a3b8;font-size:14px;padding:20px;text-align:center;border-bottom:1px solid #e2e8f0;">No goals set for this period.</td></tr>`}
                 </tbody>
               </table>
-            </div>
-            
-            <div>
-              <h4 style="color:#22c55e; font-size:18px; margin:0 0 15px 0;">Habits Completion</h4>
-              <table style="border-collapse:collapse;width:100%;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
-                <thead>
-                  <tr style="background:#f8fafc;">
-                    <th style="text-align:left;padding:12px;font-size:14px;font-weight:600;color:#374151;border-bottom:2px solid #e2e8f0;">Habit</th>
-                    <th style="text-align:left;padding:12px;font-size:14px;font-weight:600;color:#374151;border-bottom:2px solid #e2e8f0;">Daily Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${habitsRows || `<tr><td colspan="2" style="color:#94a3b8;font-size:14px;padding:20px;text-align:center;border-bottom:1px solid #e2e8f0;">No habits found for this period.</td></tr>`}
-                </tbody>
-              </table>
-              <p style="color:#64748b;font-size:12px;margin-top:12px;font-style:italic;">● = completed, ○ = missed. Numbers show day of month.</p>
             </div>
           </div>
 
