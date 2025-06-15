@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, GraduationCap, PenTool, Smile, Frown, Meh } from "lucide-react";
@@ -111,28 +110,19 @@ const MindPage = () => {
         mood: mood[0],
         energy: energy[0],
         emotions: selectedEmotions,
+        gratitude: '',
+        challenges: '',
         updated_at: new Date().toISOString()
       };
       
-      // Try to update first (in case entry already exists)
-      const { data: updateData, error: updateError } = await supabase
+      // Use upsert to handle both insert and update cases
+      const { error } = await supabase
         .from('daily_entries')
-        .update(entryData)
-        .eq('user_id', user.id)
-        .eq('date', today);
+        .upsert(entryData, {
+          onConflict: 'user_id,date'
+        });
       
-      // If no rows were affected by update, insert a new entry
-      if (updateError || (updateData === null)) {
-        const { error: insertError } = await supabase
-          .from('daily_entries')
-          .insert([{
-            ...entryData,
-            gratitude: '',
-            challenges: ''
-          }]);
-        
-        if (insertError) throw insertError;
-      }
+      if (error) throw error;
       
       toast.success("Mood and energy saved successfully", {
         description: "Your daily mood tracking has been recorded.",
