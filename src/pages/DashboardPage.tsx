@@ -5,6 +5,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Activity, Calendar, Heart, Target, TrendingUp, CheckSquare } from "lucide-react";
 import { useTasks } from "@/components/tasks/useTasks";
 import EmailTestDialog from "@/components/email/EmailTestDialog";
+import ProgressReportDialog from "@/components/email/ProgressReportDialog";
 
 // Sample data - In a real application, this would come from your backend
 const moodData = [
@@ -108,7 +109,10 @@ const DashboardPage = () => {
               Monitor your progress and well-being insights.
             </p>
           </div>
-          <EmailTestDialog />
+          <div className="flex gap-2">
+            <EmailTestDialog />
+            <ProgressReportDialog />
+          </div>
         </div>
       </motion.div>
       
