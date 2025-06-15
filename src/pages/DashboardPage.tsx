@@ -95,19 +95,11 @@ const DashboardPage = () => {
   const completedTasks = tasks.filter(task => task.completed).length;
   const totalTasks = tasks.length;
 
-  // --- Goals Progress calculation (now includes tasks) ---
-  const { goals } = useDailyGoals();
-  const totalGoals = goals.length;
-  const completedGoals = goals.filter(goal => goal.completed).length;
-  
-  // Combine goals and tasks for overall progress
-  const totalItems = totalGoals + totalTasks;
-  const completedItems = completedGoals + completedTasks;
-  const overallProgress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
-  
-  const progressSubtitle = totalItems > 0 
-    ? `${completedItems} out of ${totalItems} items completed`
-    : `No goals or tasks set`;
+  // --- Tasks Progress calculation ---
+  const tasksProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const tasksSubtitle = totalTasks > 0 
+    ? `${completedTasks} out of ${totalTasks} tasks completed`
+    : `No tasks set`;
 
   // --- Daily Checklist Streak ---
   const { 
@@ -172,13 +164,13 @@ const DashboardPage = () => {
           delay={0.3}
         />
         <StatCard
-          title="Overall Progress"
-          value={`${overallProgress}%`}
-          description={progressSubtitle}
+          title="Tasks"
+          value={`${tasksProgress}%`}
+          description={tasksSubtitle}
           icon={Target}
           trend={{
-            value: totalItems > 0 ? `${overallProgress}% completion` : "",
-            direction: overallProgress > 70 ? "up" : overallProgress > 30 ? "neutral" : "down"
+            value: totalTasks > 0 ? `${tasksProgress}% completion` : "",
+            direction: tasksProgress > 70 ? "up" : tasksProgress > 30 ? "neutral" : "down"
           }}
           delay={0.4}
         />
