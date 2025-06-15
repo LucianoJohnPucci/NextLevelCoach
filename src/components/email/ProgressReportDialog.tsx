@@ -78,7 +78,7 @@ const ProgressReportDialog = () => {
         </div>
         
         <div style="padding: 40px 20px;">
-          <!-- Key Insights - Moved to top -->
+          <!-- Key Insights -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 20px;">💡 Key Insights</h3>
             <div style="space-y: 16px;">
@@ -91,6 +91,33 @@ const ProgressReportDialog = () => {
               <div style="background: #f3f4f6; padding: 16px; border-radius: 8px;">
                 <strong>🌟 Next Steps:</strong> Continue building on your ${data.taskMetrics.completionRate}% task completion rate to maintain momentum.
               </div>
+            </div>
+          </div>
+
+          <!-- Tasks Section - Moved to top -->
+          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: #059669; margin: 0 0 20px 0; font-size: 20px;">✅ Task Completion</h3>
+            <div style="text-align: center;">
+              <div style="font-size: 48px; font-weight: bold; color: #1f2937; margin-bottom: 10px;">${data.taskMetrics.completionRate}%</div>
+              <div style="color: #6b7280; margin-bottom: 20px;">
+                ${data.taskMetrics.completedTasks} out of ${data.taskMetrics.totalTasks} tasks completed
+              </div>
+              <div style="background: #e5e7eb; height: 12px; border-radius: 6px; overflow: hidden; max-width: 300px; margin: 0 auto;">
+                <div style="background: #059669; height: 100%; width: ${data.taskMetrics.completionRate}%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overall Progress -->
+          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 24px;">🎯 Overall Progress</h3>
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <div style="flex: 1;">
+                <div style="background: #e5e7eb; height: 12px; border-radius: 6px; overflow: hidden;">
+                  <div style="background: linear-gradient(90deg, #3b82f6, #10b981); height: 100%; width: ${data.goalsProgress.overallProgress}%;"></div>
+                </div>
+              </div>
+              <span style="font-size: 24px; font-weight: bold; color: #1f2937;">${data.goalsProgress.overallProgress}%</span>
             </div>
           </div>
 
@@ -125,19 +152,6 @@ const ProgressReportDialog = () => {
                 </tbody>
               </table>
               <p style="color:#64748b;font-size:12px;">Filled green = done; faded = missed. Hover for the date.</p>
-            </div>
-          </div>
-
-          <!-- Overall Progress -->
-          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 24px;">🎯 Overall Progress</h3>
-            <div style="display: flex; align-items: center; gap: 20px;">
-              <div style="flex: 1;">
-                <div style="background: #e5e7eb; height: 12px; border-radius: 6px; overflow: hidden;">
-                  <div style="background: linear-gradient(90deg, #3b82f6, #10b981); height: 100%; width: ${data.goalsProgress.overallProgress}%;"></div>
-                </div>
-              </div>
-              <span style="font-size: 24px; font-weight: bold; color: #1f2937;">${data.goalsProgress.overallProgress}%</span>
             </div>
           </div>
 
@@ -211,20 +225,6 @@ const ProgressReportDialog = () => {
             <div style="margin-top: 20px; text-align: center;">
               <div style="background: #8b5cf6; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block;">
                 Soul Progress: ${data.goalsProgress.soulProgress}%
-              </div>
-            </div>
-          </div>
-
-          <!-- Tasks Section -->
-          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h3 style="color: #059669; margin: 0 0 20px 0; font-size: 20px;">✅ Task Completion</h3>
-            <div style="text-align: center;">
-              <div style="font-size: 48px; font-weight: bold; color: #1f2937; margin-bottom: 10px;">${data.taskMetrics.completionRate}%</div>
-              <div style="color: #6b7280; margin-bottom: 20px;">
-                ${data.taskMetrics.completedTasks} out of ${data.taskMetrics.totalTasks} tasks completed
-              </div>
-              <div style="background: #e5e7eb; height: 12px; border-radius: 6px; overflow: hidden; max-width: 300px; margin: 0 auto;">
-                <div style="background: #059669; height: 100%; width: ${data.taskMetrics.completionRate}%;"></div>
               </div>
             </div>
           </div>
