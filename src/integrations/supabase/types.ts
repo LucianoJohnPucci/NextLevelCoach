@@ -464,8 +464,11 @@ export type Database = {
           date: string
           focus_score: number
           id: string
+          journal_count: number
+          learn_count: number
           meditation_minutes: number
           mind_goals: string | null
+          read_count: number
           streak_days: number
           updated_at: string
           user_id: string
@@ -475,8 +478,11 @@ export type Database = {
           date?: string
           focus_score?: number
           id?: string
+          journal_count?: number
+          learn_count?: number
           meditation_minutes?: number
           mind_goals?: string | null
+          read_count?: number
           streak_days?: number
           updated_at?: string
           user_id: string
@@ -486,8 +492,11 @@ export type Database = {
           date?: string
           focus_score?: number
           id?: string
+          journal_count?: number
+          learn_count?: number
           meditation_minutes?: number
           mind_goals?: string | null
+          read_count?: number
           streak_days?: number
           updated_at?: string
           user_id?: string

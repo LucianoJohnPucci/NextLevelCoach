@@ -9,6 +9,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Save } from "lucide-react";
+import { useMindMetrics } from "@/services/mindMetricsService"; // NEW import
 
 const EmotionButton = ({ 
   icon: Icon, 
@@ -34,6 +35,16 @@ const EmotionButton = ({
 
 const MindPage = () => {
   const { user } = useAuth();
+
+  // Use the mind metrics service
+  const {
+    todayMetrics,
+    updateMetrics,
+    isLoading,
+    isUpdating,
+  } = useMindMetrics();
+
+  // Use local state for session counts, initialized with today's metrics or zero
   const [readCount, setReadCount] = useState(0);
   const [learnCount, setLearnCount] = useState(0);
   const [journalCount, setJournalCount] = useState(0);
@@ -136,10 +147,40 @@ const MindPage = () => {
       setIsSaving(false);
     }
   };
+
+  // Load counts from todayMetrics
+  useEffect(() => {
+    if (todayMetrics) {
+      setReadCount(todayMetrics.read_count || 0);
+      setLearnCount(todayMetrics.learn_count || 0);
+      setJournalCount(todayMetrics.journal_count || 0);
+    }
+  }, [todayMetrics]);
+
+  const handleSaveSessions = async () => {
+    if (!user) {
+      toast.error('Authentication required', {
+        description: 'Please log in to save your session counts.'
+      });
+      return;
+    }
+    try {
+      await updateMetrics({
+        read_count: readCount,
+        learn_count: learnCount,
+        journal_count: journalCount,
+      });
+      toast.success("Session counts saved!", {
+        description: "Your daily sessions are now saved."
+      });
+    } catch (error) {
+      toast.error("Failed to save sessions");
+    }
+  };
   
+  // Button click handlers update only local state
   const handleReadClick = () => {
-    const newCount = readCount + 1;
-    setReadCount(newCount);
+    setReadCount((prev) => prev + 1);
     if (user) {
       toast.success("Reading session recorded!");
     } else {
@@ -148,8 +189,7 @@ const MindPage = () => {
   };
   
   const handleLearnClick = () => {
-    const newCount = learnCount + 1;
-    setLearnCount(newCount);
+    setLearnCount((prev) => prev + 1);
     if (user) {
       toast.success("Learning session recorded!");
     } else {
@@ -158,8 +198,7 @@ const MindPage = () => {
   };
   
   const handleJournalClick = () => {
-    const newCount = journalCount + 1;
-    setJournalCount(newCount);
+    setJournalCount((prev) => prev + 1);
     if (user) {
       toast.success("Journal entry recorded!");
     } else {
@@ -175,13 +214,27 @@ const MindPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold tracking-tight">Mind</h1>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center justify-between">
+          Mind
+          {/* New Save Sessions Button */}
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2 ml-2"
+            onClick={handleSaveSessions}
+            disabled={isUpdating || !user}
+          >
+            <Save className="h-4 w-4" />
+            {isUpdating ? "Saving..." : "Save Sessions"}
+          </Button>
+        </h1>
         <p className="text-muted-foreground">
           Daily check-ins for mental growth and learning.
         </p>
       </motion.div>
       
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3 max-w-4xl mx-auto">
+        {/* Each card uses the persistent (local) count */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

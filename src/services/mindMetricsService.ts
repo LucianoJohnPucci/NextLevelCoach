@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,6 +11,9 @@ export interface MindMetrics {
   streak_days: number;
   focus_score: number;
   mind_goals: string | null;
+  read_count: number;
+  learn_count: number;
+  journal_count: number;
   created_at: Date;
   updated_at: Date;
 }
@@ -69,6 +71,9 @@ export const updateMindMetrics = async (
     streak_days?: number;
     focus_score?: number;
     mind_goals?: string;
+    read_count?: number;
+    learn_count?: number;
+    journal_count?: number;
   }
 ) => {
   const today = new Date().toISOString().split('T')[0];
@@ -232,6 +237,9 @@ export const useMindMetrics = () => {
       streak_days?: number;
       focus_score?: number;
       mind_goals?: string;
+      read_count?: number;
+      learn_count?: number;
+      journal_count?: number;
     }) => {
       if (!user) throw new Error("User must be authenticated to update metrics");
       return updateMindMetrics(user.id, metrics);
