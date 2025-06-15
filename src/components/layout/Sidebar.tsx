@@ -80,7 +80,7 @@ const Sidebar = () => {
         </NavItem>
         
         <NavItem to="/goals" icon={Target} onClick={() => close()}>
-          Habits & Goals (Tasks)
+          Goals & Tasks
         </NavItem>
         
         <NavItem to="/notes" icon={BookOpen} onClick={() => close()}>

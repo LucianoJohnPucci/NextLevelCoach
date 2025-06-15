@@ -1,14 +1,18 @@
 
 import { useState } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Target, Clock, Zap, ListCheck } from "lucide-react";
+import { Target, Clock, Zap, ListCheck, CheckSquare } from "lucide-react";
 import DailyGoalsList from "@/components/goals/DailyGoalsList";
 import DailyGoalDialog from "@/components/goals/DailyGoalDialog";
 import HabitsList from "@/components/goals/HabitsList";
 import HabitDialog from "@/components/goals/HabitDialog";
 import DailyChecklist from "@/components/daily/DailyChecklist";
+import TaskKanbanBoard from "@/components/tasks/TaskKanbanBoard";
+import TaskForm from "@/components/tasks/TaskForm";
 import { useDailyGoals } from "@/components/goals/useDailyGoals";
 import { useHabits } from "@/components/goals/hooks";
+import { useTasks } from "@/components/tasks/useTasks";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export interface DailyGoal {
   id: string;
@@ -52,6 +56,15 @@ const GoalsPage = () => {
     updateHabit,
     trackProgress: trackHabitProgress
   } = useHabits();
+
+  const {
+    tasks,
+    loading: tasksLoading,
+    addTask,
+    deleteTask,
+    toggleTaskComplete,
+    updateTaskStatus,
+  } = useTasks();
 
   const handleAddGoal = async () => {
     const success = await addGoal(
@@ -118,9 +131,9 @@ const GoalsPage = () => {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Goals & Habits</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Goals & Tasks</h1>
         <p className="text-muted-foreground">
-          Set your top 3 goals for today and build positive habits.
+          Set your major goals and break them down into actionable tasks.
         </p>
       </div>
 
@@ -138,18 +151,39 @@ const GoalsPage = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-primary" />
-            <CardTitle>Today's Top 3 Goals</CardTitle>
+            <Target className="h-5 w-5 text-primary" />
+            <CardTitle>Major Goals & Tasks</CardTitle>
           </div>
-          <CardDescription>Schedule your most important goals with time blocks</CardDescription>
+          <CardDescription>Your macro goals with actionable sub-tasks</CardDescription>
         </CardHeader>
-        <DailyGoalsList 
-          goals={goals} 
-          onAddGoal={() => setOpenGoalDialog(true)}
-          onRemoveGoal={removeGoal}
-          onToggleCompletion={toggleGoalCompletion}
-          onUpdateGoal={updateGoal}
-        />
+        
+        <Tabs defaultValue="goals" className="p-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="goals">Today's Top 3 Goals</TabsTrigger>
+            <TabsTrigger value="tasks">Task Management</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="goals" className="mt-6">
+            <DailyGoalsList 
+              goals={goals} 
+              onAddGoal={() => setOpenGoalDialog(true)}
+              onRemoveGoal={removeGoal}
+              onToggleCompletion={toggleGoalCompletion}
+              onUpdateGoal={updateGoal}
+            />
+          </TabsContent>
+          
+          <TabsContent value="tasks" className="mt-6">
+            <div className="space-y-6">
+              <TaskForm onSubmit={addTask} />
+              <TaskKanbanBoard
+                tasks={tasks}
+                onDelete={deleteTask}
+                onStatusChange={updateTaskStatus}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
       </Card>
 
       <Card>
