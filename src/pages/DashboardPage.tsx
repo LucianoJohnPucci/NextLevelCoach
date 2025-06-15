@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { Activity, Calendar, Heart, Target, TrendingUp, CheckSquare } from "lucide-react";
 import { useTasks } from "@/components/tasks/useTasks";
+import EmailTestDialog from "@/components/email/EmailTestDialog";
 
 // Sample data - In a real application, this would come from your backend
 const moodData = [
@@ -100,10 +101,15 @@ const DashboardPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Monitor your progress and well-being insights.
-        </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Monitor your progress and well-being insights.
+            </p>
+          </div>
+          <EmailTestDialog />
+        </div>
       </motion.div>
       
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
