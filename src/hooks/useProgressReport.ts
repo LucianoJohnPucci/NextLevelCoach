@@ -86,7 +86,7 @@ export const useProgressReport = () => {
       const timeframeGoals: TimeframedGoal[] = (dailyGoalsData || []).map(g => ({
         id: g.id,
         title: g.title,
-        category: g.category,
+        category: (g.category === "mind" || g.category === "body" || g.category === "soul") ? g.category : "mind",
         date: g.date,
         completed: g.completed,
       }));
@@ -100,7 +100,7 @@ export const useProgressReport = () => {
       const habitsList = (habitsData || []).map(h => ({
         id: h.id,
         title: h.title,
-        frequency: h.frequency,
+        frequency: (h.frequency === "daily" || h.frequency === "weekly" || h.frequency === "monthly") ? h.frequency : "daily",
       }));
 
       // For each habit, get completion per day in timeframe using habit_tracking
