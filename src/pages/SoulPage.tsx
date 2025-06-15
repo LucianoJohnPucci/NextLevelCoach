@@ -56,7 +56,7 @@ const SoulPage = () => {
     }
   };
 
-  // Each click ONLY increases the local count and triggers a precise update
+  // Each click ONLY increases the local count - don't call updateMetrics here to avoid double counting
   const handleMeditationClick = () => {
     if (!user) {
       toast.error("Please log in to save your progress");
@@ -64,7 +64,6 @@ const SoulPage = () => {
     }
     const newCount = meditationCount + 1;
     setMeditationCount(newCount);
-    updateMetrics({ reflection_minutes: newCount });
     toast.success("Meditation practice recorded!");
   };
 
@@ -75,7 +74,6 @@ const SoulPage = () => {
     }
     const newCount = gratitudeCount + 1;
     setGratitudeCount(newCount);
-    updateMetrics({ gratitude_streak_days: newCount });
     toast.success("Daily gratitude recorded!");
   };
 
@@ -86,7 +84,6 @@ const SoulPage = () => {
     }
     const newCount = connectionCount + 1;
     setConnectionCount(newCount);
-    updateMetrics({ connections_attended: newCount });
     toast.success("Connection made recorded!");
   };
 
