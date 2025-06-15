@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { BarChart2, Activity } from "lucide-react";
 import { toast } from "sonner";
@@ -31,7 +32,7 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-  // Fetch the workout history (last 7 days)
+  // Fetch the workout history (last 7 days) — refetch when dialog opens.
   const {
     data: historyData = [],
     isLoading: isHistoryLoading,
@@ -68,17 +69,26 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
       })) as WorkoutHistoryItem[];
     },
     enabled: isHistoryOpen, // Only fetch when open
+    refetchOnWindowFocus: false,
   });
+
+  // Refetch workout history every time dialog opens.
+  const handleOpenHistory = () => {
+    setIsHistoryOpen(true);
+    setTimeout(() => {
+      refetchHistory();
+    }, 0);
+  };
 
   const filteredWorkouts = workouts.filter(workout => 
     workoutFilter === "all" || (workoutFilter === "favorites" && workout.favorite)
   );
-  
+
   const toggleFavorite = (index: number) => {
     const updatedWorkouts = [...workouts];
     updatedWorkouts[index].favorite = !updatedWorkouts[index].favorite;
     setWorkouts(updatedWorkouts);
-    
+
     toast.success(
       updatedWorkouts[index].favorite 
         ? `Added ${updatedWorkouts[index].title} to favorites` 
@@ -99,7 +109,7 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
       toast.success(`Started ${selectedWorkout.title}!`);
     }
   };
-  
+
   return (
     <>
       <Card>
@@ -159,7 +169,8 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
           <Button
             variant="outline"
             className="w-full gap-2"
-            onClick={() => setIsHistoryOpen(true)}
+            onClick={handleOpenHistory}
+            data-testid="view-workout-history"
           >
             <BarChart2 className="h-4 w-4" />
             View Workout History
