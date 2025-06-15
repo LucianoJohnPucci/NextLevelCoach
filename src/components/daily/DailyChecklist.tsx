@@ -22,7 +22,12 @@ interface DailyChecklistProps {
 }
 
 const DailyChecklist = ({ recordsEnabled }: DailyChecklistProps) => {
-  const [items, setItems] = useState<ChecklistItem[]>([
+  const [items, setItems] = useState<ChecklistItem[]>([]);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Initialize default items
+  const defaultItems: ChecklistItem[] = [
     {
       id: "1",
       title: "Braindump your tasks, ideas, and notes",
@@ -55,9 +60,7 @@ const DailyChecklist = ({ recordsEnabled }: DailyChecklistProps) => {
       category: "soul",
       icon: "sparkles"
     }
-  ]);
-
-  const [dialogOpen, setDialogOpen] = useState(false);
+  ];
 
   // Load items from localStorage on mount
   useEffect(() => {
@@ -65,18 +68,34 @@ const DailyChecklist = ({ recordsEnabled }: DailyChecklistProps) => {
     if (saved) {
       try {
         const parsedItems = JSON.parse(saved);
-        setItems(parsedItems);
+        // Validate that parsed items have the correct structure
+        if (Array.isArray(parsedItems) && parsedItems.length > 0) {
+          setItems(parsedItems);
+        } else {
+          // If no valid saved items, use default items
+          setItems(defaultItems);
+          localStorage.setItem('dailyChecklistItems', JSON.stringify(defaultItems));
+        }
       } catch (error) {
         console.error('Error loading checklist items:', error);
+        // If error parsing, use default items
+        setItems(defaultItems);
+        localStorage.setItem('dailyChecklistItems', JSON.stringify(defaultItems));
       }
+    } else {
+      // If no saved items, use default items
+      setItems(defaultItems);
+      localStorage.setItem('dailyChecklistItems', JSON.stringify(defaultItems));
     }
   }, []);
 
   // Save items to localStorage and trigger custom event whenever items change
   useEffect(() => {
-    localStorage.setItem('dailyChecklistItems', JSON.stringify(items));
-    // Dispatch custom event to notify other components about checklist updates
-    window.dispatchEvent(new CustomEvent('checklistUpdated'));
+    if (items.length > 0) {
+      localStorage.setItem('dailyChecklistItems', JSON.stringify(items));
+      // Dispatch custom event to notify other components about checklist updates
+      window.dispatchEvent(new CustomEvent('checklistUpdated'));
+    }
   }, [items]);
 
   const getIcon = (iconName: string) => {
@@ -182,14 +201,6 @@ const DailyChecklist = ({ recordsEnabled }: DailyChecklistProps) => {
                 {item.description}
               </p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1"
-              onClick={() => console.log(`Navigate to ${item.title}`)}
-            >
-              Go
-            </Button>
           </div>
         ))}
 
