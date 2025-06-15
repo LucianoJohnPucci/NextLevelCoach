@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useSoulMetrics } from "@/services/soulMetricsService";
 import { toast } from "sonner";
 import ReflectionsSection from "@/components/soul/ReflectionsSection";
+import { Save } from "lucide-react";
 
 const SoulPage = () => {
   const { user } = useAuth();
@@ -17,6 +17,7 @@ const SoulPage = () => {
     gratitudeStreak, 
     updateMetrics,
     isLoading,
+    isUpdating,
     isError,
     todayMetrics
   } = useSoulMetrics();
@@ -33,6 +34,26 @@ const SoulPage = () => {
       setConnectionCount(todayMetrics.connections_attended || 0);
     }
   }, [todayMetrics, isLoading]);
+  
+  // Save session counts to Supabase
+  const handleSaveSessions = async () => {
+    if (!user) {
+      toast.error("Please log in to save your progress");
+      return;
+    }
+    try {
+      updateMetrics({
+        reflection_minutes: meditationCount,
+        gratitude_streak_days: gratitudeCount,
+        connections_attended: connectionCount,
+      });
+      toast.success("Soul session counts saved!", {
+        description: "Your daily soul check-ins are now saved."
+      });
+    } catch (error) {
+      toast.error("Failed to save soul sessions");
+    }
+  };
   
   const handleMeditationClick = () => {
     const newCount = meditationCount + 1;
@@ -83,7 +104,20 @@ const SoulPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold tracking-tight">Soul</h1>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center justify-between">
+          Soul
+          {/* Save Sessions Button */}
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2 ml-2"
+            onClick={handleSaveSessions}
+            disabled={isUpdating}
+          >
+            <Save className="h-4 w-4" />
+            {isUpdating ? "Saving..." : "Save Sessions"}
+          </Button>
+        </h1>
         <p className="text-muted-foreground">
           Daily check-ins for spiritual growth and inner peace.
         </p>
