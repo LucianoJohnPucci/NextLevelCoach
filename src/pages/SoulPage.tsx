@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,22 +12,22 @@ import { Save } from "lucide-react";
 
 const SoulPage = () => {
   const { user } = useAuth();
-  const { 
-    reflectionMinutes, 
-    connectionsAttended, 
-    gratitudeStreak, 
+  const {
+    reflectionMinutes,
+    connectionsAttended,
+    gratitudeStreak,
     updateMetrics,
     isLoading,
     isUpdating,
     isError,
-    todayMetrics
+    todayMetrics,
   } = useSoulMetrics();
-  
+
   const [meditationCount, setMeditationCount] = useState(0);
   const [gratitudeCount, setGratitudeCount] = useState(0);
   const [connectionCount, setConnectionCount] = useState(0);
-  
-  // Initialize counts from database values when loaded
+
+  // Only update local state when today's metrics are loaded (avoid infinite update loop)
   useEffect(() => {
     if (!isLoading && todayMetrics) {
       setMeditationCount(todayMetrics.reflection_minutes || 0);
@@ -34,71 +35,74 @@ const SoulPage = () => {
       setConnectionCount(todayMetrics.connections_attended || 0);
     }
   }, [todayMetrics, isLoading]);
-  
-  // Save session counts to Supabase
+
+  // Save session counts to Supabase -- this should *only set* the given values!
   const handleSaveSessions = async () => {
     if (!user) {
       toast.error("Please log in to save your progress");
       return;
     }
     try {
-      updateMetrics({
+      await updateMetrics({
         reflection_minutes: meditationCount,
         gratitude_streak_days: gratitudeCount,
         connections_attended: connectionCount,
       });
       toast.success("Soul session counts saved!", {
-        description: "Your daily soul check-ins are now saved."
+        description: "Your daily soul check-ins are now saved.",
       });
     } catch (error) {
       toast.error("Failed to save soul sessions");
     }
   };
-  
+
+  // Each click ONLY increases the local count and triggers a precise update
   const handleMeditationClick = () => {
+    if (!user) {
+      toast.error("Please log in to save your progress");
+      return;
+    }
     const newCount = meditationCount + 1;
     setMeditationCount(newCount);
-    if (user) {
-      updateMetrics({ reflection_minutes: newCount });
-      toast.success("Meditation practice recorded!");
-    } else {
-      toast.error("Please log in to save your progress");
-    }
+    updateMetrics({ reflection_minutes: newCount });
+    toast.success("Meditation practice recorded!");
   };
-  
+
   const handleGratitudeClick = () => {
+    if (!user) {
+      toast.error("Please log in to save your progress");
+      return;
+    }
     const newCount = gratitudeCount + 1;
     setGratitudeCount(newCount);
-    if (user) {
-      updateMetrics({ gratitude_streak_days: newCount });
-      toast.success("Daily gratitude recorded!");
-    } else {
-      toast.error("Please log in to save your progress");
-    }
+    updateMetrics({ gratitude_streak_days: newCount });
+    toast.success("Daily gratitude recorded!");
   };
-  
+
   const handleConnectionClick = () => {
+    if (!user) {
+      toast.error("Please log in to save your progress");
+      return;
+    }
     const newCount = connectionCount + 1;
     setConnectionCount(newCount);
-    if (user) {
-      updateMetrics({ connections_attended: newCount });
-      toast.success("Connection made recorded!");
-    } else {
-      toast.error("Please log in to save your progress");
-    }
+    updateMetrics({ connections_attended: newCount });
+    toast.success("Connection made recorded!");
   };
-  
+
   if (isError) {
     return (
       <div className="text-center p-4 bg-destructive/10 rounded-md">
-        <p className="text-destructive">Error loading soul metrics. Please try again later.</p>
+        <p className="text-destructive">
+          Error loading soul metrics. Please try again later.
+        </p>
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-6">
-      <motion.div 
+      <motion.div
         className="space-y-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -122,14 +126,17 @@ const SoulPage = () => {
           Daily check-ins for spiritual growth and inner peace.
         </p>
       </motion.div>
-      
+
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3 max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleMeditationClick}>
+          <Card
+            className="h-full cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={handleMeditationClick}
+          >
             <CardHeader className="text-center pb-4">
               <div className="mx-auto mb-4 w-fit rounded-lg bg-blue-100 p-3 text-blue-600">
                 <Brain className="h-8 w-8" />
@@ -143,8 +150,8 @@ const SoulPage = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Times practiced today
               </p>
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -156,13 +163,16 @@ const SoulPage = () => {
             </CardContent>
           </Card>
         </motion.div>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleGratitudeClick}>
+          <Card
+            className="h-full cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={handleGratitudeClick}
+          >
             <CardHeader className="text-center pb-4">
               <div className="mx-auto mb-4 w-fit rounded-lg bg-red-100 p-3 text-red-600">
                 <Heart className="h-8 w-8" />
@@ -176,8 +186,8 @@ const SoulPage = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Gratitude moments today
               </p>
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -189,13 +199,16 @@ const SoulPage = () => {
             </CardContent>
           </Card>
         </motion.div>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleConnectionClick}>
+          <Card
+            className="h-full cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={handleConnectionClick}
+          >
             <CardHeader className="text-center pb-4">
               <div className="mx-auto mb-4 w-fit rounded-lg bg-green-100 p-3 text-green-600">
                 <Users className="h-8 w-8" />
@@ -209,8 +222,8 @@ const SoulPage = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Connections made today
               </p>
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -223,7 +236,7 @@ const SoulPage = () => {
           </Card>
         </motion.div>
       </div>
-      
+
       <motion.div
         className="max-w-2xl mx-auto text-center mt-12"
         initial={{ opacity: 0, y: 20 }}
@@ -238,7 +251,7 @@ const SoulPage = () => {
         </div>
       </motion.div>
 
-      {/* Reflections section moved from Daily Input page */}
+      {/* Reflections section */}
       <div className="max-w-4xl mx-auto">
         <ReflectionsSection />
       </div>
