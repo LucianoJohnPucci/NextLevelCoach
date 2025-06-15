@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, Database } from "lucide-react";
 import NoteForm from "@/components/notes/NoteForm";
 import NoteItem from "@/components/notes/NoteItem";
+import SleepTracker from "@/components/notes/SleepTracker";
 import { useNotes } from "@/components/notes/useNotes";
 import { useAuth } from "@/components/AuthProvider";
 import { Link } from "react-router-dom";
@@ -190,6 +191,8 @@ const NotesPage = () => {
           </TabsContent>
         ))}
       </Tabs>
+      
+      <SleepTracker />
       
       <Card className="mb-6 overflow-hidden">
         <CardHeader className="pb-3">
