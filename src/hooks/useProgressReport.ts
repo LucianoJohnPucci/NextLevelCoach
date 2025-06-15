@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +33,23 @@ export interface ProgressReportData {
     soulProgress: number;
     overallProgress: number;
   };
+  timeframeGoals: TimeframedGoal[];
+  timeframeHabits: TimeframedHabit[];
+}
+
+export interface TimeframedGoal {
+  id: string;
+  title: string;
+  category: "mind" | "body" | "soul";
+  date: string; // YYYY-MM-DD
+  completed: boolean;
+}
+
+export interface TimeframedHabit {
+  id: string;
+  title: string;
+  frequency: "daily" | "weekly" | "monthly";
+  statusByDate: { [date: string]: boolean }; // date string -> completed boolean
 }
 
 export const useProgressReport = () => {
@@ -45,10 +61,77 @@ export const useProgressReport = () => {
     if (!user) throw new Error("User not authenticated");
 
     setIsLoading(true);
-    
+
     try {
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - timeframeDays);
+      startDate.setHours(0, 0, 0, 0);
+      startDate.setDate(startDate.getDate() - (timeframeDays - 1));
+
+      // Create an array of date strings in the selected timeframe (YYYY-MM-DD)
+      const dateStrings: string[] = [];
+      for (let i = 0; i < timeframeDays; i++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        dateStrings.push(d.toISOString().split('T')[0]);
+      }
+
+      // Fetch daily goals for the timeframe
+      const { data: dailyGoalsData, error: dailyGoalsError } = await supabase
+        .from("daily_goals")
+        .select("*")
+        .eq("user_id", user.id)
+        .in("date", dateStrings)
+        .order("date", { ascending: true });
+
+      const timeframeGoals: TimeframedGoal[] = (dailyGoalsData || []).map(g => ({
+        id: g.id,
+        title: g.title,
+        category: g.category,
+        date: g.date,
+        completed: g.completed,
+      }));
+
+      // Fetch habits list
+      const { data: habitsData, error: habitsError } = await supabase
+        .from("habits")
+        .select("*")
+        .eq("user_id", user.id);
+
+      const habitsList = (habitsData || []).map(h => ({
+        id: h.id,
+        title: h.title,
+        frequency: h.frequency,
+      }));
+
+      // For each habit, get completion per day in timeframe using habit_tracking
+      const { data: trackingData, error: trackingError } = await supabase
+        .from("habit_tracking")
+        .select("habit_id, date, completed")
+        .eq("user_id", user.id)
+        .in("date", dateStrings);
+
+      const habitsMap: { [id: string]: TimeframedHabit } = {};
+      habitsList.forEach(h => {
+        habitsMap[h.id] = {
+          id: h.id,
+          title: h.title,
+          frequency: h.frequency,
+          statusByDate: {},
+        };
+        // Default all days to false for this habit in the timeframe
+        dateStrings.forEach(ds => {
+          habitsMap[h.id].statusByDate[ds] = false;
+        });
+      });
+
+      // Populate completion state
+      (trackingData || []).forEach(td => {
+        if (habitsMap[td.habit_id] && td.date && typeof td.completed === "boolean") {
+          habitsMap[td.habit_id].statusByDate[td.date] = td.completed;
+        }
+      });
+
+      const timeframeHabits: TimeframedHabit[] = Object.values(habitsMap);
 
       // Fetch mind metrics data
       const { data: mindMetrics } = await supabase
@@ -155,6 +238,8 @@ export const useProgressReport = () => {
           soulProgress,
           overallProgress,
         },
+        timeframeGoals,
+        timeframeHabits,
       };
 
       return reportData;
@@ -163,24 +248,24 @@ export const useProgressReport = () => {
     }
   };
 
-  return { generateReportData, isLoading };
-};
-
-// Helper function to calculate average progress
-const calculateAverageProgress = (goalsObj: any) => {
-  if (!goalsObj) return 0;
-  
-  const excludeProps = ['id', 'user_id', 'created_at', 'updated_at'];
-  
-  let total = 0;
-  let count = 0;
-  
-  for (const key in goalsObj) {
-    if (!excludeProps.includes(key) && typeof goalsObj[key] === 'number') {
-      total += goalsObj[key];
-      count++;
+  // Helper function to calculate average progress
+  const calculateAverageProgress = (goalsObj: any) => {
+    if (!goalsObj) return 0;
+    
+    const excludeProps = ['id', 'user_id', 'created_at', 'updated_at'];
+    
+    let total = 0;
+    let count = 0;
+    
+    for (const key in goalsObj) {
+      if (!excludeProps.includes(key) && typeof goalsObj[key] === 'number') {
+        total += goalsObj[key];
+        count++;
+      }
     }
-  }
-  
-  return count > 0 ? Math.round(total / count) : 0;
+    
+    return count > 0 ? Math.round(total / count) : 0;
+  };
+
+  return { generateReportData, isLoading };
 };

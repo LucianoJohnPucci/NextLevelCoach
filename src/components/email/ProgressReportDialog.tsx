@@ -20,7 +20,56 @@ const ProgressReportDialog = () => {
 
   const generateEmailHTML = (data: ProgressReportData) => {
     const timeframeText = data.timeframeDays === 7 ? "Past Week" : "Past Month";
-    
+    const sortedDatesSet = new Set([...data.timeframeGoals.map(g => g.date)]);
+    data.timeframeHabits.forEach(h =>
+      Object.keys(h.statusByDate).forEach(date => sortedDatesSet.add(date))
+    );
+    const sortedDates = Array.from(sortedDatesSet).sort();
+
+    // Table rows for goals
+    const goalsRows = sortedDates.map(date => {
+      const dateGoals = data.timeframeGoals.filter(g => g.date === date);
+      if (!dateGoals.length) return "";
+      return `
+        <tr>
+          <td style="padding:4px 8px;font-size:12px;color:#64748b;">${date}</td>
+          <td style="padding:4px 8px;font-size:12px;">
+            <ul style="margin:0;padding-left:16px;">
+              ${dateGoals.map(goal => `
+                <li>
+                  <span style="color:${goal.completed ? '#10b981' : '#ef4444'};font-weight:600;">
+                    ${goal.completed ? "✓" : "✗"}
+                  </span> 
+                  ${goal.title} <span style="color:#94a3b8;">(${goal.category})</span>
+                </li>
+              `).join("")}
+            </ul>
+          </td>
+        </tr>
+      `;
+    }).filter(Boolean).join("");
+
+    // Table rows for habits
+    const habitsRows = data.timeframeHabits.map(habit => {
+      return `
+        <tr>
+          <td style="padding:4px 8px;font-size:12px;color:#64748b;">${habit.title} (${habit.frequency})</td>
+          <td style="padding:4px 8px;font-size:12px;">
+            <ul style="margin:0;padding-left:16px;display:flex;gap:8px;list-style:none;">
+              ${sortedDates.map(date => `
+                <li title="${date}">
+                  <span style="color:${habit.statusByDate[date] ? '#10b981' : '#d1d5db'};font-size:18px;">
+                    ${habit.statusByDate[date] ? "●" : "○"}
+                  </span>
+                  <span style="display:none;">${date}</span>
+                </li>
+              `).join("")}
+            </ul>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
     return `
       <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; background-color: #f8fafc;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center;">
@@ -42,6 +91,40 @@ const ProgressReportDialog = () => {
               <div style="background: #f3f4f6; padding: 16px; border-radius: 8px;">
                 <strong>🌟 Next Steps:</strong> Continue building on your ${data.taskMetrics.completionRate}% task completion rate to maintain momentum.
               </div>
+            </div>
+          </div>
+
+          <!-- GOALS & HABITS SECTION -->
+          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: #0ea5e9; margin: 0 0 20px 0; font-size: 20px;">🏆 Goals & Habits</h3>
+            <div>
+              <h4 style="color:#6366f1; font-size:16px; margin:0 0 10px 0;">Daily Goals</h4>
+              <table style="border-collapse:collapse;width:100%;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left;padding:4px 8px;font-size:13px;">Date</th>
+                    <th style="text-align:left;padding:4px 8px;font-size:13px;">Goals</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${goalsRows || `<tr><td colspan="2" style="color:#94a3b8;font-size:13px;padding:6px;">No goals set for this period.</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top:30px;">
+              <h4 style="color:#22c55e; font-size:16px; margin:0 0 10px 0;">Habits Completion</h4>
+              <table style="border-collapse:collapse;width:100%;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left;padding:4px 8px;font-size:13px;">Habit</th>
+                    <th style="text-align:left;padding:4px 8px;font-size:13px;">Daily Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${habitsRows || `<tr><td colspan="2" style="color:#94a3b8;font-size:13px;padding:6px;">No habits found for this period.</td></tr>`}
+                </tbody>
+              </table>
+              <p style="color:#64748b;font-size:12px;">Filled green = done; faded = missed. Hover for the date.</p>
             </div>
           </div>
 
