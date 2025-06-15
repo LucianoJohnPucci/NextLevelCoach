@@ -6,6 +6,7 @@ import { Activity, Calendar, Heart, Target, TrendingUp, CheckSquare } from "luci
 import { useTasks } from "@/components/tasks/useTasks";
 import EmailTestDialog from "@/components/email/EmailTestDialog";
 import ProgressReportDialog from "@/components/email/ProgressReportDialog";
+import { useDailyGoals } from "@/components/goals/useDailyGoals";
 
 // Sample data - In a real application, this would come from your backend
 const moodData = [
@@ -94,6 +95,18 @@ const DashboardPage = () => {
   const totalTasks = tasks.length;
   const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
+  // --- Goals Progress calculation from daily goals ---
+  const { goals } = useDailyGoals();
+  const totalGoals = goals.length;
+  const completedGoals = goals.filter(goal => goal.completed).length;
+  const goalsProgress = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
+
+  // Optionally, for more display details:
+  const goalsSubtitle =
+    totalGoals > 0
+      ? `${completedGoals} out of ${totalGoals} goals on track`
+      : `No goals set`;
+
   return (
     <div className="space-y-6">
       <motion.div 
@@ -143,10 +156,13 @@ const DashboardPage = () => {
         />
         <StatCard
           title="Goals Progress"
-          value="68%"
-          description="4 out of 6 goals on track"
+          value={`${goalsProgress}%`}
+          description={goalsSubtitle}
           icon={Target}
-          trend={{ value: "8% increase", direction: "up" }}
+          trend={{
+            value: totalGoals > 0 ? `${goalsProgress}% completion` : "",
+            direction: "up"
+          }}
           delay={0.4}
         />
       </div>
