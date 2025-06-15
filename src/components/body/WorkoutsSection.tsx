@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import { BarChart2, Activity } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ import WorkoutDialog from "./WorkoutDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import WorkoutHistoryDialog, { WorkoutHistoryItem } from "./WorkoutHistoryDialog";
+import { useBodyMetrics } from "@/services/bodyMetricsService";
 
 export interface Workout {
   title: string;
@@ -31,6 +33,9 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+  // Use body metrics service for recording sessions
+  const { recordSession, isRecording } = useBodyMetrics();
 
   // Fetch the workout history (last 7 days) — refetch when dialog opens.
   const {
@@ -101,12 +106,21 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
     setIsDialogOpen(true);
   };
 
-  const handleStartWorkout = () => {
+  const handleStartWorkout = async () => {
     if (selectedWorkout) {
       const minutes = parseInt(selectedWorkout.duration.match(/(\d+)/)?.[0] || "0", 10);
-      onAddWorkout(minutes);
-      setIsDialogOpen(false);
-      toast.success(`Started ${selectedWorkout.title}!`);
+      
+      try {
+        // Record the workout session in Supabase
+        recordSession({ minutes });
+        
+        onAddWorkout(minutes);
+        setIsDialogOpen(false);
+        toast.success(`Started ${selectedWorkout.title}! Workout recorded.`);
+      } catch (error) {
+        console.error("Failed to record workout session:", error);
+        toast.error("Failed to record workout session. Please try again.");
+      }
     }
   };
 
@@ -183,6 +197,7 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onStartWorkout={handleStartWorkout}
+        isRecording={isRecording}
       />
 
       {/* Workout History Dialog */}
@@ -198,3 +213,4 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
 };
 
 export default WorkoutsSection;
+

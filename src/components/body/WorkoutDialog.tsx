@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,9 +17,10 @@ interface WorkoutDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onStartWorkout: () => void;
+  isRecording?: boolean;
 }
 
-const WorkoutDialog = ({ workout, isOpen, onClose, onStartWorkout }: WorkoutDialogProps) => {
+const WorkoutDialog = ({ workout, isOpen, onClose, onStartWorkout, isRecording = false }: WorkoutDialogProps) => {
   if (!workout) return null;
 
   // Default exercises based on workout type
@@ -128,12 +128,12 @@ const WorkoutDialog = ({ workout, isOpen, onClose, onStartWorkout }: WorkoutDial
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} disabled={isRecording}>
             Cancel
           </Button>
-          <Button onClick={onStartWorkout} className="gap-2">
+          <Button onClick={onStartWorkout} className="gap-2" disabled={isRecording}>
             <Dumbbell className="h-4 w-4" />
-            Start Workout
+            {isRecording ? "Recording..." : "Start Workout"}
           </Button>
         </DialogFooter>
       </DialogContent>
