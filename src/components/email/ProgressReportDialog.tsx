@@ -74,7 +74,7 @@ const ProgressReportDialog = () => {
       <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; background-color: #f8fafc;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center;">
           <h1 style="margin: 0; font-size: 32px; font-weight: bold;">Next Level Coach</h1>
-          <h2 style="margin: 20px 0 0 0; font-size: 24px; font-weight: normal;">Progress Report - ${timeframeText}</h2>
+          <h2 style="margin: 20px 0 0 0; font-size: 24px; font-weight: normal;">Progress Report - ${data.timeframeDays === 7 ? "Past Week" : "Past Month"}</h2>
         </div>
         
         <div style="padding: 40px 20px;">
@@ -155,103 +155,107 @@ const ProgressReportDialog = () => {
             </div>
           </div>
 
-          <!-- Mind Section with Enhanced Metrics -->
+          <!-- Mind Section with Horizontal Metrics -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #3b82f6; margin: 0 0 20px 0; font-size: 20px;">🧠 Mind Vitals</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.mindMetrics.averageMood}/10</div>
-                <div style="color: #6b7280; margin-top: 8px;">Average Mood</div>
-                <div style="color: #10b981; font-size: 12px; margin-top: 4px;">↗ ${data.mindMetrics.moodTrend}</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.mindMetrics.meditationMinutes}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Meditation Minutes</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.mindMetrics.journalEntries}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Journal Entries</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.mindMetrics.readingSessions}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Reading Sessions</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.mindMetrics.learningSessions}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Learning Sessions</div>
-              </div>
-            </div>
-            <div style="margin-top: 20px; text-align: center;">
-              <div style="background: #3b82f6; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block;">
+            <table style="width:100%;border-collapse:collapse;text-align:center;margin-bottom:16px;">
+              <tr>
+                <td style="padding:0 18px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.averageMood}/10</div>
+                  <div style="color:#6b7280; font-size:13px;">Avg Mood</div>
+                </td>
+                <td style="padding:0 18px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.meditationMinutes}</div>
+                  <div style="color:#6b7280; font-size:13px;">Meditation Min</div>
+                </td>
+                <td style="padding:0 18px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.journalEntries}</div>
+                  <div style="color:#6b7280; font-size:13px;">Journal Entries</div>
+                </td>
+                <td style="padding:0 18px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.readingSessions}</div>
+                  <div style="color:#6b7280; font-size:13px;">Reading Sessions</div>
+                </td>
+                <td style="padding:0 18px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.learningSessions}</div>
+                  <div style="color:#6b7280; font-size:13px;">Learning Sessions</div>
+                </td>
+              </tr>
+            </table>
+            <div style="margin-top: 10px; text-align: center;">
+              <div style="background: #3b82f6; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; font-size: 15px; font-weight:600;">
                 Mind Progress: ${data.goalsProgress.mindProgress}%
               </div>
             </div>
           </div>
 
-          <!-- Body Section with Enhanced Metrics -->
+          <!-- Body Section with Horizontal Metrics -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #ef4444; margin: 0 0 20px 0; font-size: 20px;">💪 Body Vitals</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.averageEnergy}/10</div>
-                <div style="color: #6b7280; margin-top: 8px;">Average Energy</div>
-                <div style="color: #10b981; font-size: 12px; margin-top: 4px;">↗ ${data.bodyMetrics.energyTrend}</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.workoutsCompleted}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Total Workouts</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.yogaSessions}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Yoga Sessions</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.cardioSessions}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Cardio Sessions</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.strengthSessions}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Strength Training</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.stretchSessions}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Stretch Sessions</div>
-              </div>
-            </div>
-            <div style="margin-top: 20px; text-align: center;">
-              <div style="background: #ef4444; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block;">
+            <table style="width:100%;border-collapse:collapse;text-align:center;margin-bottom:16px;">
+              <tr>
+                <td style="padding:0 12px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.averageEnergy}/10</div>
+                  <div style="color:#6b7280;font-size:13px;">Avg Energy</div>
+                </td>
+                <td style="padding:0 12px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.workoutsCompleted}</div>
+                  <div style="color:#6b7280;font-size:13px;">Workouts</div>
+                </td>
+                <td style="padding:0 12px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.yogaSessions}</div>
+                  <div style="color:#6b7280;font-size:13px;">Yoga Sessions</div>
+                </td>
+                <td style="padding:0 12px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.cardioSessions}</div>
+                  <div style="color:#6b7280;font-size:13px;">Cardio Sessions</div>
+                </td>
+                <td style="padding:0 12px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.strengthSessions}</div>
+                  <div style="color:#6b7280;font-size:13px;">Strength</div>
+                </td>
+                <td style="padding:0 12px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.stretchSessions}</div>
+                  <div style="color:#6b7280;font-size:13px;">Stretch</div>
+                </td>
+              </tr>
+            </table>
+            <div style="margin-top: 10px; text-align: center;">
+              <div style="background: #ef4444; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; font-size: 15px; font-weight:600;">
                 Body Progress: ${data.goalsProgress.bodyProgress}%
               </div>
             </div>
           </div>
 
-          <!-- Soul Section with Enhanced Metrics -->
+          <!-- Soul Section with Horizontal Metrics -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #8b5cf6; margin: 0 0 20px 0; font-size: 20px;">✨ Soul Vitals</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.reflectionMinutes}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Reflection Minutes</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.meditationSessions}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Meditation Sessions</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.gratitudeMoments}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Gratitude Moments</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.helpedSomeone}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Helped Someone</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.gratitudeStreak}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Gratitude Streak</div>
-              </div>
-            </div>
-            <div style="margin-top: 20px; text-align: center;">
-              <div style="background: #8b5cf6; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block;">
+            <table style="width:100%;border-collapse:collapse;text-align:center;margin-bottom:16px;">
+              <tr>
+                <td style="padding:0 12px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.soulMetrics.reflectionMinutes}</div>
+                  <div style="color:#6b7280;font-size:13px;">Reflection</div>
+                </td>
+                <td style="padding:0 12px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.soulMetrics.meditationSessions}</div>
+                  <div style="color:#6b7280;font-size:13px;">Meditation</div>
+                </td>
+                <td style="padding:0 12px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.soulMetrics.gratitudeMoments}</div>
+                  <div style="color:#6b7280;font-size:13px;">Gratitude</div>
+                </td>
+                <td style="padding:0 12px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.soulMetrics.helpedSomeone}</div>
+                  <div style="color:#6b7280;font-size:13px;">Helped</div>
+                </td>
+                <td style="padding:0 12px;">
+                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.soulMetrics.gratitudeStreak}</div>
+                  <div style="color:#6b7280;font-size:13px;">Gratitude Streak</div>
+                </td>
+              </tr>
+            </table>
+            <div style="margin-top: 10px; text-align: center;">
+              <div style="background: #8b5cf6; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; font-size: 15px; font-weight:600;">
                 Soul Progress: ${data.goalsProgress.soulProgress}%
               </div>
             </div>
