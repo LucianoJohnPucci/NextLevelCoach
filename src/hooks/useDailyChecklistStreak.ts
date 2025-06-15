@@ -41,7 +41,7 @@ export const useDailyChecklistStreak = () => {
 
       // Update today's completion status in history
       const todayCompletionRate = totalItems > 0 ? completedToday / totalItems : 0;
-      const todayCompleted = todayCompletionRate >= 0.75; // 75% completion threshold
+      const todayCompleted = todayCompletionRate >= 0.10; // 10% completion threshold (reduced from 75%)
       
       const updatedHistory = {
         ...checklistHistory,
