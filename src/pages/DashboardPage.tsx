@@ -2,11 +2,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Activity, Calendar, Heart, Target, TrendingUp, CheckSquare } from "lucide-react";
+import { Activity, Calendar, Heart, Target, TrendingUp, ListCheck, CheckCircle2 } from "lucide-react";
 import { useTasks } from "@/components/tasks/useTasks";
 import EmailTestDialog from "@/components/email/EmailTestDialog";
 import ProgressReportDialog from "@/components/email/ProgressReportDialog";
 import { useDailyGoals } from "@/components/goals/useDailyGoals";
+import { useDailyChecklistStreak } from "@/hooks/useDailyChecklistStreak";
 
 // Sample data - In a real application, this would come from your backend
 const moodData = [
@@ -93,19 +94,32 @@ const DashboardPage = () => {
   const { tasks } = useTasks();
   const completedTasks = tasks.filter(task => task.completed).length;
   const totalTasks = tasks.length;
-  const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  // --- Goals Progress calculation from daily goals ---
+  // --- Goals Progress calculation (now includes tasks) ---
   const { goals } = useDailyGoals();
   const totalGoals = goals.length;
   const completedGoals = goals.filter(goal => goal.completed).length;
-  const goalsProgress = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
+  
+  // Combine goals and tasks for overall progress
+  const totalItems = totalGoals + totalTasks;
+  const completedItems = completedGoals + completedTasks;
+  const overallProgress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+  
+  const progressSubtitle = totalItems > 0 
+    ? `${completedItems} out of ${totalItems} items completed`
+    : `No goals or tasks set`;
 
-  // Optionally, for more display details:
-  const goalsSubtitle =
-    totalGoals > 0
-      ? `${completedGoals} out of ${totalGoals} goals on track`
-      : `No goals set`;
+  // --- Daily Checklist Streak ---
+  const { 
+    currentStreak, 
+    longestStreak, 
+    todayProgress, 
+    isLoading: checklistLoading 
+  } = useDailyChecklistStreak();
+
+  const checklistCompletionRate = todayProgress.total > 0 
+    ? Math.round((todayProgress.completed / todayProgress.total) * 100) 
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -147,21 +161,24 @@ const DashboardPage = () => {
           delay={0.2}
         />
         <StatCard
-          title="Tasks Completed"
-          value={completedTasks.toString()}
-          description={`Out of ${totalTasks} total tasks`}
-          icon={CheckSquare}
-          trend={{ value: `${completionPercentage}% completion`, direction: "neutral" }}
+          title="Daily Process Streak"
+          value={checklistLoading ? "..." : currentStreak.toString()}
+          description={`Today: ${todayProgress.completed}/${todayProgress.total} completed (${checklistCompletionRate}%)`}
+          icon={ListCheck}
+          trend={{ 
+            value: longestStreak > currentStreak ? `Best: ${longestStreak} days` : "Personal best!", 
+            direction: currentStreak > 0 ? "up" : "neutral" 
+          }}
           delay={0.3}
         />
         <StatCard
-          title="Goals Progress"
-          value={`${goalsProgress}%`}
-          description={goalsSubtitle}
+          title="Overall Progress"
+          value={`${overallProgress}%`}
+          description={progressSubtitle}
           icon={Target}
           trend={{
-            value: totalGoals > 0 ? `${goalsProgress}% completion` : "",
-            direction: "up"
+            value: totalItems > 0 ? `${overallProgress}% completion` : "",
+            direction: overallProgress > 70 ? "up" : overallProgress > 30 ? "neutral" : "down"
           }}
           delay={0.4}
         />
@@ -300,6 +317,16 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              <div className="rounded-lg bg-primary/5 p-4">
+                <h3 className="mb-2 font-medium">Daily Process Routine</h3>
+                <p className="text-sm text-muted-foreground">
+                  {currentStreak > 0 
+                    ? `Great job! You're on a ${currentStreak}-day streak with your daily process checklist. Consistency builds powerful habits.`
+                    : "Start building your daily routine streak by completing at least 75% of your daily process checklist items each day."
+                  }
+                </p>
+              </div>
+              
               <div className="rounded-lg bg-primary/5 p-4">
                 <h3 className="mb-2 font-medium">Mood Pattern</h3>
                 <p className="text-sm text-muted-foreground">

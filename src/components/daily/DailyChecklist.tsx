@@ -72,9 +72,11 @@ const DailyChecklist = ({ recordsEnabled }: DailyChecklistProps) => {
     }
   }, []);
 
-  // Save items to localStorage whenever items change
+  // Save items to localStorage and trigger custom event whenever items change
   useEffect(() => {
     localStorage.setItem('dailyChecklistItems', JSON.stringify(items));
+    // Dispatch custom event to notify other components about checklist updates
+    window.dispatchEvent(new CustomEvent('checklistUpdated'));
   }, [items]);
 
   const getIcon = (iconName: string) => {
