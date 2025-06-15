@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail } from "lucide-react";
+import { Mail, AlertCircle } from "lucide-react";
 import { useEmail } from "@/hooks/useEmail";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const EmailTestDialog = () => {
   const [open, setOpen] = useState(false);
@@ -68,6 +69,14 @@ const EmailTestDialog = () => {
             Send a test email to verify your Resend integration is working correctly.
           </DialogDescription>
         </DialogHeader>
+        
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Note:</strong> In testing mode, Resend only allows sending emails to your verified email address. 
+            To send to other recipients, verify a domain at <a href="https://resend.com/domains" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">resend.com/domains</a>.
+          </AlertDescription>
+        </Alert>
         
         <div className="space-y-4">
           <div className="space-y-2">
