@@ -32,18 +32,17 @@ const ProgressReportDialog = () => {
       if (!dateGoals.length) return "";
       return `
         <tr>
-          <td style="padding:4px 8px;font-size:12px;color:#64748b;">${date}</td>
-          <td style="padding:4px 8px;font-size:12px;">
-            <ul style="margin:0;padding-left:16px;">
-              ${dateGoals.map(goal => `
-                <li>
-                  <span style="color:${goal.completed ? '#10b981' : '#ef4444'};font-weight:600;">
-                    ${goal.completed ? "✓" : "✗"}
-                  </span> 
-                  ${goal.title} <span style="color:#94a3b8;">(${goal.category})</span>
-                </li>
-              `).join("")}
-            </ul>
+          <td style="padding:8px;font-size:14px;color:#64748b;border-bottom:1px solid #e2e8f0;">${date}</td>
+          <td style="padding:8px;font-size:14px;border-bottom:1px solid #e2e8f0;">
+            ${dateGoals.map(goal => `
+              <div style="margin-bottom:8px;padding:8px;background:#f8fafc;border-radius:6px;">
+                <span style="color:${goal.completed ? '#10b981' : '#ef4444'};font-weight:600;margin-right:8px;">
+                  ${goal.completed ? "✓" : "✗"}
+                </span> 
+                <strong>${goal.title}</strong> 
+                <span style="color:#94a3b8;margin-left:8px;">(${goal.category})</span>
+              </div>
+            `).join("")}
           </td>
         </tr>
       `;
@@ -53,18 +52,21 @@ const ProgressReportDialog = () => {
     const habitsRows = data.timeframeHabits.map(habit => {
       return `
         <tr>
-          <td style="padding:4px 8px;font-size:12px;color:#64748b;">${habit.title} (${habit.frequency})</td>
-          <td style="padding:4px 8px;font-size:12px;">
-            <ul style="margin:0;padding-left:16px;display:flex;gap:8px;list-style:none;">
+          <td style="padding:8px;font-size:14px;color:#64748b;border-bottom:1px solid #e2e8f0;vertical-align:top;">
+            <strong>${habit.title}</strong><br>
+            <span style="color:#94a3b8;font-size:12px;">(${habit.frequency})</span>
+          </td>
+          <td style="padding:8px;font-size:14px;border-bottom:1px solid #e2e8f0;">
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
               ${sortedDates.map(date => `
-                <li title="${date}">
-                  <span style="color:${habit.statusByDate[date] ? '#10b981' : '#d1d5db'};font-size:18px;">
+                <div style="display:flex;flex-direction:column;align-items:center;padding:4px;background:#f8fafc;border-radius:4px;min-width:60px;">
+                  <span style="color:${habit.statusByDate[date] ? '#10b981' : '#d1d5db'};font-size:20px;line-height:1;">
                     ${habit.statusByDate[date] ? "●" : "○"}
                   </span>
-                  <span style="display:none;">${date}</span>
-                </li>
+                  <span style="font-size:10px;color:#64748b;margin-top:2px;">${date.slice(-2)}</span>
+                </div>
               `).join("")}
-            </ul>
+            </div>
           </td>
         </tr>
       `;
@@ -145,7 +147,7 @@ const ProgressReportDialog = () => {
           <!-- Key Insights -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 20px;">💡 Key Insights</h3>
-            <div style="space-y: 16px;">
+            <div style="display: block;">
               <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
                 <strong>🎯 Progress Highlight:</strong> Your overall progress is at ${data.goalsProgress.overallProgress}%, showing consistent growth across all areas.
               </div>
@@ -197,66 +199,66 @@ const ProgressReportDialog = () => {
           <!-- GOALS & HABITS SECTION -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #0ea5e9; margin: 0 0 20px 0; font-size: 20px;">🏆 Goals & Habits</h3>
-            <div>
-              <h4 style="color:#6366f1; font-size:16px; margin:0 0 10px 0;">Daily Goals</h4>
-              <table style="border-collapse:collapse;width:100%;">
+            
+            <div style="margin-bottom: 30px;">
+              <h4 style="color:#6366f1; font-size:18px; margin:0 0 15px 0;">Daily Goals</h4>
+              <table style="border-collapse:collapse;width:100%;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
                 <thead>
-                  <tr>
-                    <th style="text-align:left;padding:4px 8px;font-size:13px;">Date</th>
-                    <th style="text-align:left;padding:4px 8px;font-size:13px;">Goals</th>
+                  <tr style="background:#f8fafc;">
+                    <th style="text-align:left;padding:12px;font-size:14px;font-weight:600;color:#374151;border-bottom:2px solid #e2e8f0;">Date</th>
+                    <th style="text-align:left;padding:12px;font-size:14px;font-weight:600;color:#374151;border-bottom:2px solid #e2e8f0;">Goals</th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${goalsRows || `<tr><td colspan="2" style="color:#94a3b8;font-size:13px;padding:6px;">No goals set for this period.</td></tr>`}
+                  ${goalsRows || `<tr><td colspan="2" style="color:#94a3b8;font-size:14px;padding:20px;text-align:center;border-bottom:1px solid #e2e8f0;">No goals set for this period.</td></tr>`}
                 </tbody>
               </table>
             </div>
-            <div style="margin-top:30px;">
-              <h4 style="color:#22c55e; font-size:16px; margin:0 0 10px 0;">Habits Completion</h4>
-              <table style="border-collapse:collapse;width:100%;">
+            
+            <div>
+              <h4 style="color:#22c55e; font-size:18px; margin:0 0 15px 0;">Habits Completion</h4>
+              <table style="border-collapse:collapse;width:100%;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
                 <thead>
-                  <tr>
-                    <th style="text-align:left;padding:4px 8px;font-size:13px;">Habit</th>
-                    <th style="text-align:left;padding:4px 8px;font-size:13px;">Daily Status</th>
+                  <tr style="background:#f8fafc;">
+                    <th style="text-align:left;padding:12px;font-size:14px;font-weight:600;color:#374151;border-bottom:2px solid #e2e8f0;">Habit</th>
+                    <th style="text-align:left;padding:12px;font-size:14px;font-weight:600;color:#374151;border-bottom:2px solid #e2e8f0;">Daily Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${habitsRows || `<tr><td colspan="2" style="color:#94a3b8;font-size:13px;padding:6px;">No habits found for this period.</td></tr>`}
+                  ${habitsRows || `<tr><td colspan="2" style="color:#94a3b8;font-size:14px;padding:20px;text-align:center;border-bottom:1px solid #e2e8f0;">No habits found for this period.</td></tr>`}
                 </tbody>
               </table>
-              <p style="color:#64748b;font-size:12px;">Filled green = done; faded = missed. Hover for the date.</p>
+              <p style="color:#64748b;font-size:12px;margin-top:12px;font-style:italic;">● = completed, ○ = missed. Numbers show day of month.</p>
             </div>
           </div>
 
           <!-- Mind Section with Horizontal Metrics -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #3b82f6; margin: 0 0 20px 0; font-size: 20px;">🧠 Mind Vitals</h3>
-            <table style="width:100%;border-collapse:collapse;text-align:center;margin-bottom:16px;">
-              <tr>
-                <td style="padding:0 18px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.averageMood}/10</div>
-                  <div style="color:#6b7280; font-size:13px;">Avg Mood</div>
-                </td>
-                <td style="padding:0 18px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.meditationMinutes}</div>
-                  <div style="color:#6b7280; font-size:13px;">Meditation Min</div>
-                </td>
-                <td style="padding:0 18px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.journalEntries}</div>
-                  <div style="color:#6b7280; font-size:13px;">Journal Entries</div>
-                </td>
-                <td style="padding:0 18px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.readingSessions}</div>
-                  <div style="color:#6b7280;font-size:13px;">Reading Sessions</div>
-                </td>
-                <td style="padding:0 18px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.mindMetrics.learningSessions}</div>
-                  <div style="color:#6b7280;font-size:13px;">Learning Sessions</div>
-                </td>
-              </tr>
-            </table>
-            <div style="margin-top: 10px; text-align: center;">
-              <div style="background: #3b82f6; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; font-size: 15px; font-weight:600;">
+            <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.mindMetrics.averageMood}/10</div>
+                <div style="color: #6b7280; font-size: 14px;">Avg Mood</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.mindMetrics.meditationMinutes}</div>
+                <div style="color: #6b7280; font-size: 14px;">Meditation Min</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.mindMetrics.journalEntries}</div>
+                <div style="color: #6b7280; font-size: 14px;">Journal Entries</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.mindMetrics.readingSessions}</div>
+                <div style="color: #6b7280; font-size: 14px;">Reading Sessions</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.mindMetrics.learningSessions}</div>
+                <div style="color: #6b7280; font-size: 14px;">Learning Sessions</div>
+              </div>
+            </div>
+            <div style="text-align: center;">
+              <div style="background: #3b82f6; color: white; padding: 12px 24px; border-radius: 25px; display: inline-block; font-size: 16px; font-weight: 600;">
                 Mind Progress: ${data.goalsProgress.mindProgress}%
               </div>
             </div>
@@ -265,36 +267,34 @@ const ProgressReportDialog = () => {
           <!-- Body Section with Horizontal Metrics -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #ef4444; margin: 0 0 20px 0; font-size: 20px;">💪 Body Vitals</h3>
-            <table style="width:100%;border-collapse:collapse;text-align:center;margin-bottom:16px;">
-              <tr>
-                <td style="padding:0 12px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.averageEnergy}/10</div>
-                  <div style="color:#6b7280;font-size:13px;">Avg Energy</div>
-                </td>
-                <td style="padding:0 12px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.workoutsCompleted}</div>
-                  <div style="color:#6b7280;font-size:13px;">Workouts</div>
-                </td>
-                <td style="padding:0 12px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.yogaSessions}</div>
-                  <div style="color:#6b7280;font-size:13px;">Yoga Sessions</div>
-                </td>
-                <td style="padding:0 12px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.cardioSessions}</div>
-                  <div style="color:#6b7280;font-size:13px;">Cardio Sessions</div>
-                </td>
-                <td style="padding:0 12px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.strengthSessions}</div>
-                  <div style="color:#6b7280;font-size:13px;">Strength</div>
-                </td>
-                <td style="padding:0 12px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.bodyMetrics.stretchSessions}</div>
-                  <div style="color:#6b7280;font-size:13px;">Stretch</div>
-                </td>
-              </tr>
-            </table>
-            <div style="margin-top: 10px; text-align: center;">
-              <div style="background: #ef4444; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; font-size: 15px; font-weight:600;">
+            <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.bodyMetrics.averageEnergy}/10</div>
+                <div style="color: #6b7280; font-size: 14px;">Avg Energy</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.bodyMetrics.workoutsCompleted}</div>
+                <div style="color: #6b7280; font-size: 14px;">Workouts</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.bodyMetrics.yogaSessions}</div>
+                <div style="color: #6b7280; font-size: 14px;">Yoga Sessions</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.bodyMetrics.cardioSessions}</div>
+                <div style="color: #6b7280; font-size: 14px;">Cardio Sessions</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.bodyMetrics.strengthSessions}</div>
+                <div style="color: #6b7280; font-size: 14px;">Strength</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.bodyMetrics.stretchSessions}</div>
+                <div style="color: #6b7280; font-size: 14px;">Stretch</div>
+              </div>
+            </div>
+            <div style="text-align: center;">
+              <div style="background: #ef4444; color: white; padding: 12px 24px; border-radius: 25px; display: inline-block; font-size: 16px; font-weight: 600;">
                 Body Progress: ${data.goalsProgress.bodyProgress}%
               </div>
             </div>
@@ -303,32 +303,30 @@ const ProgressReportDialog = () => {
           <!-- Soul Section with Horizontal Metrics -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #8b5cf6; margin: 0 0 20px 0; font-size: 20px;">✨ Soul Vitals</h3>
-            <table style="width:100%;border-collapse:collapse;text-align:center;margin-bottom:16px;">
-              <tr>
-                <td style="padding:0 12px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.soulMetrics.reflectionMinutes}</div>
-                  <div style="color:#6b7280;font-size:13px;">Reflection</div>
-                </td>
-                <td style="padding:0 12px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.soulMetrics.meditationSessions}</div>
-                  <div style="color:#6b7280;font-size:13px;">Meditation</div>
-                </td>
-                <td style="padding:0 12px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.soulMetrics.gratitudeMoments}</div>
-                  <div style="color:#6b7280;font-size:13px;">Gratitude</div>
-                </td>
-                <td style="padding:0 12px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.soulMetrics.helpedSomeone}</div>
-                  <div style="color:#6b7280;font-size:13px;">Helped</div>
-                </td>
-                <td style="padding:0 12px;">
-                  <div style="font-size:32px;font-weight:bold;color:#1f2937;">${data.soulMetrics.gratitudeStreak}</div>
-                  <div style="color:#6b7280;font-size:13px;">Gratitude Streak</div>
-                </td>
-              </tr>
-            </table>
-            <div style="margin-top: 10px; text-align: center;">
-              <div style="background: #8b5cf6; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; font-size: 15px; font-weight:600;">
+            <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.soulMetrics.reflectionMinutes}</div>
+                <div style="color: #6b7280; font-size: 14px;">Reflection</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.soulMetrics.meditationSessions}</div>
+                <div style="color: #6b7280; font-size: 14px;">Meditation</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.soulMetrics.gratitudeMoments}</div>
+                <div style="color: #6b7280; font-size: 14px;">Gratitude</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.soulMetrics.helpedSomeone}</div>
+                <div style="color: #6b7280; font-size: 14px;">Helped</div>
+              </div>
+              <div style="text-align: center; min-width: 100px;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${data.soulMetrics.gratitudeStreak}</div>
+                <div style="color: #6b7280; font-size: 14px;">Gratitude Streak</div>
+              </div>
+            </div>
+            <div style="text-align: center;">
+              <div style="background: #8b5cf6; color: white; padding: 12px 24px; border-radius: 25px; display: inline-block; font-size: 16px; font-weight: 600;">
                 Soul Progress: ${data.goalsProgress.soulProgress}%
               </div>
             </div>
