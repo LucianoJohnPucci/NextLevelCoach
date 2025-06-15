@@ -30,10 +30,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending email to:", to, "Subject:", subject);
 
-    // Update this line with your verified domain
-    // Replace "yourdomain.com" with your actual verified domain
     const emailResponse = await resend.emails.send({
-      from: from || "Next Level Coach <noreply@yourdomain.com>",
+      from: from || "Next Level Coach <noreply@nextlevelcoach.app>",
       to: [to],
       subject: subject,
       html: html,
