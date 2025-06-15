@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -24,17 +23,34 @@ export const fetchTodaySoulMetrics = async (userId: string) => {
     .select("*")
     .eq("user_id", userId)
     .eq("date", today)
-    .maybeSingle();
+    .order("created_at", { ascending: false });
   
   if (error) throw error;
   
-  if (!data) return null;
+  if (!data || data.length === 0) return null;
   
-  return {
-    ...data,
-    created_at: new Date(data.created_at),
-    updated_at: new Date(data.updated_at)
-  };
+  // Aggregate values from all entries for today
+  const aggregated = data.reduce((acc, entry) => ({
+    id: entry.id, // Use the most recent entry's ID
+    user_id: entry.user_id,
+    date: entry.date,
+    reflection_minutes: acc.reflection_minutes + entry.reflection_minutes,
+    connections_attended: acc.connections_attended + entry.connections_attended,
+    gratitude_streak_days: Math.max(acc.gratitude_streak_days, entry.gratitude_streak_days), // Use max for streak
+    created_at: new Date(entry.created_at),
+    updated_at: new Date(entry.updated_at)
+  }), {
+    id: data[0].id,
+    user_id: data[0].user_id,
+    date: data[0].date,
+    reflection_minutes: 0,
+    connections_attended: 0,
+    gratitude_streak_days: 0,
+    created_at: new Date(data[0].created_at),
+    updated_at: new Date(data[0].updated_at)
+  });
+
+  return aggregated;
 };
 
 // Fetch soul metrics for the current week
