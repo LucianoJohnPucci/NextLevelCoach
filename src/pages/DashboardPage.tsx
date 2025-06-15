@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { Activity, Calendar, Heart, Target, TrendingUp, ListCheck, CheckCircle2 } from "lucide-react";
 import { useTasks } from "@/components/tasks/useTasks";
-import EmailTestDialog from "@/components/email/EmailTestDialog";
 import ProgressReportDialog from "@/components/email/ProgressReportDialog";
 import { useDailyGoals } from "@/components/goals/useDailyGoals";
 import { useDailyChecklistStreak } from "@/hooks/useDailyChecklistStreak";
@@ -129,7 +128,6 @@ const DashboardPage = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <EmailTestDialog />
             <ProgressReportDialog />
           </div>
         </div>
