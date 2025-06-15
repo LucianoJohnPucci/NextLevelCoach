@@ -9,7 +9,6 @@ import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, Database } from 
 import NoteForm from "@/components/notes/NoteForm";
 import NoteItem from "@/components/notes/NoteItem";
 import SleepTracker from "@/components/notes/SleepTracker";
-import SleepMetricsCard from "@/components/notes/SleepMetricsCard";
 import { useNotes } from "@/components/notes/useNotes";
 import { useAuth } from "@/components/AuthProvider";
 import { Link } from "react-router-dom";
@@ -73,15 +72,6 @@ const NotesPage = () => {
           </CardContent>
         </Card>
       )}
-      
-      {/* Sleep Metrics Card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <SleepMetricsCard 
-          averageHours={7.8}
-          trendPercentage={12}
-          isIncreasing={true}
-        />
-      </div>
       
       <div className="flex items-center justify-between">
         <div className="relative w-full max-w-sm">
