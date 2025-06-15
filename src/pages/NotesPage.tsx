@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -5,14 +6,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, CheckSquare, Database, ListCheck, List, Kanban } from "lucide-react";
+import { Brain, Heart, Sparkles, Plus, Search, BookOpen, LogIn, CheckSquare, Database, List, Kanban } from "lucide-react";
 import { format } from "date-fns";
 import NoteForm from "@/components/notes/NoteForm";
 import NoteItem from "@/components/notes/NoteItem";
 import TaskForm from "@/components/tasks/TaskForm";
 import TaskItem from "@/components/tasks/TaskItem";
 import TaskKanbanBoard from "@/components/tasks/TaskKanbanBoard";
-import DailyChecklist from "@/components/daily/DailyChecklist";
 import { useNotes } from "@/components/notes/useNotes";
 import { useTasks } from "@/components/tasks/useTasks";
 import { useAuth } from "@/components/AuthProvider";
@@ -112,9 +112,6 @@ const NotesPage = () => {
           </TabsTrigger>
           <TabsTrigger value="notes">
             <BookOpen className="mr-2 h-4 w-4" /> Notes
-          </TabsTrigger>
-          <TabsTrigger value="checklist">
-            <ListCheck className="mr-2 h-4 w-4" /> Daily Checklist
           </TabsTrigger>
           <TabsTrigger value="mind">
             <Brain className="mr-2 h-4 w-4" /> Mind
@@ -237,10 +234,6 @@ const NotesPage = () => {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="checklist" className="mt-6">
-          <DailyChecklist recordsEnabled={recordsEnabled} />
         </TabsContent>
 
         {["mind", "body", "soul"].map((category) => (

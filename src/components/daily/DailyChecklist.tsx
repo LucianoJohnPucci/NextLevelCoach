@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Heart, Sparkles, Target, Calendar, Plus } from "lucide-react";
+import { Brain, Heart, Sparkles, Target, Plus } from "lucide-react";
 import { toast } from "sonner";
 import DailyChecklistDialog from "./DailyChecklistDialog";
 
@@ -134,89 +134,77 @@ const DailyChecklist = ({ recordsEnabled }: DailyChecklistProps) => {
 
   return (
     <>
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Daily Process Checklist
-              </CardTitle>
-              <CardDescription>
-                Complete these steps to stay on track with your wellness journey
-              </CardDescription>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">{completedCount}/{totalCount}</div>
-              <div className="text-sm text-muted-foreground">{Math.round(progressPercentage)}% Complete</div>
-            </div>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-right">
+            <div className="text-2xl font-bold">{completedCount}/{totalCount}</div>
+            <div className="text-sm text-muted-foreground">{Math.round(progressPercentage)}% Complete</div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className={`flex items-start space-x-3 rounded-lg border p-4 transition-all duration-200 ${
-                item.completed 
-                  ? 'bg-green-50 border-green-200 opacity-75' 
-                  : 'bg-background hover:bg-muted/50'
-              }`}
-            >
-              <Checkbox
-                id={item.id}
-                checked={item.completed}
-                onCheckedChange={() => toggleItem(item.id)}
-                className="mt-1"
-              />
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className={`p-1 rounded-full ${getCategoryColor(item.category)} bg-opacity-20`}>
-                    {getIcon(item.icon)}
-                  </div>
-                  <label
-                    htmlFor={item.id}
-                    className={`font-medium cursor-pointer ${
-                      item.completed ? 'line-through text-muted-foreground' : ''
-                    }`}
-                  >
-                    {item.title}
-                  </label>
-                  {item.category !== "general" && (
-                    <Badge variant="secondary" className={`text-xs ${getCategoryColor(item.category)}`}>
-                      {item.category}
-                    </Badge>
-                  )}
+        </div>
+        
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className={`flex items-start space-x-3 rounded-lg border p-4 transition-all duration-200 ${
+              item.completed 
+                ? 'bg-green-50 border-green-200 opacity-75' 
+                : 'bg-background hover:bg-muted/50'
+            }`}
+          >
+            <Checkbox
+              id={item.id}
+              checked={item.completed}
+              onCheckedChange={() => toggleItem(item.id)}
+              className="mt-1"
+            />
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className={`p-1 rounded-full ${getCategoryColor(item.category)} bg-opacity-20`}>
+                  {getIcon(item.icon)}
                 </div>
-                <p className={`text-sm ${item.completed ? 'text-muted-foreground line-through' : 'text-muted-foreground'}`}>
-                  {item.description}
-                </p>
+                <label
+                  htmlFor={item.id}
+                  className={`font-medium cursor-pointer ${
+                    item.completed ? 'line-through text-muted-foreground' : ''
+                  }`}
+                >
+                  {item.title}
+                </label>
+                {item.category !== "general" && (
+                  <Badge variant="secondary" className={`text-xs ${getCategoryColor(item.category)}`}>
+                    {item.category}
+                  </Badge>
+                )}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1"
-                onClick={() => console.log(`Navigate to ${item.title}`)}
-              >
-                Go
-              </Button>
+              <p className={`text-sm ${item.completed ? 'text-muted-foreground line-through' : 'text-muted-foreground'}`}>
+                {item.description}
+              </p>
             </div>
-          ))}
-
-          <div className="pt-4 border-t">
-            <Button 
-              variant="outline" 
-              className="w-full gap-2" 
-              onClick={() => setDialogOpen(true)}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1"
+              onClick={() => console.log(`Navigate to ${item.title}`)}
             >
-              <Plus className="h-4 w-4" />
-              Go to inputs
+              Go
             </Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Add new habits to your daily routine. Daily check-ins with modifications allow new habits to be BORN! 🌱
-            </p>
           </div>
-        </CardContent>
-      </Card>
+        ))}
+
+        <div className="pt-4 border-t">
+          <Button 
+            variant="outline" 
+            className="w-full gap-2" 
+            onClick={() => setDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            Go to inputs
+          </Button>
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            Add new habits to your daily routine. Daily check-ins with modifications allow new habits to be BORN! 🌱
+          </p>
+        </div>
+      </CardContent>
 
       <DailyChecklistDialog
         open={dialogOpen}
