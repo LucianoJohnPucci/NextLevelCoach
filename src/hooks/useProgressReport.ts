@@ -50,26 +50,69 @@ export const useProgressReport = () => {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - timeframeDays);
 
-      // Fetch mind metrics
+      // Fetch mind metrics data
+      const { data: mindMetrics } = await supabase
+        .from("mind_metrics")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false })
+        .limit(timeframeDays);
+
+      // Fetch body metrics data
+      const { data: bodyMetrics } = await supabase
+        .from("body_metrics")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false })
+        .limit(timeframeDays);
+
+      // Fetch soul metrics data
+      const { data: soulMetrics } = await supabase
+        .from("soul_metrics")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false })
+        .limit(timeframeDays);
+
+      // Fetch daily entries for mood and energy data
+      const { data: dailyEntries } = await supabase
+        .from("daily_entries")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false })
+        .limit(timeframeDays);
+
+      // Fetch goals for progress calculation
       const { data: mindGoals } = await supabase
         .from("mind_goals")
         .select("*")
         .eq("user_id", user.id)
         .single();
 
-      // Fetch body metrics
       const { data: bodyGoals } = await supabase
         .from("body_goals")
         .select("*")
         .eq("user_id", user.id)
         .single();
 
-      // Fetch soul metrics
       const { data: soulGoals } = await supabase
         .from("soul_goals")
         .select("*")
         .eq("user_id", user.id)
         .single();
+
+      // Calculate aggregated metrics
+      const totalMeditationMinutes = mindMetrics?.reduce((sum, entry) => sum + entry.meditation_minutes, 0) || 0;
+      const totalWorkoutMinutes = bodyMetrics?.reduce((sum, entry) => sum + entry.workout_minutes, 0) || 0;
+      const totalReflectionMinutes = soulMetrics?.reduce((sum, entry) => sum + entry.reflection_minutes, 0) || 0;
+      const totalConnectionsAttended = soulMetrics?.reduce((sum, entry) => sum + entry.connections_attended, 0) || 0;
+      const maxGratitudeStreak = soulMetrics?.reduce((max, entry) => Math.max(max, entry.gratitude_streak_days), 0) || 0;
+
+      // Calculate mood and energy averages
+      const avgMood = dailyEntries?.length ? 
+        dailyEntries.reduce((sum, entry) => sum + entry.mood, 0) / dailyEntries.length : 7.8;
+      const avgEnergy = dailyEntries?.length ? 
+        dailyEntries.reduce((sum, entry) => sum + entry.energy, 0) / dailyEntries.length : 7.0;
 
       // Calculate task metrics
       const completedTasks = tasks.filter(task => task.completed).length;
@@ -85,21 +128,21 @@ export const useProgressReport = () => {
       const reportData: ProgressReportData = {
         timeframeDays,
         mindMetrics: {
-          averageMood: 7.8, // Sample data - in real app this would come from daily entries
-          moodTrend: "12% increase",
-          meditationMinutes: mindGoals?.meditation_minutes || 0,
-          journalEntries: mindGoals?.journal_entries || 0,
+          averageMood: Math.round(avgMood * 10) / 10, // Round to 1 decimal
+          moodTrend: "12% increase", // Sample trend - could be calculated from historical data
+          meditationMinutes: totalMeditationMinutes,
+          journalEntries: dailyEntries?.length || 0,
         },
         bodyMetrics: {
-          averageEnergy: 7.0,
-          energyTrend: "5% increase",
-          workoutsCompleted: bodyGoals?.workouts_completed || 0,
-          waterIntake: bodyGoals?.water_intake || 0,
+          averageEnergy: Math.round(avgEnergy * 10) / 10, // Round to 1 decimal
+          energyTrend: "5% increase", // Sample trend - could be calculated from historical data
+          workoutsCompleted: bodyMetrics?.length || 0,
+          waterIntake: 0, // Default value - water intake tracking not implemented yet
         },
         soulMetrics: {
-          reflectionMinutes: soulGoals?.reflection_minutes || 0,
-          connectionsAttended: soulGoals?.connections_attended || 0,
-          gratitudeStreak: soulGoals?.gratitude_streak_days || 0,
+          reflectionMinutes: totalReflectionMinutes,
+          connectionsAttended: totalConnectionsAttended,
+          gratitudeStreak: maxGratitudeStreak,
         },
         taskMetrics: {
           totalTasks,
