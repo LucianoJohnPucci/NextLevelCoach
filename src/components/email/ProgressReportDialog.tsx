@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -231,7 +230,7 @@ const ProgressReportDialog = () => {
             <h3 style="color: #8b5cf6; margin: 0 0 20px 0; font-size: 20px;">✨ Soul Vitals</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
               <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.reflectionMin utes}</div>
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.reflectionMinutes}</div>
                 <div style="color: #6b7280; margin-top: 8px;">Reflection Minutes</div>
               </div>
               <div style="text-align: center;">
