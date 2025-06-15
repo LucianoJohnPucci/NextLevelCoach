@@ -13,6 +13,7 @@ export interface BodyMetrics {
   body_goals: string | null;
   weight: number | null;
   height: number | null;
+  workout_title: string | null;
   // New persistent session counters
   yoga_count: number;
   cardio_count: number;
@@ -85,6 +86,7 @@ export const updateBodyMetrics = async (
     body_goals?: string;
     weight?: number;
     height?: number;
+    workout_title?: string;
     yoga_count?: number;
     cardio_count?: number;
     strength_count?: number;
@@ -133,7 +135,7 @@ export const updateBodyMetrics = async (
 };
 
 // Record workout session
-export const recordWorkoutSession = async (userId: string, minutes: number) => {
+export const recordWorkoutSession = async (userId: string, minutes: number, workoutTitle?: string) => {
   const today = new Date().toISOString().split('T')[0];
   
   // First get today's metrics
@@ -150,6 +152,7 @@ export const recordWorkoutSession = async (userId: string, minutes: number) => {
       .from("body_metrics")
       .update({
         workout_minutes: existingData.workout_minutes + minutes,
+        workout_title: workoutTitle || existingData.workout_title,
         streak_days: existingData.streak_days, // Maintain streak
         updated_at: new Date().toISOString()
       })
@@ -184,6 +187,7 @@ export const recordWorkoutSession = async (userId: string, minutes: number) => {
         user_id: userId,
         date: today,
         workout_minutes: minutes,
+        workout_title: workoutTitle,
         streak_days: streak,
         calories_burned: minutes * 0.5, // Simple calorie estimation
       })
@@ -228,9 +232,9 @@ export const useBodyMetrics = () => {
   
   // Mutation for recording workout session
   const recordSessionMutation = useMutation({
-    mutationFn: ({minutes}: {minutes: number}) => {
+    mutationFn: ({minutes, workoutTitle}: {minutes: number, workoutTitle?: string}) => {
       if (!user) throw new Error("User must be authenticated to record session");
-      return recordWorkoutSession(user.id, minutes);
+      return recordWorkoutSession(user.id, minutes, workoutTitle);
     },
     onSuccess: () => {
       // Invalidate relevant queries to refresh data
@@ -248,6 +252,7 @@ export const useBodyMetrics = () => {
       body_goals?: string;
       weight?: number;
       height?: number;
+      workout_title?: string;
       yoga_count?: number;
       cardio_count?: number;
       strength_count?: number;

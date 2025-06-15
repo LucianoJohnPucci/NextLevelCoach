@@ -61,6 +61,7 @@ export type Database = {
           user_id: string
           weight: number | null
           workout_minutes: number
+          workout_title: string | null
           yoga_count: number
         }
         Insert: {
@@ -78,6 +79,7 @@ export type Database = {
           user_id: string
           weight?: number | null
           workout_minutes?: number
+          workout_title?: string | null
           yoga_count?: number
         }
         Update: {
@@ -95,6 +97,7 @@ export type Database = {
           user_id?: string
           weight?: number | null
           workout_minutes?: number
+          workout_title?: string | null
           yoga_count?: number
         }
         Relationships: []

@@ -57,7 +57,7 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
 
       const { data, error } = await supabase
         .from("body_metrics")
-        .select("date, workout_minutes, calories_burned, streak_days")
+        .select("date, workout_minutes, calories_burned, streak_days, workout_title")
         .eq("user_id", user.id)
         .gte("date", startDate)
         .order("date", { ascending: false });
@@ -71,6 +71,7 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
         workout_minutes: item.workout_minutes ?? 0,
         calories_burned: item.calories_burned ?? 0,
         streak_days: item.streak_days ?? 0,
+        workout_title: item.workout_title,
       })) as WorkoutHistoryItem[];
     },
     enabled: isHistoryOpen, // Only fetch when open
@@ -111,8 +112,8 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
       const minutes = parseInt(selectedWorkout.duration.match(/(\d+)/)?.[0] || "0", 10);
       
       try {
-        // Record the workout session in Supabase
-        recordSession({ minutes });
+        // Record the workout session in Supabase with workout title
+        recordSession({ minutes, workoutTitle: selectedWorkout.title });
         
         onAddWorkout(minutes);
         setIsDialogOpen(false);
@@ -213,4 +214,3 @@ export const WorkoutsSection = ({ initialWorkouts, onAddWorkout }: WorkoutsSecti
 };
 
 export default WorkoutsSection;
-

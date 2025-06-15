@@ -9,6 +9,7 @@ export interface WorkoutHistoryItem {
   workout_minutes: number;
   calories_burned: number;
   streak_days: number;
+  workout_title: string | null;
 }
 
 interface WorkoutHistoryDialogProps {
@@ -22,7 +23,7 @@ interface WorkoutHistoryDialogProps {
 const WorkoutHistoryDialog: React.FC<WorkoutHistoryDialogProps> = ({ isOpen, onClose, data, isLoading, error }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BarChart2 className="h-5 w-5" />
@@ -44,6 +45,7 @@ const WorkoutHistoryDialog: React.FC<WorkoutHistoryDialogProps> = ({ isOpen, onC
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
+                  <TableHead>Workout</TableHead>
                   <TableHead>Minutes</TableHead>
                   <TableHead>Calories</TableHead>
                   <TableHead>Streak</TableHead>
@@ -53,6 +55,7 @@ const WorkoutHistoryDialog: React.FC<WorkoutHistoryDialogProps> = ({ isOpen, onC
                 {data.map((item) => (
                   <TableRow key={item.date}>
                     <TableCell>{item.date}</TableCell>
+                    <TableCell>{item.workout_title || "General Workout"}</TableCell>
                     <TableCell>{item.workout_minutes}</TableCell>
                     <TableCell>{item.calories_burned}</TableCell>
                     <TableCell>{item.streak_days}</TableCell>
