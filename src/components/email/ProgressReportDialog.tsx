@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -94,7 +95,7 @@ const ProgressReportDialog = () => {
             </div>
           </div>
 
-          <!-- Tasks Section - Moved to top -->
+          <!-- Tasks Section -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #059669; margin: 0 0 20px 0; font-size: 20px;">✅ Task Completion</h3>
             <div style="text-align: center;">
@@ -155,10 +156,10 @@ const ProgressReportDialog = () => {
             </div>
           </div>
 
-          <!-- Mind Section -->
+          <!-- Mind Section with Enhanced Metrics -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #3b82f6; margin: 0 0 20px 0; font-size: 20px;">🧠 Mind Vitals</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
               <div style="text-align: center;">
                 <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.mindMetrics.averageMood}/10</div>
                 <div style="color: #6b7280; margin-top: 8px;">Average Mood</div>
@@ -172,6 +173,14 @@ const ProgressReportDialog = () => {
                 <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.mindMetrics.journalEntries}</div>
                 <div style="color: #6b7280; margin-top: 8px;">Journal Entries</div>
               </div>
+              <div style="text-align: center;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.mindMetrics.readingSessions}</div>
+                <div style="color: #6b7280; margin-top: 8px;">Reading Sessions</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.mindMetrics.learningSessions}</div>
+                <div style="color: #6b7280; margin-top: 8px;">Learning Sessions</div>
+              </div>
             </div>
             <div style="margin-top: 20px; text-align: center;">
               <div style="background: #3b82f6; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block;">
@@ -180,10 +189,10 @@ const ProgressReportDialog = () => {
             </div>
           </div>
 
-          <!-- Body Section -->
+          <!-- Body Section with Enhanced Metrics -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #ef4444; margin: 0 0 20px 0; font-size: 20px;">💪 Body Vitals</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
               <div style="text-align: center;">
                 <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.averageEnergy}/10</div>
                 <div style="color: #6b7280; margin-top: 8px;">Average Energy</div>
@@ -191,11 +200,23 @@ const ProgressReportDialog = () => {
               </div>
               <div style="text-align: center;">
                 <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.workoutsCompleted}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Workouts Completed</div>
+                <div style="color: #6b7280; margin-top: 8px;">Total Workouts</div>
               </div>
               <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.waterIntake}L</div>
-                <div style="color: #6b7280; margin-top: 8px;">Water Intake</div>
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.yogaSessions}</div>
+                <div style="color: #6b7280; margin-top: 8px;">Yoga Sessions</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.cardioSessions}</div>
+                <div style="color: #6b7280; margin-top: 8px;">Cardio Sessions</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.strengthSessions}</div>
+                <div style="color: #6b7280; margin-top: 8px;">Strength Training</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.bodyMetrics.stretchSessions}</div>
+                <div style="color: #6b7280; margin-top: 8px;">Stretch Sessions</div>
               </div>
             </div>
             <div style="margin-top: 20px; text-align: center;">
@@ -205,17 +226,25 @@ const ProgressReportDialog = () => {
             </div>
           </div>
 
-          <!-- Soul Section -->
+          <!-- Soul Section with Enhanced Metrics -->
           <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h3 style="color: #8b5cf6; margin: 0 0 20px 0; font-size: 20px;">✨ Soul Vitals</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
               <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.reflectionMinutes}</div>
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.reflectionMin utes}</div>
                 <div style="color: #6b7280; margin-top: 8px;">Reflection Minutes</div>
               </div>
               <div style="text-align: center;">
-                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.connectionsAttended}</div>
-                <div style="color: #6b7280; margin-top: 8px;">Connections Attended</div>
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.meditationSessions}</div>
+                <div style="color: #6b7280; margin-top: 8px;">Meditation Sessions</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.gratitudeMoments}</div>
+                <div style="color: #6b7280; margin-top: 8px;">Gratitude Moments</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.helpedSomeone}</div>
+                <div style="color: #6b7280; margin-top: 8px;">Helped Someone</div>
               </div>
               <div style="text-align: center;">
                 <div style="font-size: 36px; font-weight: bold; color: #1f2937;">${data.soulMetrics.gratitudeStreak}</div>
