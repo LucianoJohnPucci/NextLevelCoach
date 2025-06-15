@@ -49,41 +49,53 @@ export type Database = {
         Row: {
           body_goals: string | null
           calories_burned: number
+          cardio_count: number
           created_at: string
           date: string
           height: number | null
           id: string
           streak_days: number
+          strength_count: number
+          stretch_count: number
           updated_at: string
           user_id: string
           weight: number | null
           workout_minutes: number
+          yoga_count: number
         }
         Insert: {
           body_goals?: string | null
           calories_burned?: number
+          cardio_count?: number
           created_at?: string
           date?: string
           height?: number | null
           id?: string
           streak_days?: number
+          strength_count?: number
+          stretch_count?: number
           updated_at?: string
           user_id: string
           weight?: number | null
           workout_minutes?: number
+          yoga_count?: number
         }
         Update: {
           body_goals?: string | null
           calories_burned?: number
+          cardio_count?: number
           created_at?: string
           date?: string
           height?: number | null
           id?: string
           streak_days?: number
+          strength_count?: number
+          stretch_count?: number
           updated_at?: string
           user_id?: string
           weight?: number | null
           workout_minutes?: number
+          yoga_count?: number
         }
         Relationships: []
       }

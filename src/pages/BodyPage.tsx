@@ -9,8 +9,19 @@ import WorkoutsSection from "@/components/body/WorkoutsSection";
 import NutritionSection from "@/components/body/NutritionSection";
 import { Workout } from "@/components/body/WorkoutsSection";
 import { Meal } from "@/components/body/NutritionSection";
+import { Save } from "lucide-react";
+import { useBodyMetrics } from "@/services/bodyMetricsService";
 
 const BodyPage = () => {
+  // Connect to backend session persistence
+  const {
+    todayMetrics,
+    updateMetrics,
+    isUpdating,
+    isLoading,
+    sessionCounts,
+  } = useBodyMetrics();
+
   const [yogaCount, setYogaCount] = useState(0);
   const [cardioCount, setCardioCount] = useState(0);
   const [strengthCount, setStrengthCount] = useState(0);
@@ -82,6 +93,33 @@ const BodyPage = () => {
     }
   ];
   
+  // Load persistent counts when loading finishes
+  React.useEffect(() => {
+    if (todayMetrics) {
+      setYogaCount(todayMetrics.yoga_count || 0);
+      setCardioCount(todayMetrics.cardio_count || 0);
+      setStrengthCount(todayMetrics.strength_count || 0);
+      setStretchCount(todayMetrics.stretch_count || 0);
+    }
+  }, [todayMetrics]);
+
+  // Save session counts to backend
+  const handleSaveSessions = async () => {
+    try {
+      await updateMetrics({
+        yoga_count: yogaCount,
+        cardio_count: cardioCount,
+        strength_count: strengthCount,
+        stretch_count: stretchCount,
+      });
+      toast.success("Session counts saved!", {
+        description: "Your daily physical sessions are now saved."
+      });
+    } catch (error) {
+      toast.error("Failed to save sessions");
+    }
+  };
+
   const handleYogaClick = () => {
     const newCount = yogaCount + 1;
     setYogaCount(newCount);
@@ -153,7 +191,20 @@ const BodyPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold tracking-tight">Body</h1>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center justify-between">
+          Body
+          {/* Save Sessions Button */}
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2 ml-2"
+            onClick={handleSaveSessions}
+            disabled={isUpdating}
+          >
+            <Save className="h-4 w-4" />
+            {isUpdating ? "Saving..." : "Save Sessions"}
+          </Button>
+        </h1>
         <p className="text-muted-foreground">
           Daily check-ins for physical health and wellness.
         </p>

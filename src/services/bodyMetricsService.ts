@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +13,11 @@ export interface BodyMetrics {
   body_goals: string | null;
   weight: number | null;
   height: number | null;
+  // New persistent session counters
+  yoga_count: number;
+  cardio_count: number;
+  strength_count: number;
+  stretch_count: number;
   created_at: Date;
   updated_at: Date;
 }
@@ -36,7 +40,11 @@ export const fetchTodayBodyMetrics = async (userId: string) => {
   return {
     ...data,
     created_at: new Date(data.created_at),
-    updated_at: new Date(data.updated_at)
+    updated_at: new Date(data.updated_at),
+    yoga_count: data.yoga_count || 0,
+    cardio_count: data.cardio_count || 0,
+    strength_count: data.strength_count || 0,
+    stretch_count: data.stretch_count || 0
   };
 };
 
@@ -59,7 +67,11 @@ export const fetchWeeklyBodyMetrics = async (userId: string) => {
   return data.map(item => ({
     ...item,
     created_at: new Date(item.created_at),
-    updated_at: new Date(item.updated_at)
+    updated_at: new Date(item.updated_at),
+    yoga_count: item.yoga_count || 0,
+    cardio_count: item.cardio_count || 0,
+    strength_count: item.strength_count || 0,
+    stretch_count: item.stretch_count || 0
   }));
 };
 
@@ -73,6 +85,10 @@ export const updateBodyMetrics = async (
     body_goals?: string;
     weight?: number;
     height?: number;
+    yoga_count?: number;
+    cardio_count?: number;
+    strength_count?: number;
+    stretch_count?: number;
   }
 ) => {
   const today = new Date().toISOString().split('T')[0];
@@ -232,6 +248,10 @@ export const useBodyMetrics = () => {
       body_goals?: string;
       weight?: number;
       height?: number;
+      yoga_count?: number;
+      cardio_count?: number;
+      strength_count?: number;
+      stretch_count?: number;
     }) => {
       if (!user) throw new Error("User must be authenticated to update metrics");
       return updateBodyMetrics(user.id, metrics);
@@ -255,6 +275,15 @@ export const useBodyMetrics = () => {
     updateMetrics: updateMetricsMutation.mutate,
     isRecording: recordSessionMutation.isPending,
     isUpdating: updateMetricsMutation.isPending,
+    // Convenience: expose session counts
+    sessionCounts: todayQuery.data
+      ? {
+          yoga: todayQuery.data.yoga_count || 0,
+          cardio: todayQuery.data.cardio_count || 0,
+          strength: todayQuery.data.strength_count || 0,
+          stretch: todayQuery.data.stretch_count || 0,
+        }
+      : { yoga: 0, cardio: 0, strength: 0, stretch: 0 },
   };
 };
 
