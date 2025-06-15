@@ -84,7 +84,7 @@ const Sidebar = () => {
         </NavItem>
         
         <NavItem to="/notes" icon={BookOpen} onClick={() => close()}>
-          Notes
+          Notes & Sleep Tracker
         </NavItem>
         
         <div className="mb-2 mt-6 px-4 text-xs font-semibold uppercase text-muted-foreground">

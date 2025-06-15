@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,7 +47,7 @@ const NotesPage = () => {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">My Notes</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Notes & Sleep Tracker</h1>
         <p className="text-muted-foreground">
           Capture insights and knowledge across mind, body, and soul.
         </p>
