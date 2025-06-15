@@ -100,7 +100,7 @@ export const useProgressReport = () => {
       const habitsList = (habitsData || []).map(h => ({
         id: h.id,
         title: h.title,
-        frequency: (h.frequency === "daily" || h.frequency === "weekly" || h.frequency === "monthly") ? h.frequency : "daily",
+        frequency: (h.frequency === "daily" || h.frequency === "weekly" || h.frequency === "monthly") ? h.frequency as "daily" | "weekly" | "monthly" : "daily" as const,
       }));
 
       // For each habit, get completion per day in timeframe using habit_tracking
