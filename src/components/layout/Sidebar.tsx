@@ -12,7 +12,8 @@ import {
   Target, 
   MessageCircle,
   BookOpen,
-  MessageSquare
+  MessageSquare,
+  CheckSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -79,11 +80,11 @@ const Sidebar = () => {
         </NavItem>
         
         <NavItem to="/goals" icon={Target} onClick={() => close()}>
-          Goals & Habits
+          Habits & Goals (Tasks)
         </NavItem>
         
         <NavItem to="/notes" icon={BookOpen} onClick={() => close()}>
-          Tasks & Notes
+          Notes
         </NavItem>
         
         <div className="mb-2 mt-6 px-4 text-xs font-semibold uppercase text-muted-foreground">
