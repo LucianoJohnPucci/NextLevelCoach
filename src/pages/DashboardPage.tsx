@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
@@ -8,6 +7,7 @@ import { useTasks } from "@/components/tasks/useTasks";
 import ProgressReportDialog from "@/components/email/ProgressReportDialog";
 import { useDailyGoals } from "@/components/goals/useDailyGoals";
 import { useDailyChecklistStreak } from "@/hooks/useDailyChecklistStreak";
+import { useSleepTracking } from "@/hooks/useSleepTracking";
 
 // Sample data - In a real application, this would come from your backend
 const moodData = [
@@ -92,6 +92,7 @@ const StatCard = ({
 
 const DashboardPage = () => {
   const { tasks } = useTasks();
+  const { averageSleep, sleepTrend } = useSleepTracking();
   const completedTasks = tasks.filter(task => task.completed).length;
   const totalTasks = tasks.length;
 
@@ -112,6 +113,14 @@ const DashboardPage = () => {
   const checklistCompletionRate = todayProgress.total > 0 
     ? Math.round((todayProgress.completed / todayProgress.total) * 100) 
     : 0;
+
+  // --- Sleep data formatting ---
+  const sleepValue = averageSleep ? averageSleep.toFixed(1) : "0.0";
+  const sleepDescription = averageSleep ? "Over the past 7 days" : "No sleep data recorded";
+  const sleepTrendData = sleepTrend ? {
+    value: `${sleepTrend.percentChange}% ${sleepTrend.isIncreasing ? 'increase' : 'decrease'}`,
+    direction: sleepTrend.isIncreasing ? "up" as const : "down" as const
+  } : undefined;
 
   return (
     <div className="space-y-6">
@@ -137,10 +146,10 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
         <StatCard
           title="Average Sleep"
-          value="7.8"
-          description="Over the past 7 days"
+          value={sleepValue}
+          description={sleepDescription}
           icon={Bed}
-          trend={{ value: "12% increase", direction: "up" }}
+          trend={sleepTrendData}
           delay={0.1}
         />
         <StatCard

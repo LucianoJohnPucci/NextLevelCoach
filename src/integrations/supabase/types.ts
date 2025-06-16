@@ -656,6 +656,60 @@ export type Database = {
         }
         Relationships: []
       }
+      sleep_entries: {
+        Row: {
+          additional_notes: string | null
+          bedtime: string | null
+          created_at: string
+          date: string
+          dream_notes: string | null
+          dream_recall: boolean | null
+          id: string
+          interrupted: boolean | null
+          interruption_cause: string | null
+          sleep_duration: number | null
+          sleep_onset_time: string | null
+          sleep_quality: number | null
+          updated_at: string
+          user_id: string
+          wake_feelings: number | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          bedtime?: string | null
+          created_at?: string
+          date?: string
+          dream_notes?: string | null
+          dream_recall?: boolean | null
+          id?: string
+          interrupted?: boolean | null
+          interruption_cause?: string | null
+          sleep_duration?: number | null
+          sleep_onset_time?: string | null
+          sleep_quality?: number | null
+          updated_at?: string
+          user_id: string
+          wake_feelings?: number | null
+        }
+        Update: {
+          additional_notes?: string | null
+          bedtime?: string | null
+          created_at?: string
+          date?: string
+          dream_notes?: string | null
+          dream_recall?: boolean | null
+          id?: string
+          interrupted?: boolean | null
+          interruption_cause?: string | null
+          sleep_duration?: number | null
+          sleep_onset_time?: string | null
+          sleep_quality?: number | null
+          updated_at?: string
+          user_id?: string
+          wake_feelings?: number | null
+        }
+        Relationships: []
+      }
       soul_goals: {
         Row: {
           connection_progress: number

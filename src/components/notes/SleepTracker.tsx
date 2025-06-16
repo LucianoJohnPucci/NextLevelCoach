@@ -11,20 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Bed, Moon, Clock, Brain } from "lucide-react";
 import { toast } from "sonner";
-
-interface SleepEntry {
-  date: Date;
-  bedTime: string;
-  sleepDuration: number;
-  sleepQuality: number;
-  interrupted: boolean;
-  interruptionCause?: string;
-  dreamRecall: boolean;
-  dreamNotes?: string;
-  sleepOnsetTime: string;
-  wakeFeelings: number;
-  additionalNotes?: string;
-}
+import { useSleepTracking } from "@/hooks/useSleepTracking";
+import { useAuth } from "@/components/AuthProvider";
 
 const SleepTracker = () => {
   const [bedTime, setBedTime] = useState("");
@@ -38,6 +26,9 @@ const SleepTracker = () => {
   const [wakeFeelings, setWakeFeelings] = useState([3]);
   const [additionalNotes, setAdditionalNotes] = useState("");
 
+  const { addSleepEntry } = useSleepTracking();
+  const { user } = useAuth();
+
   const sleepQualityEmojis = ["😴", "💤", "🥱", "😐", "😵"];
   const sleepQualityLabels = ["Poor", "Below Average", "Average", "Good", "Excellent"];
   
@@ -50,30 +41,36 @@ const SleepTracker = () => {
   ];
 
   const handleSaveSleepEntry = async () => {
-    const sleepEntry: SleepEntry = {
-      date: new Date(),
-      bedTime,
-      sleepDuration: sleepDuration[0],
-      sleepQuality: sleepQuality[0],
+    if (!user) {
+      toast.error("Please sign in to save sleep entries");
+      return;
+    }
+
+    const sleepEntry = {
+      date: new Date().toISOString().split('T')[0], // Today's date
+      bedtime: bedTime || undefined,
+      sleep_duration: sleepDuration[0],
+      sleep_quality: sleepQuality[0],
       interrupted,
-      interruptionCause: interrupted ? interruptionCause : undefined,
-      dreamRecall,
-      dreamNotes: dreamRecall ? dreamNotes : undefined,
-      sleepOnsetTime,
-      wakeFeelings: wakeFeelings[0],
-      additionalNotes
+      interruption_cause: interrupted ? interruptionCause : undefined,
+      dream_recall: dreamRecall,
+      dream_notes: dreamRecall ? dreamNotes : undefined,
+      sleep_onset_time: sleepOnsetTime || undefined,
+      wake_feelings: wakeFeelings[0],
+      additional_notes: additionalNotes || undefined
     };
 
-    // Here you would typically save to your backend/storage
-    console.log("Sleep entry:", sleepEntry);
+    const success = await addSleepEntry(sleepEntry);
     
-    toast("Sleep entry saved successfully!", {
-      description: `Logged ${sleepDuration[0]} hours of ${sleepQualityLabels[sleepQuality[0] - 1].toLowerCase()} sleep`,
-      icon: <Moon className="h-4 w-4" />,
-    });
-
-    // Reset form
-    resetForm();
+    if (success) {
+      toast.success("Sleep entry saved successfully!", {
+        description: `Logged ${sleepDuration[0]} hours of ${sleepQualityLabels[sleepQuality[0] - 1].toLowerCase()} sleep`,
+        icon: <Moon className="h-4 w-4" />,
+      });
+      resetForm();
+    } else {
+      toast.error("Failed to save sleep entry. Please try again.");
+    }
   };
 
   const resetForm = () => {
