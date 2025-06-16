@@ -25,6 +25,7 @@ const SleepTracker = () => {
   const [sleepOnsetTime, setSleepOnsetTime] = useState("");
   const [wakeFeelings, setWakeFeelings] = useState([3]);
   const [additionalNotes, setAdditionalNotes] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { addSleepEntry } = useSleepTracking();
   const { user } = useAuth();
@@ -46,30 +47,41 @@ const SleepTracker = () => {
       return;
     }
 
-    const sleepEntry = {
-      date: new Date().toISOString().split('T')[0], // Today's date
-      bedtime: bedTime || undefined,
-      sleep_duration: sleepDuration[0],
-      sleep_quality: sleepQuality[0],
-      interrupted,
-      interruption_cause: interrupted ? interruptionCause : undefined,
-      dream_recall: dreamRecall,
-      dream_notes: dreamRecall ? dreamNotes : undefined,
-      sleep_onset_time: sleepOnsetTime || undefined,
-      wake_feelings: wakeFeelings[0],
-      additional_notes: additionalNotes || undefined
-    };
+    setIsSubmitting(true);
 
-    const success = await addSleepEntry(sleepEntry);
-    
-    if (success) {
-      toast.success("Sleep entry saved successfully!", {
-        description: `Logged ${sleepDuration[0]} hours of ${sleepQualityLabels[sleepQuality[0] - 1].toLowerCase()} sleep`,
-        icon: <Moon className="h-4 w-4" />,
-      });
-      resetForm();
-    } else {
-      toast.error("Failed to save sleep entry. Please try again.");
+    try {
+      const sleepEntry = {
+        date: new Date().toISOString().split('T')[0], // Today's date
+        bedtime: bedTime || undefined,
+        sleep_duration: sleepDuration[0],
+        sleep_quality: sleepQuality[0],
+        interrupted,
+        interruption_cause: interrupted ? interruptionCause : undefined,
+        dream_recall: dreamRecall,
+        dream_notes: dreamRecall ? dreamNotes : undefined,
+        sleep_onset_time: sleepOnsetTime || undefined,
+        wake_feelings: wakeFeelings[0],
+        additional_notes: additionalNotes || undefined
+      };
+
+      console.log('Attempting to save sleep entry:', sleepEntry);
+      
+      const success = await addSleepEntry(sleepEntry);
+      
+      if (success) {
+        toast.success("Sleep entry saved successfully!", {
+          description: `Logged ${sleepDuration[0]} hours of ${sleepQualityLabels[sleepQuality[0] - 1].toLowerCase()} sleep`,
+          icon: <Moon className="h-4 w-4" />,
+        });
+        resetForm();
+      } else {
+        toast.error("Failed to save sleep entry. Please try again.");
+      }
+    } catch (error) {
+      console.error('Error saving sleep entry:', error);
+      toast.error("An error occurred while saving your sleep entry.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -266,9 +278,13 @@ const SleepTracker = () => {
 
         {/* Save Button */}
         <div className="flex justify-end pt-4">
-          <Button onClick={handleSaveSleepEntry} className="w-full md:w-auto">
+          <Button 
+            onClick={handleSaveSleepEntry} 
+            className="w-full md:w-auto"
+            disabled={isSubmitting}
+          >
             <Bed className="mr-2 h-4 w-4" />
-            Save Sleep Entry
+            {isSubmitting ? "Saving..." : "Save Sleep Entry"}
           </Button>
         </div>
       </CardContent>
