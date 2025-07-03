@@ -28,92 +28,85 @@ const ProgressReportDialog = () => {
     const goalCompletionRate = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
 
     return `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
         
         <!-- Header -->
-        <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 30px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2);">
-          <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🚀 Progress Scorecard</h1>
-          <p style="margin: 8px 0 0 0; font-size: 16px; color: rgba(255,255,255,0.9); font-weight: 500;">${timeframeText} • ${new Date().toLocaleDateString()}</p>
+        <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 20px; text-align: center;">
+          <h1 style="margin: 0; font-size: 20px; font-weight: 700; color: white;">🚀 Progress Scorecard</h1>
+          <p style="margin: 5px 0 0 0; font-size: 14px; color: rgba(255,255,255,0.9); font-weight: 500;">${timeframeText} • ${new Date().toLocaleDateString()}</p>
         </div>
 
-        <!-- Main Stats Grid -->
-        <div style="padding: 30px 20px; background: white;">
+        <!-- Main Content -->
+        <div style="padding: 24px;">
           
-          <!-- Key Metrics Row 1 -->
-          <div style="display: flex; justify-content: space-between; margin-bottom: 25px; gap: 15px;">
-            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 12px; color: white;">
-              <div style="font-size: 36px; font-weight: 900; margin-bottom: 5px;">${data.mindMetrics.averageMood}/10</div>
-              <div style="font-size: 14px; font-weight: 600; opacity: 0.9;">Avg Mood</div>
+          <!-- Key Metrics Grid -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+            <!-- Avg Mood -->
+            <div style="text-align: center; padding: 16px; background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); border-radius: 10px; color: white;">
+              <div style="font-size: 28px; font-weight: 800; margin-bottom: 4px;">${data.mindMetrics.averageMood}/10</div>
+              <div style="font-size: 12px; font-weight: 600; opacity: 0.9;">Avg Mood</div>
             </div>
-            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); border-radius: 12px; color: white;">
-              <div style="font-size: 36px; font-weight: 900; margin-bottom: 5px;">${data.bodyMetrics.averageEnergy}/10</div>
-              <div style="font-size: 14px; font-weight: 600; opacity: 0.9;">Avg Energy</div>
+            <!-- Avg Energy -->
+            <div style="text-align: center; padding: 16px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 10px; color: white;">
+              <div style="font-size: 28px; font-weight: 800; margin-bottom: 4px;">${data.bodyMetrics.averageEnergy}/10</div>
+              <div style="font-size: 12px; font-weight: 600; opacity: 0.9;">Avg Energy</div>
+            </div>
+            <!-- Tasks Done -->
+            <div style="text-align: center; padding: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 10px; color: white;">
+              <div style="font-size: 28px; font-weight: 800; margin-bottom: 4px;">${data.taskMetrics.completionRate}%</div>
+              <div style="font-size: 12px; font-weight: 600; opacity: 0.9;">Tasks Done</div>
+            </div>
+            <!-- Goals Hit -->
+            <div style="text-align: center; padding: 16px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 10px; color: white;">
+              <div style="font-size: 28px; font-weight: 800; margin-bottom: 4px;">${goalCompletionRate}%</div>
+              <div style="font-size: 12px; font-weight: 600; opacity: 0.9;">Goals Hit</div>
             </div>
           </div>
 
-          <!-- Key Metrics Row 2 -->
-          <div style="display: flex; justify-content: space-between; margin-bottom: 25px; gap: 15px;">
-            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 12px; color: #2d3748;">
-              <div style="font-size: 36px; font-weight: 900; margin-bottom: 5px;">${data.taskMetrics.completionRate}%</div>
-              <div style="font-size: 14px; font-weight: 600;">Tasks Done</div>
-            </div>
-            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); border-radius: 12px; color: #2d3748;">
-              <div style="font-size: 36px; font-weight: 900; margin-bottom: 5px;">${goalCompletionRate}%</div>
-              <div style="font-size: 14px; font-weight: 600;">Goals Hit</div>
-            </div>
-          </div>
-
-          <!-- Activity Stats -->
-          <div style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
-            <h3 style="margin: 0 0 15px 0; font-size: 18px; font-weight: 700; color: #2d3748; text-align: center;">🎯 Activity Highlights</h3>
-            <div style="display: flex; justify-content: space-around; text-align: center;">
+          <!-- Activity Highlights -->
+          <div style="background: #f8fafc; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: #374151; text-align: center;">🎯 Activity Highlights</h3>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center;">
               <div>
-                <div style="font-size: 24px; font-weight: 800; color: #5a67d8; margin-bottom: 3px;">${data.mindMetrics.meditationMinutes}</div>
-                <div style="font-size: 12px; color: #718096;">Meditation Min</div>
+                <div style="font-size: 20px; font-weight: 800; color: #3b82f6; margin-bottom: 2px;">${data.mindMetrics.meditationMinutes}</div>
+                <div style="font-size: 10px; color: #6b7280; line-height: 1.2;">Meditation<br>Minutes</div>
               </div>
               <div>
-                <div style="font-size: 24px; font-weight: 800; color: #ed8936; margin-bottom: 3px;">${data.bodyMetrics.workoutsCompleted}</div>
-                <div style="font-size: 12px; color: #718096;">Workouts</div>
+                <div style="font-size: 20px; font-weight: 800; color: #f59e0b; margin-bottom: 2px;">${data.bodyMetrics.workoutsCompleted}</div>
+                <div style="font-size: 10px; color: #6b7280; line-height: 1.2;">Workouts<br>Done</div>
               </div>
               <div>
-                <div style="font-size: 24px; font-weight: 800; color: #38b2ac; margin-bottom: 3px;">${data.soulMetrics.reflectionMinutes}</div>
-                <div style="font-size: 12px; color: #718096;">Reflection Min</div>
+                <div style="font-size: 20px; font-weight: 800; color: #10b981; margin-bottom: 2px;">${data.soulMetrics.reflectionMinutes}</div>
+                <div style="font-size: 10px; color: #6b7280; line-height: 1.2;">Reflection<br>Minutes</div>
               </div>
               <div>
-                <div style="font-size: 24px; font-weight: 800; color: #d69e2e; margin-bottom: 3px;">${data.mindMetrics.journalEntries}</div>
-                <div style="font-size: 12px; color: #718096;">Journal Entries</div>
+                <div style="font-size: 20px; font-weight: 800; color: #8b5cf6; margin-bottom: 2px;">${data.mindMetrics.journalEntries}</div>
+                <div style="font-size: 10px; color: #6b7280; line-height: 1.2;">Journal<br>Entries</div>
               </div>
             </div>
           </div>
 
           <!-- Overall Progress -->
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 25px; text-align: center; color: white; margin-bottom: 20px;">
-            <h3 style="margin: 0 0 15px 0; font-size: 20px; font-weight: 700;">🌟 Overall Progress</h3>
-            <div style="font-size: 48px; font-weight: 900; margin-bottom: 10px;">${data.goalsProgress.overallProgress}%</div>
-            <div style="background: rgba(255,255,255,0.2); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 15px;">
-              <div style="background: white; height: 100%; width: ${data.goalsProgress.overallProgress}%; border-radius: 4px;"></div>
+          <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 10px; padding: 20px; text-align: center; color: white;">
+            <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700;">🌟 Overall Progress</h3>
+            <div style="font-size: 36px; font-weight: 900; margin-bottom: 8px;">${data.goalsProgress.overallProgress}%</div>
+            <div style="background: rgba(255,255,255,0.2); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 12px;">
+              <div style="background: white; height: 100%; width: ${data.goalsProgress.overallProgress}%; border-radius: 3px;"></div>
             </div>
-            <p style="margin: 0; font-size: 16px; font-weight: 600; opacity: 0.95;">You're crushing it! Keep going! 💪</p>
-          </div>
-
-          <!-- Encouragement Section -->
-          <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); border-radius: 12px; margin-bottom: 20px;">
-            <h3 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 700; color: #2d3748;">🎉 You're Doing Amazing!</h3>
-            <p style="margin: 0; font-size: 14px; color: #4a5568; line-height: 1.4;">
+            <p style="margin: 0; font-size: 14px; font-weight: 600; opacity: 0.95;">
               ${data.goalsProgress.overallProgress >= 70 ? 
-                "Outstanding performance! You're in the top tier of achievers. Keep this momentum going!" :
+                "Outstanding! You're crushing it! 💪" :
                 data.goalsProgress.overallProgress >= 50 ?
-                "Great work! You're making solid progress. A few more consistent days and you'll be unstoppable!" :
-                "Every step counts! You're building great habits. Tomorrow is a new opportunity to shine!"
+                "Great progress! Keep it up! 🚀" :
+                "Every step counts! You've got this! 💫"
               }
             </p>
           </div>
-
         </div>
 
         <!-- Footer -->
-        <div style="background: #2d3748; color: white; text-align: center; padding: 20px;">
-          <p style="margin: 0; font-size: 14px; opacity: 0.8;">Generated by Next Level Coach • Keep leveling up! 🚀</p>
+        <div style="background: #f8fafc; text-align: center; padding: 12px; border-top: 1px solid #e5e7eb;">
+          <p style="margin: 0; font-size: 12px; color: #6b7280;">Generated by Next Level Coach • Keep leveling up! 🚀</p>
         </div>
 
       </div>
