@@ -25,7 +25,7 @@ const PasswordResetPage = () => {
   useEffect(() => {
     const handlePasswordReset = async () => {
       try {
-        console.log("[Password Reset] Starting fresh password reset process");
+        console.log("[Password Reset] Starting password reset process");
         setIsProcessing(true);
 
         // Get URL parameters from both hash and search
@@ -46,6 +46,8 @@ const PasswordResetPage = () => {
         });
         
         if (type === "recovery" && accessToken && refreshToken) {
+          console.log("[Password Reset] Valid recovery link detected");
+          
           // Set the session for password reset
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
@@ -63,13 +65,13 @@ const PasswordResetPage = () => {
             return;
           }
           
-          console.log("[Password Reset] Session established, showing password form");
+          console.log("[Password Reset] Recovery session established successfully");
           
           // Clean URL and show password form
           window.history.replaceState({}, document.title, "/reset-password");
           setIsResetDialogOpen(true);
         } else {
-          console.log("[Password Reset] Invalid or missing parameters");
+          console.log("[Password Reset] Invalid or missing recovery parameters");
           toast({
             title: "Invalid reset link",
             description: "This password reset link is invalid or expired. Please request a new one.",
@@ -135,7 +137,7 @@ const PasswordResetPage = () => {
 
   const handleComplete = async () => {
     try {
-      console.log("[Password Reset] Completing process");
+      console.log("[Password Reset] Completing process - signing out");
       
       // Sign out to clear the recovery session
       await supabase.auth.signOut();

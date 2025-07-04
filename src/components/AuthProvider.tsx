@@ -37,9 +37,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const path = window.location.pathname;
         console.log("[Auth Provider] Current path:", path);
         
-        // COMPLETELY IGNORE password reset - don't do anything
+        // COMPLETELY IGNORE password reset - don't do anything at all
         if (path === "/reset-password") {
-          console.log("[Auth Provider] Ignoring reset-password page completely");
+          console.log("[Auth Provider] On reset-password page - doing NOTHING");
           setLoading(false);
           return;
         }
@@ -84,9 +84,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         const path = window.location.pathname;
         
-        // COMPLETELY IGNORE password reset page
+        // COMPLETELY IGNORE password reset page - no state updates, no redirects, NOTHING
         if (path === "/reset-password") {
-          console.log("[Auth Provider] Ignoring auth state change on reset-password page");
+          console.log("[Auth Provider] On reset-password page - IGNORING ALL AUTH EVENTS");
           return;
         }
         
