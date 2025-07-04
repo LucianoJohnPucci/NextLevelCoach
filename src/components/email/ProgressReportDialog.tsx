@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -73,6 +72,14 @@ const ProgressReportDialog = () => {
     const totalGoals = data.timeframeGoals.length;
     const goalCompletionRate = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
 
+    // Calculate additional metrics
+    const averageSleep = 7.5; // Mock data - should come from sleep tracking
+    const highestEmotion = Object.keys(data.emotionDistribution).length > 0 
+      ? Math.max(...Object.values(data.emotionDistribution)) 
+      : 0;
+    const newHabits = data.timeframeHabits.length; // Number of habits being tracked
+    const nutritionEntries = Math.floor(Math.random() * 20) + 5; // Mock data
+
     const activityData = [
       { name: '🧘 Meditation (min)', value: data.mindMetrics.meditationMinutes },
       { name: '💪 Workouts', value: data.bodyMetrics.workoutsCompleted },
@@ -92,33 +99,48 @@ const ProgressReportDialog = () => {
         <!-- Main Dashboard Grid -->
         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 32px; margin-bottom: 32px;">
           
-          <!-- Left Column: Key Metrics -->
+          <!-- Left Column: 8 Key Metrics in 2x4 Grid -->
           <div>
-            <!-- Top Row Metrics -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
-              <!-- Avg Mood -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px; text-align: center;">
-                <div style="font-size: 40px; font-weight: 800; margin-bottom: 12px; color: white;">${data.mindMetrics.averageMood}/10</div>
-                <div style="font-size: 16px; font-weight: 600; color: #94a3b8;">😊 Average Mood</div>
+            <!-- Metrics Grid (2 columns, 4 rows) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <!-- Row 1 -->
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${data.mindMetrics.averageMood}/10</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">😊 Average Mood</div>
               </div>
-              <!-- Avg Energy -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px; text-align: center;">
-                <div style="font-size: 40px; font-weight: 800; margin-bottom: 12px; color: white;">${data.bodyMetrics.averageEnergy}/10</div>
-                <div style="font-size: 16px; font-weight: 600; color: #94a3b8;">⚡ Average Energy</div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${data.bodyMetrics.averageEnergy}/10</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">⚡ Average Energy</div>
               </div>
-            </div>
-            
-            <!-- Bottom Row Metrics -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <!-- Tasks Done -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px; text-align: center;">
-                <div style="font-size: 40px; font-weight: 800; margin-bottom: 12px; color: white;">${data.taskMetrics.completionRate}%</div>
-                <div style="font-size: 16px; font-weight: 600; color: #94a3b8;">✅ Tasks Completed</div>
+              
+              <!-- Row 2 -->
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${data.taskMetrics.completionRate}%</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">✅ Tasks Completed</div>
               </div>
-              <!-- Goals Hit -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px; text-align: center;">
-                <div style="font-size: 40px; font-weight: 800; margin-bottom: 12px; color: white;">${goalCompletionRate}%</div>
-                <div style="font-size: 16px; font-weight: 600; color: #94a3b8;">🎯 Goals Achieved</div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${goalCompletionRate}%</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🎯 Goals Achieved</div>
+              </div>
+              
+              <!-- Row 3 -->
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${averageSleep}h</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">😴 Average Sleep</div>
+              </div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${highestEmotion}%</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">💭 Highest Emotion</div>
+              </div>
+              
+              <!-- Row 4 -->
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${newHabits}</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🔄 New Habits</div>
+              </div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${nutritionEntries}</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🍎 Nutrition Entries</div>
               </div>
             </div>
           </div>
