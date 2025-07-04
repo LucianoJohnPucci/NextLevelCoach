@@ -37,9 +37,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const path = window.location.pathname;
         console.log("[Auth Provider] Current path:", path);
         
-        // For password reset page, completely ignore - let it handle everything
+        // COMPLETELY IGNORE password reset - don't do anything
         if (path === "/reset-password") {
-          console.log("[Auth Provider] On reset-password page, letting page handle auth completely");
+          console.log("[Auth Provider] Ignoring reset-password page completely");
           setLoading(false);
           return;
         }
@@ -84,9 +84,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         const path = window.location.pathname;
         
-        // Completely ignore password reset page - let it handle its own flow
+        // COMPLETELY IGNORE password reset page
         if (path === "/reset-password") {
-          console.log("[Auth Provider] On reset-password page, ignoring all auth state changes");
+          console.log("[Auth Provider] Ignoring auth state change on reset-password page");
           return;
         }
         
@@ -95,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           path.includes('/onboarding') ||
           path.includes('/auth');
         
-        // Don't update session during special flows or password recovery
+        // Skip session updates for special routes or password recovery events
         if (event === 'PASSWORD_RECOVERY' || isSpecialRoute) {
           console.log("[Auth Provider] Skipping session update for special flow or recovery");
           return;
@@ -110,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setIsVerified(isEmailVerified);
           console.log("[Auth Provider] Updated email verification status:", isEmailVerified);
           
-          // Only redirect to dashboard if on home page (not on reset-password or other special pages)
+          // Only redirect to dashboard if on home page
           if (window.location.pathname === "/") {
             console.log("[Auth Provider] Redirecting authenticated user to dashboard");
             navigate("/dashboard");
