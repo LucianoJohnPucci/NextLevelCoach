@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Target, Clock, Zap, ListCheck, CheckSquare } from "lucide-react";
@@ -141,17 +142,6 @@ const GoalsPage = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <ListCheck className="h-5 w-5 text-primary" />
-            <CardTitle>Daily Process Checklist</CardTitle>
-          </div>
-          <CardDescription>Complete these steps to stay on track with your wellness journey</CardDescription>
-        </CardHeader>
-        <DailyChecklist recordsEnabled={true} />
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
             <Target className="h-5 w-5 text-primary" />
             <CardTitle>Major Goals & Tasks</CardTitle>
           </div>
@@ -184,6 +174,17 @@ const GoalsPage = () => {
             </div>
           </TabsContent>
         </Tabs>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <ListCheck className="h-5 w-5 text-primary" />
+            <CardTitle>Daily Process Checklist</CardTitle>
+          </div>
+          <CardDescription>Complete these steps to stay on track with your wellness journey</CardDescription>
+        </CardHeader>
+        <DailyChecklist recordsEnabled={true} />
       </Card>
 
       <Card>
