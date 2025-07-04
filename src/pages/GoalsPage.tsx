@@ -1,7 +1,8 @@
 
 import { useState } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Target, Clock, Zap, ListCheck, CheckSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Target, Clock, Zap, ListCheck, CheckSquare, Plus } from "lucide-react";
 import DailyGoalsList from "@/components/goals/DailyGoalsList";
 import DailyGoalDialog from "@/components/goals/DailyGoalDialog";
 import HabitsList from "@/components/goals/HabitsList";
@@ -141,9 +142,11 @@ const GoalsPage = () => {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-primary" />
-            <CardTitle>Major Goals & Tasks</CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              <CardTitle>Major Goals & Tasks</CardTitle>
+            </div>
           </div>
           <CardDescription>Your macro goals with actionable sub-tasks</CardDescription>
         </CardHeader>
@@ -166,6 +169,16 @@ const GoalsPage = () => {
           
           <TabsContent value="tasks" className="mt-6">
             <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Task Board</h3>
+                <Button 
+                  onClick={() => setOpenTaskForm(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  New Task
+                </Button>
+              </div>
               <TaskKanbanBoard
                 tasks={tasks}
                 onDelete={deleteTask}

@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -164,29 +163,24 @@ serve(async (req) => {
       )
     }
 
-    // Build query - ALWAYS filter by authenticated user's ID
-    let query = supabaseClient
+    // Query both tasks and user_tasks tables
+    const { data: priorityTasks, error: priorityError } = await supabaseClient
       .from('tasks')
       .select('*')
-      .eq('user_id', user.id) // CRITICAL: Always filter by authenticated user
-      .range(offset, offset + limit - 1)
-      .order(sortBy, { ascending: sortOrder })
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
 
-    // Apply additional filters
-    if (priority) {
-      query = query.eq('priority', priority)
-    }
+    const { data: userTasks, error: userTasksError } = await supabaseClient
+      .from('user_tasks')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
 
-    if (importance) {
-      query = query.eq('importance', importance)
-    }
-
-    const { data: tasks, error: tasksError } = await query
-
-    if (tasksError) {
+    if (priorityError && userTasksError) {
       logSecurityEvent('DATABASE_ERROR', userId, { 
-        error: tasksError.message,
-        operation: 'select_tasks' 
+        priorityError: priorityError?.message,
+        userTasksError: userTasksError?.message,
+        operation: 'select_all_tasks' 
       });
       return new Response(
         JSON.stringify({ error: 'Failed to retrieve tasks' }),
@@ -197,28 +191,56 @@ serve(async (req) => {
       )
     }
 
-    // Get total count for pagination
-    const { count: totalCount } = await supabaseClient
-      .from('tasks')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id) // CRITICAL: Always filter by authenticated user
+    // Combine and normalize tasks from both tables
+    const allTasks = [
+      ...(priorityTasks || []).map(task => ({
+        ...task,
+        source: 'priority_tasks',
+        status: 'active'
+      })),
+      ...(userTasks || []).map(task => ({
+        ...task,
+        priority: task.importance_level || 'medium',
+        importance: task.importance_level || 'medium',
+        source: 'user_tasks'
+      }))
+    ];
+
+    // Apply filters to combined results
+    let filteredTasks = allTasks;
+    
+    if (priority) {
+      filteredTasks = filteredTasks.filter(task => 
+        task.priority === priority || task.importance_level === priority
+      );
+    }
+
+    if (importance) {
+      filteredTasks = filteredTasks.filter(task => 
+        task.importance === importance || task.importance_level === importance
+      );
+    }
+
+    // Apply pagination
+    const paginatedTasks = filteredTasks.slice(offset, offset + limit);
 
     // Log successful operation
     logSecurityEvent('SUCCESSFUL_OPERATION', userId, {
       operation: 'tasks-retrieve',
-      taskCount: tasks?.length || 0,
+      taskCount: paginatedTasks.length,
+      totalCount: filteredTasks.length,
       duration: Date.now() - startTime
     });
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        tasks: tasks || [],
+        tasks: paginatedTasks,
         pagination: {
-          total: totalCount || 0,
+          total: filteredTasks.length,
           limit,
           offset,
-          hasMore: (offset + limit) < (totalCount || 0)
+          hasMore: (offset + limit) < filteredTasks.length
         },
         userId: user.id 
       }),

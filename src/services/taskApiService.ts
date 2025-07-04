@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 interface ApiError extends Error {
@@ -67,6 +66,64 @@ class TaskApiService {
         timestamp: new Date().toISOString()
       });
       throw error;
+    }
+  }
+
+  // Get all tasks from both tables for comprehensive view
+  async getAllUserTasks() {
+    try {
+      // Get tasks from both tables
+      const { data: priorityTasks } = await supabase
+        .from('tasks')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      const { data: userTasks } = await supabase
+        .from('user_tasks')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Combine and normalize the data
+      const allTasks = [
+        ...(priorityTasks || []).map(task => ({
+          id: task.id,
+          title: task.title,
+          description: task.description,
+          due_date: task.due_date,
+          priority: task.priority || 'medium',
+          importance: task.importance || 'medium',
+          status: 'active',
+          source: 'priority_tasks',
+          created_at: task.created_at,
+          updated_at: task.updated_at
+        })),
+        ...(userTasks || []).map(task => ({
+          id: task.id,
+          title: task.title,
+          description: `Status: ${task.status}, Importance: ${task.importance_level}`,
+          due_date: task.due_date,
+          priority: task.importance_level || 'medium',
+          importance: task.importance_level || 'medium',
+          status: task.status || 'new',
+          completed: task.completed,
+          source: 'user_tasks',
+          created_at: task.created_at,
+          updated_at: task.updated_at
+        }))
+      ];
+
+      return {
+        success: true,
+        tasks: allTasks,
+        userId: (await supabase.auth.getUser()).data.user?.id
+      };
+    } catch (error) {
+      console.error('Error fetching all user tasks:', error);
+      return {
+        success: false,
+        tasks: [],
+        error: error.message
+      };
     }
   }
 
