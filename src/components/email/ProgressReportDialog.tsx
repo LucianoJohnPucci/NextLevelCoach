@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -34,8 +35,8 @@ const ProgressReportDialog = () => {
       const weekEnd = new Date(now);
       weekEnd.setDate(now.getDate() - (i * 7));
       
-      const startStr = `${String(weekStart.getMonth() + 1).padStart(2, '0')}/${String(weekStart.getDate()).padStart(2, '0')}/${weekStart.getFullYear()}`;
-      const endStr = `${String(weekEnd.getMonth() + 1).padStart(2, '0')}/${String(weekEnd.getDate()).padStart(2, '0')}/${weekEnd.getFullYear()}`;
+      const startStr = `${String(weekStart.getMonth() + 1).padStart(2, '0')}/${String(weekStart.getDate()).padStart(2, '0')}`;
+      const endStr = `${String(weekEnd.getMonth() + 1).padStart(2, '0')}/${String(weekEnd.getDate()).padStart(2, '0')}`;
       
       weeks.push(`<th style="background: #1e293b; color: #94a3b8; padding: 16px 12px; text-align: center; font-size: 14px; font-weight: 600; border: 1px solid #334155; border-radius: 8px; margin: 2px;">${startStr}-${endStr}</th>`);
     }
@@ -44,20 +45,28 @@ const ProgressReportDialog = () => {
   };
 
   const generateWeeklyData = (activity: string, currentValue: number) => {
-    // Generate sample data for 7 days
+    // Generate realistic daily data based on the total value
     const dailyData = [];
+    const baseValue = Math.floor(currentValue / 7); // Average per day
+    
     for (let i = 0; i < 7; i++) {
-      const value = Math.max(0, currentValue + Math.floor(Math.random() * 6) - 3);
+      // Add some variation to make it realistic
+      const variation = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+      const value = Math.max(0, baseValue + variation);
       dailyData.push(`<td style="background: #0f172a; color: white; padding: 18px 12px; text-align: center; font-size: 18px; font-weight: 700; border: 1px solid #334155; border-radius: 6px; margin: 2px;">${value}</td>`);
     }
     return dailyData.join('');
   };
 
   const generateMonthlyData = (activity: string, currentValue: number) => {
-    // Generate sample data for 4 weeks
+    // Generate weekly data for 4 weeks
     const weeklyData = [];
+    const baseValue = Math.floor(currentValue / 4); // Average per week
+    
     for (let i = 0; i < 4; i++) {
-      const value = Math.max(0, Math.floor(currentValue * (0.7 + Math.random() * 0.6)));
+      // Add some variation to make it realistic
+      const variation = Math.floor(Math.random() * Math.ceil(baseValue * 0.3)) - Math.floor(baseValue * 0.15);
+      const value = Math.max(0, baseValue + variation);
       weeklyData.push(`<td style="background: #0f172a; color: white; padding: 18px 12px; text-align: center; font-size: 18px; font-weight: 700; border: 1px solid #334155; border-radius: 6px; margin: 2px;">${value}</td>`);
     }
     return weeklyData.join('');
@@ -135,7 +144,7 @@ const ProgressReportDialog = () => {
                 </td>
                 <td style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
                   <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${highestEmotion}%</div>
-                  <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🧠 Highest Emotion</div>
+                  <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🧠 Top Emotion</div>
                 </td>
               </tr>
               
@@ -143,11 +152,11 @@ const ProgressReportDialog = () => {
               <tr>
                 <td style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
                   <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${newHabits}</div>
-                  <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🔄 New Habits</div>
+                  <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🔄 Active Habits</div>
                 </td>
                 <td style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
                   <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${nutritionEntries}</div>
-                  <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🍎 Nutrition Entries</div>
+                  <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🍎 Nutrition Logs</div>
                 </td>
               </tr>
             </table>
