@@ -1,10 +1,9 @@
-
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { useSidebar } from "./SidebarProvider";
 import Header from "./Header";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 
 const Layout = () => {
   const { isOpen } = useSidebar();

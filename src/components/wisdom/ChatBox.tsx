@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Message } from "@/types/wisdom";
 import MessageItem from "./MessageItem";
 import { addWisdomToNotes } from "@/utils/wisdomUtils";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 
 const ChatBox = () => {
   const [input, setInput] = useState("");

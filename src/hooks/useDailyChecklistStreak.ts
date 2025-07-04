@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from "react";
-import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ChecklistItem {
   id: string;

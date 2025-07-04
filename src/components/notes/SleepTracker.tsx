@@ -1,294 +1,191 @@
-
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Bed, Moon, Clock, Brain } from "lucide-react";
-import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, Moon, Sun, Clock, Heart, Brain, Zap } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 import { useSleepTracking } from "@/hooks/useSleepTracking";
-import { useAuth } from "@/components/AuthProvider";
 
 const SleepTracker = () => {
-  const [bedTime, setBedTime] = useState("");
-  const [sleepDuration, setSleepDuration] = useState([7.5]);
-  const [sleepQuality, setSleepQuality] = useState([3]);
-  const [interrupted, setInterrupted] = useState(false);
-  const [interruptionCause, setInterruptionCause] = useState("");
-  const [dreamRecall, setDreamRecall] = useState(false);
-  const [dreamNotes, setDreamNotes] = useState("");
-  const [sleepOnsetTime, setSleepOnsetTime] = useState("");
-  const [wakeFeelings, setWakeFeelings] = useState([3]);
-  const [additionalNotes, setAdditionalNotes] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { addSleepEntry } = useSleepTracking();
+  const [date, setDate] = React.useState<Date | undefined>(new Date());
+  const [bedtime, setBedtime] = useState("22:00");
+  const [wakeUpTime, setWakeUpTime] = useState("06:00");
+  const [sleepQuality, setSleepQuality] = useState("good");
+  const [notes, setNotes] = useState("");
+  const [isNightMode, setIsNightMode] = useState(false);
   const { user } = useAuth();
+  const { sleepData, addSleepEntry, updateSleepEntry, deleteSleepEntry, isLoading, error } = useSleepTracking();
 
-  const sleepQualityEmojis = ["😴", "💤", "🥱", "😐", "😵"];
-  const sleepQualityLabels = ["Poor", "Below Average", "Average", "Good", "Excellent"];
-  
-  const wakeFeelingsEmojis = ["😣", "😞", "😐", "🙂", "😃"];
-  const wakeFeelingsLabels = ["Terrible", "Poor", "Okay", "Good", "Excellent"];
+  useEffect(() => {
+    if (sleepData && date) {
+      const formattedDate = format(date, "yyyy-MM-dd");
+      const entryForDate = sleepData.find(entry => format(new Date(entry.date), "yyyy-MM-dd") === formattedDate);
 
-  const interruptionCauses = [
-    "Bathroom", "Noise", "Anxiety", "Pain/Discomfort", "Hot/Cold", 
-    "Partner/Pet", "Dreams/Nightmares", "Technology", "Other"
-  ];
+      if (entryForDate) {
+        setBedtime(entryForDate.bedtime);
+        setWakeUpTime(entryForDate.wake_up_time);
+        setSleepQuality(entryForDate.sleep_quality);
+        setNotes(entryForDate.notes || "");
+      } else {
+        // Reset form if no entry for the selected date
+        setBedtime("22:00");
+        setWakeUpTime("06:00");
+        setSleepQuality("good");
+        setNotes("");
+      }
+    }
+  }, [sleepData, date]);
 
-  const handleSaveSleepEntry = async () => {
-    if (!user) {
-      toast.error("Please sign in to save sleep entries");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!date) {
+      console.error("Date is required");
       return;
     }
 
-    setIsSubmitting(true);
+    const formattedDate = format(date, "yyyy-MM-dd");
 
-    try {
-      const sleepEntry = {
-        date: new Date().toISOString().split('T')[0], // Today's date
-        bedtime: bedTime || undefined,
-        sleep_duration: sleepDuration[0],
-        sleep_quality: sleepQuality[0],
-        interrupted,
-        interruption_cause: interrupted ? interruptionCause : undefined,
-        dream_recall: dreamRecall,
-        dream_notes: dreamRecall ? dreamNotes : undefined,
-        sleep_onset_time: sleepOnsetTime || undefined,
-        wake_feelings: wakeFeelings[0],
-        additional_notes: additionalNotes || undefined
-      };
+    const newEntry = {
+      date: formattedDate,
+      bedtime,
+      wake_up_time: wakeUpTime,
+      sleep_quality: sleepQuality,
+      notes,
+    };
 
-      console.log('Attempting to save sleep entry:', sleepEntry);
-      
-      const success = await addSleepEntry(sleepEntry);
-      
-      if (success) {
-        toast.success("Sleep entry saved successfully!", {
-          description: `Logged ${sleepDuration[0]} hours of ${sleepQualityLabels[sleepQuality[0] - 1].toLowerCase()} sleep`,
-          icon: <Moon className="h-4 w-4" />,
-        });
-        resetForm();
-      } else {
-        toast.error("Failed to save sleep entry. Please try again.");
+    if (sleepData && sleepData.some(entry => format(new Date(entry.date), "yyyy-MM-dd") === formattedDate)) {
+      // Update existing entry
+      const existingEntry = sleepData.find(entry => format(new Date(entry.date), "yyyy-MM-dd") === formattedDate);
+      if (existingEntry) {
+        await updateSleepEntry(existingEntry.id, newEntry);
       }
-    } catch (error) {
-      console.error('Error saving sleep entry:', error);
-      toast.error("An error occurred while saving your sleep entry.");
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      // Add new entry
+      await addSleepEntry(newEntry);
     }
   };
 
-  const resetForm = () => {
-    setBedTime("");
-    setSleepDuration([7.5]);
-    setSleepQuality([3]);
-    setInterrupted(false);
-    setInterruptionCause("");
-    setDreamRecall(false);
-    setDreamNotes("");
-    setSleepOnsetTime("");
-    setWakeFeelings([3]);
-    setAdditionalNotes("");
+  const handleDelete = async () => {
+    if (!date) {
+      console.error("Date is required");
+      return;
+    }
+
+    const formattedDate = format(date, "yyyy-MM-dd");
+    const existingEntry = sleepData && sleepData.find(entry => format(new Date(entry.date), "yyyy-MM-dd") === formattedDate);
+
+    if (existingEntry) {
+      await deleteSleepEntry(existingEntry.id);
+    }
   };
 
   return (
-    <Card className="mb-6 overflow-hidden">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <Bed className="h-5 w-5 text-primary" />
-          Sleep Tracker
-        </CardTitle>
-        <CardDescription>
-          Track your sleep patterns and quality for better rest insights
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Bedtime Only */}
-        <div className="space-y-2">
-          <Label htmlFor="bedTime" className="flex items-center gap-2">
-            <Moon className="h-4 w-4" /> Bedtime
-          </Label>
-          <Input
-            id="bedTime"
-            type="time"
-            value={bedTime}
-            onChange={(e) => setBedTime(e.target.value)}
-          />
-        </div>
-
-        {/* Sleep Duration */}
-        <div className="space-y-3">
-          <Label className="flex items-center gap-2">
-            <Clock className="h-4 w-4" /> Sleep Duration: {sleepDuration[0]} hours
-          </Label>
-          <Slider
-            value={sleepDuration}
-            onValueChange={setSleepDuration}
-            max={12}
-            min={2}
-            step={0.5}
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>2h</span>
-            <span>7h</span>
-            <span>12h</span>
-          </div>
-        </div>
-
-        {/* Sleep Quality */}
-        <div className="space-y-3">
-          <Label>Sleep Quality</Label>
-          <div className="flex items-center justify-center space-x-2 p-4 bg-muted/20 rounded-lg">
-            {sleepQualityEmojis.map((emoji, index) => (
-              <button
-                key={index}
-                onClick={() => setSleepQuality([index + 1])}
-                className={`text-3xl p-2 rounded-full transition-all ${
-                  sleepQuality[0] === index + 1 
-                    ? 'bg-primary/20 scale-110 shadow-lg' 
-                    : 'hover:bg-muted/40 hover:scale-105'
-                }`}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-          <div className="text-center">
-            <Badge variant="secondary">
-              {sleepQualityLabels[sleepQuality[0] - 1]}
-            </Badge>
-          </div>
-        </div>
-
-        {/* Sleep Interruptions */}
-        <div className="space-y-3">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="interrupted"
-              checked={interrupted}
-              onCheckedChange={setInterrupted}
-            />
-            <Label htmlFor="interrupted">Sleep was interrupted</Label>
-          </div>
-          
-          {interrupted && (
-            <div className="space-y-2">
-              <Label>What caused the interruption?</Label>
-              <Select value={interruptionCause} onValueChange={setInterruptionCause}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a cause" />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Moon className="h-5 w-5" />
+            Sleep Tracker
+          </CardTitle>
+          <CardDescription>
+            Log your sleep schedule and quality to track your sleep patterns.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="grid grid-cols-2 items-center gap-4">
+              <Label htmlFor="date">Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[240px] justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    disabled={(date) =>
+                      date > new Date() || date < new Date("2023-01-01")
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="grid grid-cols-2 items-center gap-4">
+              <Label htmlFor="bedtime">Bedtime</Label>
+              <Input
+                type="time"
+                id="bedtime"
+                value={bedtime}
+                onChange={(e) => setBedtime(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 items-center gap-4">
+              <Label htmlFor="wakeUpTime">Wake-up Time</Label>
+              <Input
+                type="time"
+                id="wakeUpTime"
+                value={wakeUpTime}
+                onChange={(e) => setWakeUpTime(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 items-center gap-4">
+              <Label htmlFor="sleepQuality">Sleep Quality</Label>
+              <Select value={sleepQuality} onValueChange={setSleepQuality}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  {interruptionCauses.map((cause) => (
-                    <SelectItem key={cause} value={cause.toLowerCase()}>
-                      {cause}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="excellent">Excellent</SelectItem>
+                  <SelectItem value="good">Good</SelectItem>
+                  <SelectItem value="average">Average</SelectItem>
+                  <SelectItem value="poor">Poor</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          )}
-        </div>
-
-        {/* Dream Recall */}
-        <div className="space-y-3">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="dreamRecall"
-              checked={dreamRecall}
-              onCheckedChange={setDreamRecall}
-            />
-            <Label htmlFor="dreamRecall" className="flex items-center gap-2">
-              <Brain className="h-4 w-4" /> I remember my dreams
-            </Label>
-          </div>
-          
-          {dreamRecall && (
-            <div className="space-y-2">
-              <Label>Dream Notes</Label>
+            <div>
+              <Label htmlFor="notes">Notes</Label>
               <Textarea
-                value={dreamNotes}
-                onChange={(e) => setDreamNotes(e.target.value)}
-                placeholder="Describe what you remember about your dreams..."
-                className="min-h-[80px]"
+                id="notes"
+                placeholder="Any notes about your sleep?"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
               />
             </div>
-          )}
-        </div>
-
-        {/* Sleep Onset Time */}
-        <div className="space-y-2">
-          <Label>How long did it take to fall asleep?</Label>
-          <Select value={sleepOnsetTime} onValueChange={setSleepOnsetTime}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select time to fall asleep" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="<10">Less than 10 minutes</SelectItem>
-              <SelectItem value="10-30">10-30 minutes</SelectItem>
-              <SelectItem value="30-60">30-60 minutes</SelectItem>
-              <SelectItem value=">60">More than 60 minutes</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Wake Feelings */}
-        <div className="space-y-3">
-          <Label>How did you feel when you woke up?</Label>
-          <div className="flex items-center justify-center space-x-2 p-4 bg-muted/20 rounded-lg">
-            {wakeFeelingsEmojis.map((emoji, index) => (
-              <button
-                key={index}
-                onClick={() => setWakeFeelings([index + 1])}
-                className={`text-3xl p-2 rounded-full transition-all ${
-                  wakeFeelings[0] === index + 1 
-                    ? 'bg-primary/20 scale-110 shadow-lg' 
-                    : 'hover:bg-muted/40 hover:scale-105'
-                }`}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-          <div className="text-center">
-            <Badge variant="secondary">
-              {wakeFeelingsLabels[wakeFeelings[0] - 1]}
-            </Badge>
-          </div>
-        </div>
-
-        {/* Additional Notes */}
-        <div className="space-y-2">
-          <Label>Additional Notes (Optional)</Label>
-          <Textarea
-            value={additionalNotes}
-            onChange={(e) => setAdditionalNotes(e.target.value)}
-            placeholder="Any other observations about your sleep..."
-            className="min-h-[80px]"
-          />
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end pt-4">
-          <Button 
-            onClick={handleSaveSleepEntry} 
-            className="w-full md:w-auto"
-            disabled={isSubmitting}
-          >
-            <Bed className="mr-2 h-4 w-4" />
-            {isSubmitting ? "Saving..." : "Save Sleep Entry"}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+            <div className="flex justify-between">
+              <Button type="submit">Save</Button>
+              <Button type="button" variant="destructive" onClick={handleDelete}>
+                Delete
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 
