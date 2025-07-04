@@ -2,7 +2,6 @@
 import { motion } from "framer-motion";
 import ChatBox from "@/components/wisdom/ChatBox";
 import DailyWisdom from "@/components/wisdom/DailyWisdom";
-import PrioritizeBox from "@/components/wisdom/PrioritizeBox";
 import CommandChatBox from "@/components/wisdom/CommandChatBox";
 
 const WisdomPage = () => {
@@ -23,11 +22,6 @@ const WisdomPage = () => {
       {/* Task Command Interface */}
       <div className="grid grid-cols-1 gap-6">
         <CommandChatBox />
-      </div>
-      
-      {/* Prioritize Box Section */}
-      <div className="grid grid-cols-1 gap-6">
-        <PrioritizeBox />
       </div>
       
       {/* Original Chat and Daily Wisdom Section */}
