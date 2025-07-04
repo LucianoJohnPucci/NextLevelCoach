@@ -65,7 +65,7 @@ const PasswordResetPage = () => {
           
           console.log("[Password Reset] Session set successfully, showing reset dialog");
           
-          // Clear the URL parameters
+          // Clear the URL parameters but stay on this page
           window.history.replaceState({}, document.title, "/reset-password");
           
           setIsResetDialogOpen(true);
@@ -137,7 +137,9 @@ const PasswordResetPage = () => {
 
   const handleSuccessDialogClose = async () => {
     try {
-      console.log("[Password Reset] Completing reset process");
+      console.log("[Password Reset] Completing reset process, signing out and redirecting");
+      
+      // Sign out the user to clear the recovery session
       await supabase.auth.signOut();
       setShowSuccessDialog(false);
       
@@ -145,6 +147,8 @@ const PasswordResetPage = () => {
         title: "Password updated successfully",
         description: "Please sign in with your new password.",
       });
+      
+      // Redirect to auth page for fresh login
       navigate("/auth", { replace: true });
     } catch (error) {
       console.error("[Password Reset] Cleanup error:", error);
@@ -230,7 +234,7 @@ const PasswordResetPage = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>Password Updated Successfully</AlertDialogTitle>
               <AlertDialogDescription>
-                Your password has been changed. You'll need to sign in with your new password.
+                Your password has been changed. Click continue to sign in with your new password.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
