@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Target, Send, RefreshCw } from "lucide-react";
+import { Target, Send, RefreshCw, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -12,21 +12,25 @@ import { Message } from "@/types/wisdom";
 import MessageItem from "./MessageItem";
 import { addWisdomToNotes } from "@/utils/wisdomUtils";
 import { useAuth } from "@/components/AuthProvider";
+import { usePrioritizeTasks } from "@/hooks/usePrioritizeTasks";
+import TaskQuickAdd from "./TaskQuickAdd";
 
 const PrioritizeBox = () => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      content: "I'm here to help you prioritize your goals and break down big tasks. Tell me what you're working on, and we'll strategize together.",
+      content: "I'm here to help you prioritize your goals and break down big tasks. I can see your existing tasks and help you create new ones. Tell me what you're working on, and we'll strategize together.",
       role: "assistant",
       timestamp: new Date()
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showTaskForm, setShowTaskForm] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { tasks, loading: tasksLoading, addTask } = usePrioritizeTasks();
   
   useEffect(() => {
     // Scroll to the bottom when messages change
@@ -53,11 +57,19 @@ const PrioritizeBox = () => {
     setIsLoading(true);
     
     try {
+      // Prepare context with current tasks
+      const tasksContext = tasks.length > 0 ? 
+        `\n\nCurrent user tasks:\n${tasks.map(task => 
+          `- ${task.title} (Priority: ${task.priority}, Importance: ${task.importance}${task.due_date ? `, Due: ${task.due_date}` : ''})`
+        ).join('\n')}` : '';
+      
+      const contextualMessage = input.trim() + tasksContext;
+      
       // Call the Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('wisdom-chat', {
         body: { 
-          message: input.trim(),
-          mode: "prioritize" // Add a mode parameter to differentiate from regular wisdom chat
+          message: contextualMessage,
+          mode: "prioritize"
         }
       });
       
@@ -111,15 +123,34 @@ const PrioritizeBox = () => {
   return (
     <Card className="md:col-span-3">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Target className="h-5 w-5" />
-          Chat AI Prioritize
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Target className="h-5 w-5" />
+            <CardTitle>Chat AI Prioritize</CardTitle>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowTaskForm(!showTaskForm)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Quick Add Task
+          </Button>
+        </div>
         <CardDescription>
-          Let me break down big goals or strategize with you
+          Let me break down big goals or strategize with you. I can see your {tasks.length} existing tasks.
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {showTaskForm && (
+          <div className="mb-4">
+            <TaskQuickAdd 
+              onTaskAdded={addTask}
+              onClose={() => setShowTaskForm(false)}
+            />
+          </div>
+        )}
         <ScrollArea className="h-[300px] pr-4" ref={scrollAreaRef}>
           <div className="space-y-4">
             {messages.map((message) => (
