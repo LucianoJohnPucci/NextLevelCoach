@@ -21,16 +21,17 @@ const PasswordResetPage = () => {
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [hasValidResetLink, setHasValidResetLink] = useState(false);
 
   useEffect(() => {
     const handlePasswordReset = async () => {
       try {
-        console.log("[Password Reset] INDEPENDENT - Starting password reset process");
+        console.log("[Password Reset] Starting password reset process");
         setIsProcessing(true);
 
         // Get URL parameters from both hash and search
         const { hash, search } = window.location;
-        console.log("[Password Reset] INDEPENDENT - URL hash:", hash, "search:", search);
+        console.log("[Password Reset] URL hash:", hash, "search:", search);
         
         const hashParams = new URLSearchParams(hash.substring(1));
         const searchParams = new URLSearchParams(search);
@@ -39,61 +40,52 @@ const PasswordResetPage = () => {
         const accessToken = hashParams.get("access_token") || searchParams.get("access_token");
         const refreshToken = hashParams.get("refresh_token") || searchParams.get("refresh_token");
         
-        console.log("[Password Reset] INDEPENDENT - Found parameters:", { 
+        console.log("[Password Reset] Found parameters:", { 
           type, 
           hasAccessToken: !!accessToken, 
           hasRefreshToken: !!refreshToken 
         });
         
         if (type === "recovery" && accessToken && refreshToken) {
-          console.log("[Password Reset] INDEPENDENT - Valid recovery link detected");
+          console.log("[Password Reset] Valid recovery link detected");
           
-          // Set the session for password reset - this will NOT trigger AuthProvider
+          // Set the session for password reset
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken
           });
           
           if (error) {
-            console.error("[Password Reset] INDEPENDENT - Session error:", error);
+            console.error("[Password Reset] Session error:", error);
+            setHasValidResetLink(false);
             toast({
               title: "Invalid reset link",
               description: "The password reset link is invalid or expired. Please request a new one.",
               variant: "destructive",
             });
-            navigate("/auth");
             return;
           }
           
-          console.log("[Password Reset] INDEPENDENT - Recovery session established successfully");
+          console.log("[Password Reset] Recovery session established successfully");
+          setHasValidResetLink(true);
           
           // Clean URL and show password form
           window.history.replaceState({}, document.title, "/reset-password");
           setIsResetDialogOpen(true);
         } else {
-          console.log("[Password Reset] INDEPENDENT - Invalid or missing recovery parameters");
-          toast({
-            title: "Invalid reset link",
-            description: "This password reset link is invalid or expired. Please request a new one.",
-            variant: "destructive",
-          });
-          navigate("/auth");
+          console.log("[Password Reset] No valid recovery parameters found - showing page anyway");
+          setHasValidResetLink(false);
         }
       } catch (error) {
-        console.error("[Password Reset] INDEPENDENT - Error:", error);
-        toast({
-          title: "Error",
-          description: "Something went wrong with the password reset process.",
-          variant: "destructive",
-        });
-        navigate("/auth");
+        console.error("[Password Reset] Error:", error);
+        setHasValidResetLink(false);
       } finally {
         setIsProcessing(false);
       }
     };
 
     handlePasswordReset();
-  }, [navigate, toast]);
+  }, [toast]);
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,24 +103,24 @@ const PasswordResetPage = () => {
     
     try {
       setLoading(true);
-      console.log("[Password Reset] INDEPENDENT - Updating password");
+      console.log("[Password Reset] Updating password");
       
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
       
       if (error) {
-        console.error("[Password Reset] INDEPENDENT - Update error:", error);
+        console.error("[Password Reset] Update error:", error);
         setPasswordError(error.message || "Failed to update password");
         return;
       }
       
-      console.log("[Password Reset] INDEPENDENT - Password updated successfully");
+      console.log("[Password Reset] Password updated successfully");
       setIsResetDialogOpen(false);
       setShowSuccessDialog(true);
       
     } catch (error: any) {
-      console.error("[Password Reset] INDEPENDENT - Unexpected error:", error);
+      console.error("[Password Reset] Unexpected error:", error);
       setPasswordError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -137,7 +129,7 @@ const PasswordResetPage = () => {
 
   const handleComplete = async () => {
     try {
-      console.log("[Password Reset] INDEPENDENT - Completing process - signing out");
+      console.log("[Password Reset] Completing process - signing out");
       
       // Sign out to clear the recovery session
       await supabase.auth.signOut();
@@ -153,9 +145,13 @@ const PasswordResetPage = () => {
       navigate("/auth", { replace: true });
       
     } catch (error) {
-      console.error("[Password Reset] INDEPENDENT - Error during completion:", error);
+      console.error("[Password Reset] Error during completion:", error);
       navigate("/auth", { replace: true });
     }
+  };
+
+  const handleRequestNewLink = () => {
+    navigate("/auth", { replace: true });
   };
 
   if (isProcessing) {
@@ -177,6 +173,19 @@ const PasswordResetPage = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
+        {!hasValidResetLink && (
+          <div className="text-center p-6 bg-card rounded-lg border">
+            <h1 className="text-2xl font-bold mb-4">Password Reset</h1>
+            <p className="text-muted-foreground mb-6">
+              This page is for password reset. If you have a valid reset link, 
+              it will automatically process when you visit this page.
+            </p>
+            <Button onClick={handleRequestNewLink} className="w-full">
+              Go to Login Page
+            </Button>
+          </div>
+        )}
+
         {/* Password Reset Form Dialog */}
         <Dialog open={isResetDialogOpen} onOpenChange={() => {}}>
           <DialogContent className="sm:max-w-md">

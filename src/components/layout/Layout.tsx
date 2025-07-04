@@ -1,3 +1,4 @@
+
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { useSidebar } from "./SidebarProvider";
@@ -16,9 +17,11 @@ const Layout = () => {
     setMounted(true);
   }, []);
 
-  // Don't show the standard app layout for non-authenticated users on the home page
+  // Don't show the standard app layout for specific pages
   const isHomePage = location.pathname === "/";
-  if (isHomePage && !user) {
+  const isPasswordResetPage = location.pathname === "/reset-password";
+  
+  if ((isHomePage && !user) || isPasswordResetPage) {
     return <Outlet />;
   }
 
