@@ -37,7 +37,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
     try {
       setLoading(true);
       
-      // Create the redirect URL for password reset
+      // Create the redirect URL for password reset - this should go to /reset-password
       const origin = window.location.origin;
       const redirectUrl = `${origin}/reset-password`;
       
