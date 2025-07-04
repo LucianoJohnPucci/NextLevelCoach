@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,24 +19,69 @@ const ProgressReportDialog = () => {
   const { generateReportData } = useProgressReport();
   const { user } = useAuth();
 
+  const generateWeeklyColumns = () => {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days.map(day => `<th style="background: #475569; color: #e2e8f0; padding: 12px 8px; text-align: center; font-size: 14px; font-weight: 600; border: 1px solid #64748b;">${day}</th>`).join('');
+  };
+
+  const generateMonthlyColumns = () => {
+    const now = new Date();
+    const weeks = [];
+    
+    // Generate 4 weeks of date ranges
+    for (let i = 3; i >= 0; i--) {
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - (i * 7) - 6);
+      const weekEnd = new Date(now);
+      weekEnd.setDate(now.getDate() - (i * 7));
+      
+      const startStr = `${String(weekStart.getMonth() + 1).padStart(2, '0')}/${String(weekStart.getDate()).padStart(2, '0')}/${weekStart.getFullYear()}`;
+      const endStr = `${String(weekEnd.getMonth() + 1).padStart(2, '0')}/${String(weekEnd.getDate()).padStart(2, '0')}/${weekEnd.getFullYear()}`;
+      
+      weeks.push(`<th style="background: #475569; color: #e2e8f0; padding: 12px 8px; text-align: center; font-size: 12px; font-weight: 600; border: 1px solid #64748b;">${startStr}-${endStr}</th>`);
+    }
+    
+    return weeks.join('');
+  };
+
+  const generateWeeklyData = (activity: string, currentValue: number) => {
+    // Generate sample data for 7 days
+    const dailyData = [];
+    for (let i = 0; i < 7; i++) {
+      const value = Math.max(0, currentValue + Math.floor(Math.random() * 6) - 3);
+      dailyData.push(`<td style="background: #0f172a; color: white; padding: 14px 8px; text-align: center; font-size: 16px; font-weight: 700; border: 1px solid #475569;">${value}</td>`);
+    }
+    return dailyData.join('');
+  };
+
+  const generateMonthlyData = (activity: string, currentValue: number) => {
+    // Generate sample data for 4 weeks
+    const weeklyData = [];
+    for (let i = 0; i < 4; i++) {
+      const value = Math.max(0, Math.floor(currentValue * (0.7 + Math.random() * 0.6)));
+      weeklyData.push(`<td style="background: #0f172a; color: white; padding: 14px 8px; text-align: center; font-size: 16px; font-weight: 700; border: 1px solid #475569;">${value}</td>`);
+    }
+    return weeklyData.join('');
+  };
+
   const generateEmailHTML = (data: ProgressReportData) => {
     const timeframeText = data.timeframeDays === 7 ? "Past Week" : "Past Month";
+    const isWeekly = data.timeframeDays === 7;
     
     // Calculate completion rate for goals
     const completedGoals = data.timeframeGoals.filter(g => g.completed).length;
     const totalGoals = data.timeframeGoals.length;
     const goalCompletionRate = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
 
-    // Create sample historical data for comparison (in a real app, this would come from the database)
-    const previousPeriodData = {
-      meditation: Math.max(0, data.mindMetrics.meditationMinutes - Math.floor(Math.random() * 20) + 10),
-      workouts: Math.max(0, data.bodyMetrics.workoutsCompleted - Math.floor(Math.random() * 2) + 1),
-      reflection: Math.max(0, data.soulMetrics.reflectionMinutes - Math.floor(Math.random() * 30) + 15),
-      journal: Math.max(0, data.mindMetrics.journalEntries - Math.floor(Math.random() * 2) + 1),
-    };
+    const activityData = [
+      { name: '🧘 Meditation (min)', value: data.mindMetrics.meditationMinutes },
+      { name: '💪 Workouts', value: data.bodyMetrics.workoutsCompleted },
+      { name: '🤔 Reflection (min)', value: data.soulMetrics.reflectionMinutes },
+      { name: '📝 Journal Entries', value: data.mindMetrics.journalEntries }
+    ];
 
     return `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; background: #f8fafc; padding: 24px; border-radius: 16px;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px; margin: 0 auto; background: #f1f5f9; padding: 24px; border-radius: 16px;">
         
         <!-- Header -->
         <div style="background: #1e293b; padding: 20px 32px; text-align: center; border-radius: 12px; margin-bottom: 24px; border: 2px solid #334155;">
@@ -86,33 +132,18 @@ const ProgressReportDialog = () => {
               <!-- Headers -->
               <thead>
                 <tr>
-                  <th style="background: #334155; color: #94a3b8; padding: 12px 16px; text-align: left; font-size: 14px; font-weight: 600; border-radius: 8px 0 0 8px; border: 1px solid #475569;">Activity</th>
-                  <th style="background: #334155; color: #94a3b8; padding: 12px 16px; text-align: center; font-size: 14px; font-weight: 600; border-top: 1px solid #475569; border-bottom: 1px solid #475569;">Previous</th>
-                  <th style="background: #334155; color: #94a3b8; padding: 12px 16px; text-align: center; font-size: 14px; font-weight: 600; border-radius: 0 8px 8px 0; border: 1px solid #475569;">Current</th>
+                  <th style="background: #334155; color: #94a3b8; padding: 12px 16px; text-align: left; font-size: 14px; font-weight: 600; border-radius: 8px 0 0 0; border: 1px solid #475569;">Activity</th>
+                  ${isWeekly ? generateWeeklyColumns() : generateMonthlyColumns()}
                 </tr>
               </thead>
               <!-- Data Rows -->
               <tbody>
-                <tr>
-                  <td style="background: #0f172a; color: white; padding: 14px 16px; font-size: 15px; font-weight: 500; border-left: 1px solid #475569; border-bottom: 1px solid #475569;">🧘 Meditation (min)</td>
-                  <td style="background: #0f172a; color: #94a3b8; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-bottom: 1px solid #475569;">${previousPeriodData.meditation}</td>
-                  <td style="background: #0f172a; color: white; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-right: 1px solid #475569; border-bottom: 1px solid #475569;">${data.mindMetrics.meditationMinutes}</td>
-                </tr>
-                <tr>
-                  <td style="background: #0f172a; color: white; padding: 14px 16px; font-size: 15px; font-weight: 500; border-left: 1px solid #475569; border-bottom: 1px solid #475569;">💪 Workouts</td>
-                  <td style="background: #0f172a; color: #94a3b8; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-bottom: 1px solid #475569;">${previousPeriodData.workouts}</td>
-                  <td style="background: #0f172a; color: white; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-right: 1px solid #475569; border-bottom: 1px solid #475569;">${data.bodyMetrics.workoutsCompleted}</td>
-                </tr>
-                <tr>
-                  <td style="background: #0f172a; color: white; padding: 14px 16px; font-size: 15px; font-weight: 500; border-left: 1px solid #475569; border-bottom: 1px solid #475569;">🤔 Reflection (min)</td>
-                  <td style="background: #0f172a; color: #94a3b8; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-bottom: 1px solid #475569;">${previousPeriodData.reflection}</td>
-                  <td style="background: #0f172a; color: white; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-right: 1px solid #475569; border-bottom: 1px solid #475569;">${data.soulMetrics.reflectionMinutes}</td>
-                </tr>
-                <tr>
-                  <td style="background: #0f172a; color: white; padding: 14px 16px; font-size: 15px; font-weight: 500; border-left: 1px solid #475569; border-bottom: 1px solid #475569; border-radius: 0 0 0 8px;">📝 Journal Entries</td>
-                  <td style="background: #0f172a; color: #94a3b8; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-bottom: 1px solid #475569;">${previousPeriodData.journal}</td>
-                  <td style="background: #0f172a; color: white; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-right: 1px solid #475569; border-bottom: 1px solid #475569; border-radius: 0 0 8px 0;">${data.mindMetrics.journalEntries}</td>
-                </tr>
+                ${activityData.map((activity, index) => `
+                  <tr>
+                    <td style="background: #0f172a; color: white; padding: 14px 16px; font-size: 15px; font-weight: 500; border-left: 1px solid #475569; border-bottom: 1px solid #475569; ${index === activityData.length - 1 ? 'border-radius: 0 0 0 8px;' : ''}">${activity.name}</td>
+                    ${isWeekly ? generateWeeklyData(activity.name, activity.value) : generateMonthlyData(activity.name, activity.value)}
+                  </tr>
+                `).join('')}
               </tbody>
             </table>
           </div>
