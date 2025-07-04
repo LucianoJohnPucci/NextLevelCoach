@@ -11,7 +11,7 @@ import {
 import { X } from "lucide-react";
 import SearchForm from "./SearchForm";
 import DateEventPreview from "./DateEventPreview";
-import { Event } from "@/hooks/use-community-events";
+import { Event } from "@/hooks/community-events";
 
 interface SearchDialogProps {
   searchLocation: string;

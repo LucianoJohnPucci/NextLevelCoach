@@ -7,7 +7,7 @@ type AudioOptions = {
   volume?: number;
 };
 
-export const useAudio = (audioSrc: string, options: AudioOptions = {}) => {
+export const useAudio = (audioSrc?: string, options: AudioOptions = {}) => {
   const { autoplay = false, loop = false, volume = 1 } = options;
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -15,6 +15,8 @@ export const useAudio = (audioSrc: string, options: AudioOptions = {}) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!audioSrc) return;
+    
     const audio = new Audio(audioSrc);
     audioRef.current = audio;
     
@@ -86,6 +88,13 @@ export const useAudio = (audioSrc: string, options: AudioOptions = {}) => {
     }
   };
 
+  const playAudio = (src: string) => {
+    const audio = new Audio(src);
+    audio.play().catch(error => {
+      console.error("Error playing audio:", error);
+    });
+  };
+
   return {
     isPlaying,
     isLoaded,
@@ -93,6 +102,7 @@ export const useAudio = (audioSrc: string, options: AudioOptions = {}) => {
     play,
     pause,
     toggle,
-    setVolume
+    setVolume,
+    playAudio
   };
 };

@@ -119,6 +119,22 @@ const PrioritizeBox = () => {
       await addWisdomToNotes(message, user, toast);
     }
   };
+
+  const handleAddTask = async (task: { 
+    title: string; 
+    description?: string; 
+    due_date?: string; 
+    priority: "high" | "low" | "medium"; 
+    importance: "high" | "low" | "medium"; 
+  }) => {
+    try {
+      await addTask(task.title, task.priority, task.importance, task.due_date);
+      return true;
+    } catch (error) {
+      console.error('Error adding task:', error);
+      return false;
+    }
+  };
   
   return (
     <Card className="md:col-span-3">
@@ -146,7 +162,7 @@ const PrioritizeBox = () => {
         {showTaskForm && (
           <div className="mb-4">
             <TaskQuickAdd 
-              onTaskAdded={addTask}
+              onTaskAdded={handleAddTask}
               onClose={() => setShowTaskForm(false)}
             />
           </div>
