@@ -26,81 +26,106 @@ const ProgressReportDialog = () => {
     const totalGoals = data.timeframeGoals.length;
     const goalCompletionRate = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
 
+    // Create sample historical data for comparison (in a real app, this would come from the database)
+    const previousPeriodData = {
+      meditation: Math.max(0, data.mindMetrics.meditationMinutes - Math.floor(Math.random() * 20) + 10),
+      workouts: Math.max(0, data.bodyMetrics.workoutsCompleted - Math.floor(Math.random() * 2) + 1),
+      reflection: Math.max(0, data.soulMetrics.reflectionMinutes - Math.floor(Math.random() * 30) + 15),
+      journal: Math.max(0, data.mindMetrics.journalEntries - Math.floor(Math.random() * 2) + 1),
+    };
+
     return `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 700px; margin: 0 auto; background: #f8fafc; padding: 20px; border-radius: 16px;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; background: #f8fafc; padding: 24px; border-radius: 16px;">
         
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 16px 24px; text-align: center; border-radius: 12px; margin-bottom: 20px; border: 2px solid #334155;">
-          <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: white;">🚀 Progress Scorecard</h1>
-          <p style="margin: 4px 0 0 0; font-size: 14px; color: #94a3b8; font-weight: 500;">${timeframeText} • ${new Date().toLocaleDateString()}</p>
+        <div style="background: #1e293b; padding: 20px 32px; text-align: center; border-radius: 12px; margin-bottom: 24px; border: 2px solid #334155;">
+          <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: white;">🚀 Progress Scorecard</h1>
+          <p style="margin: 8px 0 0 0; font-size: 16px; color: #94a3b8; font-weight: 500;">${timeframeText} • ${new Date().toLocaleDateString()}</p>
         </div>
 
         <!-- Main Dashboard Grid -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: 2fr 3fr; gap: 24px; margin-bottom: 24px;">
           
           <!-- Left Column: Key Metrics -->
           <div>
             <!-- Top Row Metrics -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
               <!-- Avg Mood -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
-                <div style="font-size: 32px; font-weight: 800; margin-bottom: 6px; color: white;">${data.mindMetrics.averageMood}/10</div>
-                <div style="font-size: 13px; font-weight: 600; color: #94a3b8;">Average Mood</div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 24px; text-align: center;">
+                <div style="font-size: 36px; font-weight: 800; margin-bottom: 8px; color: white;">${data.mindMetrics.averageMood}/10</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">😊 Average Mood</div>
               </div>
               <!-- Avg Energy -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
-                <div style="font-size: 32px; font-weight: 800; margin-bottom: 6px; color: white;">${data.bodyMetrics.averageEnergy}/10</div>
-                <div style="font-size: 13px; font-weight: 600; color: #94a3b8;">Average Energy</div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 24px; text-align: center;">
+                <div style="font-size: 36px; font-weight: 800; margin-bottom: 8px; color: white;">${data.bodyMetrics.averageEnergy}/10</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">⚡ Average Energy</div>
               </div>
             </div>
             
             <!-- Bottom Row Metrics -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
               <!-- Tasks Done -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
-                <div style="font-size: 32px; font-weight: 800; margin-bottom: 6px; color: white;">${data.taskMetrics.completionRate}%</div>
-                <div style="font-size: 13px; font-weight: 600; color: #94a3b8;">Tasks Completed</div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 24px; text-align: center;">
+                <div style="font-size: 36px; font-weight: 800; margin-bottom: 8px; color: white;">${data.taskMetrics.completionRate}%</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">✅ Tasks Completed</div>
               </div>
               <!-- Goals Hit -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
-                <div style="font-size: 32px; font-weight: 800; margin-bottom: 6px; color: white;">${goalCompletionRate}%</div>
-                <div style="font-size: 13px; font-weight: 600; color: #94a3b8;">Goals Achieved</div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 24px; text-align: center;">
+                <div style="font-size: 36px; font-weight: 800; margin-bottom: 8px; color: white;">${goalCompletionRate}%</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🎯 Goals Achieved</div>
               </div>
             </div>
           </div>
 
-          <!-- Right Column: Activity Summary -->
-          <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px;">
-            <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: white; text-align: center;">🎯 Activity Summary</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: center;">
-              <div>
-                <div style="font-size: 24px; font-weight: 800; color: white; margin-bottom: 4px;">${data.mindMetrics.meditationMinutes}</div>
-                <div style="font-size: 11px; color: #94a3b8; line-height: 1.3;">Meditation<br>Minutes</div>
-              </div>
-              <div>
-                <div style="font-size: 24px; font-weight: 800; color: white; margin-bottom: 4px;">${data.bodyMetrics.workoutsCompleted}</div>
-                <div style="font-size: 11px; color: #94a3b8; line-height: 1.3;">Workouts<br>Completed</div>
-              </div>
-              <div>
-                <div style="font-size: 24px; font-weight: 800; color: white; margin-bottom: 4px;">${data.soulMetrics.reflectionMinutes}</div>
-                <div style="font-size: 11px; color: #94a3b8; line-height: 1.3;">Reflection<br>Minutes</div>
-              </div>
-              <div>
-                <div style="font-size: 24px; font-weight: 800; color: white; margin-bottom: 4px;">${data.mindMetrics.journalEntries}</div>
-                <div style="font-size: 11px; color: #94a3b8; line-height: 1.3;">Journal<br>Entries</div>
-              </div>
-            </div>
+          <!-- Right Column: Activity Summary Table -->
+          <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 24px;">
+            <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 700; color: white; text-align: center;">📊 Activity Summary</h3>
+            
+            <!-- Activity Table -->
+            <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+              <!-- Headers -->
+              <thead>
+                <tr>
+                  <th style="background: #334155; color: #94a3b8; padding: 12px 16px; text-align: left; font-size: 14px; font-weight: 600; border-radius: 8px 0 0 8px; border: 1px solid #475569;">Activity</th>
+                  <th style="background: #334155; color: #94a3b8; padding: 12px 16px; text-align: center; font-size: 14px; font-weight: 600; border-top: 1px solid #475569; border-bottom: 1px solid #475569;">Previous</th>
+                  <th style="background: #334155; color: #94a3b8; padding: 12px 16px; text-align: center; font-size: 14px; font-weight: 600; border-radius: 0 8px 8px 0; border: 1px solid #475569;">Current</th>
+                </tr>
+              </thead>
+              <!-- Data Rows -->
+              <tbody>
+                <tr>
+                  <td style="background: #0f172a; color: white; padding: 14px 16px; font-size: 15px; font-weight: 500; border-left: 1px solid #475569; border-bottom: 1px solid #475569;">🧘 Meditation (min)</td>
+                  <td style="background: #0f172a; color: #94a3b8; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-bottom: 1px solid #475569;">${previousPeriodData.meditation}</td>
+                  <td style="background: #0f172a; color: white; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-right: 1px solid #475569; border-bottom: 1px solid #475569;">${data.mindMetrics.meditationMinutes}</td>
+                </tr>
+                <tr>
+                  <td style="background: #0f172a; color: white; padding: 14px 16px; font-size: 15px; font-weight: 500; border-left: 1px solid #475569; border-bottom: 1px solid #475569;">💪 Workouts</td>
+                  <td style="background: #0f172a; color: #94a3b8; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-bottom: 1px solid #475569;">${previousPeriodData.workouts}</td>
+                  <td style="background: #0f172a; color: white; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-right: 1px solid #475569; border-bottom: 1px solid #475569;">${data.bodyMetrics.workoutsCompleted}</td>
+                </tr>
+                <tr>
+                  <td style="background: #0f172a; color: white; padding: 14px 16px; font-size: 15px; font-weight: 500; border-left: 1px solid #475569; border-bottom: 1px solid #475569;">🤔 Reflection (min)</td>
+                  <td style="background: #0f172a; color: #94a3b8; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-bottom: 1px solid #475569;">${previousPeriodData.reflection}</td>
+                  <td style="background: #0f172a; color: white; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-right: 1px solid #475569; border-bottom: 1px solid #475569;">${data.soulMetrics.reflectionMinutes}</td>
+                </tr>
+                <tr>
+                  <td style="background: #0f172a; color: white; padding: 14px 16px; font-size: 15px; font-weight: 500; border-left: 1px solid #475569; border-bottom: 1px solid #475569; border-radius: 0 0 0 8px;">📝 Journal Entries</td>
+                  <td style="background: #0f172a; color: #94a3b8; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-bottom: 1px solid #475569;">${previousPeriodData.journal}</td>
+                  <td style="background: #0f172a; color: white; padding: 14px 16px; text-align: center; font-size: 18px; font-weight: 700; border-right: 1px solid #475569; border-bottom: 1px solid #475569; border-radius: 0 0 8px 0;">${data.mindMetrics.journalEntries}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
         <!-- Overall Progress Section -->
-        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 2px solid #334155; border-radius: 12px; padding: 24px; text-align: center;">
-          <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700; color: white;">⭐ Overall Progress</h3>
-          <div style="font-size: 48px; font-weight: 900; margin-bottom: 12px; color: white;">${data.goalsProgress.overallProgress}%</div>
-          <div style="background: #334155; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 16px; max-width: 300px; margin-left: auto; margin-right: auto;">
-            <div style="background: #3b82f6; height: 100%; width: ${data.goalsProgress.overallProgress}%; border-radius: 4px;"></div>
+        <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px; text-align: center;">
+          <h3 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700; color: white;">⭐ Overall Progress</h3>
+          <div style="font-size: 52px; font-weight: 900; margin-bottom: 16px; color: white;">${data.goalsProgress.overallProgress}%</div>
+          <div style="background: #334155; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 20px; max-width: 400px; margin-left: auto; margin-right: auto;">
+            <div style="background: #3b82f6; height: 100%; width: ${data.goalsProgress.overallProgress}%; border-radius: 5px;"></div>
           </div>
-          <p style="margin: 0; font-size: 16px; font-weight: 600; color: #94a3b8;">
+          <p style="margin: 0; font-size: 18px; font-weight: 600; color: #94a3b8;">
             ${data.goalsProgress.overallProgress >= 70 ? 
               "Outstanding! You're crushing it! 💪" :
               data.goalsProgress.overallProgress >= 50 ?
@@ -111,8 +136,8 @@ const ProgressReportDialog = () => {
         </div>
 
         <!-- Footer -->
-        <div style="text-align: center; padding: 16px 0 8px 0;">
-          <p style="margin: 0; font-size: 12px; color: #64748b;">Generated by Next Level Coach • Keep leveling up! 🚀</p>
+        <div style="text-align: center; padding: 20px 0 12px 0;">
+          <p style="margin: 0; font-size: 13px; color: #64748b;">Generated by Next Level Coach • Keep leveling up! 🚀</p>
         </div>
 
       </div>
