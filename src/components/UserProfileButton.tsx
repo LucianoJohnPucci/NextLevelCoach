@@ -10,12 +10,12 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { LogOut, User as UserIcon } from "lucide-react";
 
 // Create a version that doesn't use router hooks for components outside Router context
 export function UserProfileButtonNoRouter() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   
   if (!user) {
     return (
@@ -68,7 +68,6 @@ export function UserProfileButtonNoRouter() {
         <DropdownMenuItem 
           className="cursor-pointer text-destructive focus:text-destructive" 
           onClick={async () => {
-            const { signOut } = useAuth();
             await signOut();
             window.location.href = '/auth';
           }}
