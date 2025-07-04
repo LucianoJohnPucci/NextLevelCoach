@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +17,7 @@ export const useNotes = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
+  const { toast: showToast } = useToast();
 
   // Fetch notes from Supabase
   const fetchNotes = async () => {
@@ -23,14 +25,14 @@ export const useNotes = () => {
 
     try {
       const { data, error } = await supabase
-        .from("notes")
+        .from("users_notes")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error fetching notes:", error);
-        toast({
+        showToast({
           title: "Error fetching notes",
           description: error.message,
           variant: "destructive",
@@ -83,7 +85,7 @@ export const useNotes = () => {
       // Add to Supabase
       try {
         const { data, error } = await supabase
-          .from("notes")
+          .from("users_notes")
           .insert([
             {
               title,
@@ -96,7 +98,7 @@ export const useNotes = () => {
 
         if (error) {
           console.error("Error adding note:", error);
-          toast({
+          showToast({
             title: "Error adding note",
             description: error.message,
             variant: "destructive",
@@ -134,13 +136,13 @@ export const useNotes = () => {
       // Remove from Supabase
       try {
         const { error } = await supabase
-          .from("notes")
+          .from("users_notes")
           .delete()
           .eq("id", id);
 
         if (error) {
           console.error("Error removing note:", error);
-          toast({
+          showToast({
             title: "Error removing note",
             description: error.message,
             variant: "destructive",
@@ -171,13 +173,13 @@ export const useNotes = () => {
     if (user) {
       try {
         const { error } = await supabase
-          .from("notes")
+          .from("users_notes")
           .update({ title, content, category })
           .eq("id", id);
 
         if (error) {
           console.error("Error updating note:", error);
-          toast({
+          showToast({
             title: "Error updating note",
             description: error.message,
             variant: "destructive",

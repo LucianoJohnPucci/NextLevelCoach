@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ const SleepTracker = () => {
   const { sleepData, addSleepEntry, updateSleepEntry, deleteSleepEntry, isLoading, error } = useSleepTracking();
 
   useEffect(() => {
-    if (sleepData && date) {
+    if (sleepData && sleepData.length > 0 && date) {
       const formattedDate = format(date, "yyyy-MM-dd");
       const entryForDate = sleepData.find(entry => format(new Date(entry.date), "yyyy-MM-dd") === formattedDate);
 
@@ -63,7 +64,7 @@ const SleepTracker = () => {
       notes,
     };
 
-    if (sleepData && sleepData.some(entry => format(new Date(entry.date), "yyyy-MM-dd") === formattedDate)) {
+    if (sleepData && sleepData.length > 0 && sleepData.some(entry => format(new Date(entry.date), "yyyy-MM-dd") === formattedDate)) {
       // Update existing entry
       const existingEntry = sleepData.find(entry => format(new Date(entry.date), "yyyy-MM-dd") === formattedDate);
       if (existingEntry) {
@@ -82,7 +83,7 @@ const SleepTracker = () => {
     }
 
     const formattedDate = format(date, "yyyy-MM-dd");
-    const existingEntry = sleepData && sleepData.find(entry => format(new Date(entry.date), "yyyy-MM-dd") === formattedDate);
+    const existingEntry = sleepData && sleepData.length > 0 && sleepData.find(entry => format(new Date(entry.date), "yyyy-MM-dd") === formattedDate);
 
     if (existingEntry) {
       await deleteSleepEntry(existingEntry.id);
@@ -177,8 +178,10 @@ const SleepTracker = () => {
               />
             </div>
             <div className="flex justify-between">
-              <Button type="submit">Save</Button>
-              <Button type="button" variant="destructive" onClick={handleDelete}>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save"}
+              </Button>
+              <Button type="button" variant="destructive" onClick={handleDelete} disabled={isLoading}>
                 Delete
               </Button>
             </div>

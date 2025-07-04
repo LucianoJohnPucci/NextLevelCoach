@@ -1,72 +1,87 @@
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { useOnboarding } from "./useOnboarding";
+import { Progress } from "@/components/ui/progress";
+import { Sparkles, ArrowRight, ArrowLeft, CheckCircle } from "lucide-react";
+import { useAudio } from "@/hooks/useAudio";
 
 interface OnboardingDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  onComplete?: () => void;
 }
 
-const defaultQuestions = [
-  "What is your primary goal for the next 5 years?",
-  "What habits would you like to develop in the next 3 months?",
-  "What is your biggest obstacle to achieving your goals?",
-  "How would you rate your current wellness on a scale of 1-10 and why?",
-  "What areas of your life would you like to improve the most?",
-  "How much time can you dedicate daily to your personal development?",
-  "What previous methods have you tried that didn't work for you?",
-  "What strengths do you bring to your personal development journey?",
-  "What motivates you the most in life?",
-  "What would success look like for you at the end of this coaching journey?"
+interface OnboardingQuestion {
+  id: string;
+  question: string;
+  type: "text" | "textarea" | "select";
+  options?: string[];
+  placeholder: string;
+}
+
+const onboardingQuestions: OnboardingQuestion[] = [
+  {
+    id: "question_1",
+    question: "What's your primary goal for personal development?",
+    type: "select",
+    options: ["Improve physical health", "Enhance mental clarity", "Develop spiritual practices", "Build better habits", "Increase productivity"],
+    placeholder: "Select your primary goal"
+  },
+  {
+    id: "question_2", 
+    question: "What time of day do you feel most productive?",
+    type: "select",
+    options: ["Early morning (5-8 AM)", "Morning (8-11 AM)", "Afternoon (12-5 PM)", "Evening (5-8 PM)", "Night (8-11 PM)"],
+    placeholder: "Select your productive time"
+  },
+  {
+    id: "question_3",
+    question: "How many minutes can you realistically dedicate to daily practices?",
+    type: "select", 
+    options: ["10-15 minutes", "15-30 minutes", "30-45 minutes", "45-60 minutes", "More than 60 minutes"],
+    placeholder: "Select your available time"
+  },
+  {
+    id: "question_4",
+    question: "What's your biggest challenge in maintaining healthy habits?",
+    type: "textarea",
+    placeholder: "Describe your main challenge..."
+  },
+  {
+    id: "question_5",
+    question: "What does success look like for you in 3 months?",
+    type: "textarea", 
+    placeholder: "Describe your vision of success..."
+  }
 ];
 
-const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ open, onOpenChange }) => {
-  const { toast } = useToast();
-  const { user } = useAuth();
+const OnboardingDialog = ({ isOpen, onClose, onComplete }: OnboardingDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const { saveAnswers, getUserAnswers } = useOnboarding();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const { saveAnswers } = useOnboarding();
+  const { playAudio } = useAudio();
 
   useEffect(() => {
-    if (open && user) {
-      // Load existing answers if available
-      const loadAnswers = async () => {
-        setIsLoading(true);
-        try {
-          const existingAnswers = await getUserAnswers();
-          if (existingAnswers) {
-            const loadedAnswers: Record<string, string> = {};
-            for (let i = 1; i <= 10; i++) {
-              const answer = existingAnswers[`answer_${i}`];
-              if (answer) {
-                loadedAnswers[`${i}`] = answer;
-              }
-            }
-            setAnswers(loadedAnswers);
-          }
-        } catch (error) {
-          console.error("Error loading answers:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      loadAnswers();
+    if (isOpen && currentStep === 0) {
+      playAudio('/assets/audio/onboarding/welcome.mp3');
     }
-  }, [open, user]);
+  }, [isOpen, currentStep, playAudio]);
 
   const handleNext = () => {
-    if (currentStep < defaultQuestions.length - 1) {
+    if (currentStep < onboardingQuestions.length - 1) {
       setCurrentStep(currentStep + 1);
-    } else {
-      handleSubmit();
+      playAudio('/assets/audio/onboarding/welcome2.mp3');
     }
   };
 
@@ -76,123 +91,175 @@ const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ open, onOpenChange 
     }
   };
 
-  const handleInputChange = (value: string) => {
-    setAnswers({
-      ...answers,
-      [`${currentStep + 1}`]: value,
-    });
+  const handleAnswerChange = (questionId: string, answer: string) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }));
   };
 
   const handleSubmit = async () => {
     if (!user) {
       toast({
         title: "Error",
-        description: "You must be logged in to save your answers",
+        description: "You must be logged in to save your onboarding answers.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsLoading(true);
-
+    setIsSubmitting(true);
     try {
-      const formattedAnswers: Record<string, string> = {};
-
-      // Format answers for saving
-      for (let i = 1; i <= 10; i++) {
-        formattedAnswers[`question_${i}`] = defaultQuestions[i - 1];
-        formattedAnswers[`answer_${i}`] = answers[`${i}`] || "";
-      }
-
-      await saveAnswers(formattedAnswers);
-
-      toast({
-        title: "Success",
-        description: "Your answers have been saved. We'll use them to customize your experience.",
+      // Create question-answer pairs
+      const questionAnswerPairs: Record<string, string> = {};
+      onboardingQuestions.forEach((q, index) => {
+        questionAnswerPairs[`question_${index + 1}`] = q.question;
+        questionAnswerPairs[`answer_${index + 1}`] = answers[q.id] || '';
       });
 
-      onOpenChange(false);
+      await saveAnswers(questionAnswerPairs);
+      
+      toast({
+        title: "Welcome aboard! 🎉",
+        description: "Your personalized journey starts now.",
+      });
+      
+      onComplete?.();
+      onClose();
     } catch (error) {
-      console.error("Error saving answers:", error);
       toast({
         title: "Error",
-        description: "There was an error saving your answers. Please try again.",
+        description: "Failed to save your answers. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const progress = ((currentStep + 1) / defaultQuestions.length) * 100;
+  const currentQuestion = onboardingQuestions[currentStep];
+  const progress = ((currentStep + 1) / onboardingQuestions.length) * 100;
+  const isCurrentAnswered = answers[currentQuestion?.id];
+
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Personalize Your Journey</DialogTitle>
-          <DialogDescription>
-            Answer these questions to help us create your custom 5-year transformation plan.
-          </DialogDescription>
-        </DialogHeader>
-        
-        {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        ) : (
-          <div className="space-y-6 py-4">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="w-full max-w-2xl"
+      >
+        <Card className="border-2 border-primary/20">
+          <CardHeader className="text-center space-y-4">
+            <div className="flex items-center justify-center gap-2">
+              <Sparkles className="h-6 w-6 text-primary" />
+              <CardTitle className="text-2xl">Welcome to Your Journey</CardTitle>
+            </div>
+            <CardDescription>
+              Let's personalize your experience with a few quick questions
+            </CardDescription>
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Question {currentStep + 1} of {defaultQuestions.length}</span>
-                <span>{Math.round(progress)}%</span>
-              </div>
               <Progress value={progress} className="h-2" />
+              <p className="text-sm text-muted-foreground">
+                Question {currentStep + 1} of {onboardingQuestions.length}
+              </p>
             </div>
-            
-            <div className="space-y-4">
-              <Label htmlFor="question" className="text-lg font-medium">
-                {defaultQuestions[currentStep]}
-              </Label>
-              
-              {defaultQuestions[currentStep].length > 100 ? (
-                <Textarea
-                  id="question"
-                  className="min-h-[150px]"
-                  placeholder="Your answer..."
-                  value={answers[`${currentStep + 1}`] || ""}
-                  onChange={(e) => handleInputChange(e.target.value)}
-                />
-              ) : (
-                <Input
-                  id="question"
-                  placeholder="Your answer..."
-                  value={answers[`${currentStep + 1}`] || ""}
-                  onChange={(e) => handleInputChange(e.target.value)}
-                />
-              )}
-            </div>
-            
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-4"
+              >
+                <h3 className="text-lg font-medium text-center">
+                  {currentQuestion.question}
+                </h3>
+
+                {currentQuestion.type === "select" && (
+                  <Select
+                    value={answers[currentQuestion.id] || ""}
+                    onValueChange={(value) => handleAnswerChange(currentQuestion.id, value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={currentQuestion.placeholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currentQuestion.options?.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {currentQuestion.type === "text" && (
+                  <Input
+                    value={answers[currentQuestion.id] || ""}
+                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                    placeholder={currentQuestion.placeholder}
+                    className="text-center"
+                  />
+                )}
+
+                {currentQuestion.type === "textarea" && (
+                  <Textarea
+                    value={answers[currentQuestion.id] || ""}
+                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                    placeholder={currentQuestion.placeholder}
+                    className="min-h-[100px]"
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+
             <div className="flex justify-between pt-4">
               <Button
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
+                className="flex items-center gap-2"
               >
+                <ArrowLeft className="h-4 w-4" />
                 Previous
               </Button>
-              
-              <Button
-                onClick={handleNext}
-                disabled={isLoading}
-              >
-                {currentStep === defaultQuestions.length - 1 ? "Submit" : "Next"}
-              </Button>
+
+              {currentStep === onboardingQuestions.length - 1 ? (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!isCurrentAnswered || isSubmitting}
+                  className="flex items-center gap-2"
+                >
+                  {isSubmitting ? (
+                    "Saving..."
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4" />
+                      Complete Setup
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleNext}
+                  disabled={!isCurrentAnswered}
+                  className="flex items-center gap-2"
+                >
+                  Next
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              )}
             </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
   );
 };
 

@@ -1,53 +1,59 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
-interface SleepData {
+interface SleepEntry {
   id: string;
   user_id: string;
   date: string;
   bedtime: string;
-  wake_time: string;
-  sleep_duration: number;
-  sleep_quality: number;
+  wake_up_time: string;
+  sleep_quality: string;
   notes: string;
   created_at: string;
 }
 
 export const useSleepTracking = () => {
-  const [sleepData, setSleepData] = useState<SleepData | null>(null);
+  const [sleepData, setSleepData] = useState<SleepEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const today = new Date().toISOString().split("T")[0];
-
+  // Fetch sleep data for the last 30 days
   useEffect(() => {
     const fetchSleepData = async () => {
       if (!user) return;
 
       setLoading(true);
+      setError(null);
       try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
         const { data, error } = await supabase
-          .from("sleep_data")
+          .from("sleep_entries")
           .select("*")
           .eq("user_id", user.id)
-          .eq("date", today)
-          .single();
+          .gte("date", thirtyDaysAgo.toISOString().split('T')[0])
+          .order("date", { ascending: false });
 
         if (error) {
-          console.error("Error fetching sleep data:", error);
+          setError(error);
           toast({
             title: "Error fetching sleep data",
             description: error.message,
             variant: "destructive",
           });
+          return;
         }
 
-        setSleepData(data);
-      } catch (error) {
-        console.error("Unexpected error fetching sleep data:", error);
+        setSleepData(data || []);
+      } catch (err) {
+        const error = err as Error;
+        setError(error);
         toast({
           title: "Unexpected error",
           description: "Failed to retrieve sleep data. Please try again.",
@@ -59,15 +65,9 @@ export const useSleepTracking = () => {
     };
 
     fetchSleepData();
-  }, [user, today, toast]);
+  }, [user, toast]);
 
-  const saveSleepData = async (
-    bedtime: string,
-    wake_time: string,
-    sleep_duration: number,
-    sleep_quality: number,
-    notes: string
-  ) => {
+  const addSleepEntry = async (entry: Omit<SleepEntry, 'id' | 'user_id' | 'created_at'>) => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -79,27 +79,16 @@ export const useSleepTracking = () => {
 
     setLoading(true);
     try {
-      const sleepEntry = {
-        user_id: user.id,
-        date: today,
-        bedtime,
-        wake_time,
-        sleep_duration,
-        sleep_quality,
-        notes,
-      };
-
-      const { data, error } = sleepData
-        ? await supabase
-            .from("sleep_data")
-            .update(sleepEntry)
-            .eq("id", sleepData.id)
-            .select()
-            .single()
-        : await supabase.from("sleep_data").insert([sleepEntry]).select().single();
+      const { data, error } = await supabase
+        .from("sleep_entries")
+        .insert([{
+          ...entry,
+          user_id: user.id,
+        }])
+        .select()
+        .single();
 
       if (error) {
-        console.error("Error saving sleep data:", error);
         toast({
           title: "Error saving sleep data",
           description: error.message,
@@ -108,14 +97,13 @@ export const useSleepTracking = () => {
         return false;
       }
 
-      setSleepData(data as SleepData);
+      setSleepData(prev => [data, ...prev]);
       toast({
         title: "Sleep data saved",
-        description: "Your sleep data has been successfully saved.",
+        description: "Your sleep entry has been successfully saved.",
       });
       return true;
     } catch (error) {
-      console.error("Unexpected error saving sleep data:", error);
       toast({
         title: "Unexpected error",
         description: "Failed to save sleep data. Please try again.",
@@ -127,5 +115,144 @@ export const useSleepTracking = () => {
     }
   };
 
-  return { sleepData, loading, saveSleepData };
+  const updateSleepEntry = async (id: string, updates: Partial<SleepEntry>) => {
+    if (!user) return false;
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("sleep_entries")
+        .update(updates)
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+
+      if (error) {
+        toast({
+          title: "Error updating sleep data",
+          description: error.message,
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      setSleepData(prev => prev.map(entry => entry.id === id ? data : entry));
+      toast({
+        title: "Sleep data updated",
+        description: "Your sleep entry has been successfully updated.",
+      });
+      return true;
+    } catch (error) {
+      toast({
+        title: "Unexpected error",
+        description: "Failed to update sleep data. Please try again.",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteSleepEntry = async (id: string) => {
+    if (!user) return false;
+
+    try {
+      const { error } = await supabase
+        .from("sleep_entries")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if (error) {
+        toast({
+          title: "Error deleting sleep data",
+          description: error.message,
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      setSleepData(prev => prev.filter(entry => entry.id !== id));
+      toast({
+        title: "Sleep data deleted",
+        description: "Your sleep entry has been successfully deleted.",
+      });
+      return true;
+    } catch (error) {
+      toast({
+        title: "Unexpected error",
+        description: "Failed to delete sleep data. Please try again.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  // Calculate average sleep and trend
+  const averageSleep = useMemo(() => {
+    if (sleepData.length === 0) return null;
+
+    const recentEntries = sleepData.slice(0, 7); // Last 7 days
+    if (recentEntries.length === 0) return null;
+
+    const totalHours = recentEntries.reduce((sum, entry) => {
+      const bedtime = new Date(`2000-01-01 ${entry.bedtime}`);
+      const wakeTime = new Date(`2000-01-01 ${entry.wake_up_time}`);
+      
+      // Handle overnight sleep
+      if (wakeTime < bedtime) {
+        wakeTime.setDate(wakeTime.getDate() + 1);
+      }
+      
+      const hours = (wakeTime.getTime() - bedtime.getTime()) / (1000 * 60 * 60);
+      return sum + hours;
+    }, 0);
+
+    return totalHours / recentEntries.length;
+  }, [sleepData]);
+
+  const sleepTrend = useMemo(() => {
+    if (sleepData.length < 14) return null;
+
+    const recent7Days = sleepData.slice(0, 7);
+    const previous7Days = sleepData.slice(7, 14);
+
+    const getAverage = (entries: SleepEntry[]) => {
+      const totalHours = entries.reduce((sum, entry) => {
+        const bedtime = new Date(`2000-01-01 ${entry.bedtime}`);
+        const wakeTime = new Date(`2000-01-01 ${entry.wake_up_time}`);
+        
+        if (wakeTime < bedtime) {
+          wakeTime.setDate(wakeTime.getDate() + 1);
+        }
+        
+        const hours = (wakeTime.getTime() - bedtime.getTime()) / (1000 * 60 * 60);
+        return sum + hours;
+      }, 0);
+      return totalHours / entries.length;
+    };
+
+    const recentAvg = getAverage(recent7Days);
+    const previousAvg = getAverage(previous7Days);
+    const percentChange = Math.round(((recentAvg - previousAvg) / previousAvg) * 100);
+
+    return {
+      percentChange: Math.abs(percentChange),
+      isIncreasing: percentChange > 0,
+    };
+  }, [sleepData]);
+
+  return {
+    sleepData,
+    loading,
+    error,
+    isLoading: loading,
+    addSleepEntry,
+    updateSleepEntry,
+    deleteSleepEntry,
+    averageSleep,
+    sleepTrend,
+  };
 };
