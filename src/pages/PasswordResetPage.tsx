@@ -25,12 +25,12 @@ const PasswordResetPage = () => {
   useEffect(() => {
     const handlePasswordReset = async () => {
       try {
-        console.log("[Password Reset] Starting password reset process");
+        console.log("[Password Reset] INDEPENDENT - Starting password reset process");
         setIsProcessing(true);
 
         // Get URL parameters from both hash and search
         const { hash, search } = window.location;
-        console.log("[Password Reset] URL hash:", hash, "search:", search);
+        console.log("[Password Reset] INDEPENDENT - URL hash:", hash, "search:", search);
         
         const hashParams = new URLSearchParams(hash.substring(1));
         const searchParams = new URLSearchParams(search);
@@ -39,23 +39,23 @@ const PasswordResetPage = () => {
         const accessToken = hashParams.get("access_token") || searchParams.get("access_token");
         const refreshToken = hashParams.get("refresh_token") || searchParams.get("refresh_token");
         
-        console.log("[Password Reset] Found parameters:", { 
+        console.log("[Password Reset] INDEPENDENT - Found parameters:", { 
           type, 
           hasAccessToken: !!accessToken, 
           hasRefreshToken: !!refreshToken 
         });
         
         if (type === "recovery" && accessToken && refreshToken) {
-          console.log("[Password Reset] Valid recovery link detected");
+          console.log("[Password Reset] INDEPENDENT - Valid recovery link detected");
           
-          // Set the session for password reset
+          // Set the session for password reset - this will NOT trigger AuthProvider
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken
           });
           
           if (error) {
-            console.error("[Password Reset] Session error:", error);
+            console.error("[Password Reset] INDEPENDENT - Session error:", error);
             toast({
               title: "Invalid reset link",
               description: "The password reset link is invalid or expired. Please request a new one.",
@@ -65,13 +65,13 @@ const PasswordResetPage = () => {
             return;
           }
           
-          console.log("[Password Reset] Recovery session established successfully");
+          console.log("[Password Reset] INDEPENDENT - Recovery session established successfully");
           
           // Clean URL and show password form
           window.history.replaceState({}, document.title, "/reset-password");
           setIsResetDialogOpen(true);
         } else {
-          console.log("[Password Reset] Invalid or missing recovery parameters");
+          console.log("[Password Reset] INDEPENDENT - Invalid or missing recovery parameters");
           toast({
             title: "Invalid reset link",
             description: "This password reset link is invalid or expired. Please request a new one.",
@@ -80,7 +80,7 @@ const PasswordResetPage = () => {
           navigate("/auth");
         }
       } catch (error) {
-        console.error("[Password Reset] Error:", error);
+        console.error("[Password Reset] INDEPENDENT - Error:", error);
         toast({
           title: "Error",
           description: "Something went wrong with the password reset process.",
@@ -111,24 +111,24 @@ const PasswordResetPage = () => {
     
     try {
       setLoading(true);
-      console.log("[Password Reset] Updating password");
+      console.log("[Password Reset] INDEPENDENT - Updating password");
       
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
       
       if (error) {
-        console.error("[Password Reset] Update error:", error);
+        console.error("[Password Reset] INDEPENDENT - Update error:", error);
         setPasswordError(error.message || "Failed to update password");
         return;
       }
       
-      console.log("[Password Reset] Password updated successfully");
+      console.log("[Password Reset] INDEPENDENT - Password updated successfully");
       setIsResetDialogOpen(false);
       setShowSuccessDialog(true);
       
     } catch (error: any) {
-      console.error("[Password Reset] Unexpected error:", error);
+      console.error("[Password Reset] INDEPENDENT - Unexpected error:", error);
       setPasswordError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -137,7 +137,7 @@ const PasswordResetPage = () => {
 
   const handleComplete = async () => {
     try {
-      console.log("[Password Reset] Completing process - signing out");
+      console.log("[Password Reset] INDEPENDENT - Completing process - signing out");
       
       // Sign out to clear the recovery session
       await supabase.auth.signOut();
@@ -153,7 +153,7 @@ const PasswordResetPage = () => {
       navigate("/auth", { replace: true });
       
     } catch (error) {
-      console.error("[Password Reset] Error during completion:", error);
+      console.error("[Password Reset] INDEPENDENT - Error during completion:", error);
       navigate("/auth", { replace: true });
     }
   };

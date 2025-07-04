@@ -30,19 +30,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
 
   useEffect(() => {
+    // If we're on the reset-password page, don't initialize auth at all
+    if (window.location.pathname === "/reset-password") {
+      console.log("[Auth Provider] On reset-password page - SKIPPING ALL AUTH INITIALIZATION");
+      setLoading(false);
+      return;
+    }
+
     const getSession = async () => {
       setLoading(true);
       
       try {
         const path = window.location.pathname;
         console.log("[Auth Provider] Current path:", path);
-        
-        // COMPLETELY IGNORE password reset - don't do anything at all
-        if (path === "/reset-password") {
-          console.log("[Auth Provider] On reset-password page - doing NOTHING");
-          setLoading(false);
-          return;
-        }
         
         // For other special routes, don't redirect
         const isSpecialRoute = 
@@ -84,9 +84,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         const path = window.location.pathname;
         
-        // COMPLETELY IGNORE password reset page - no state updates, no redirects, NOTHING
+        // COMPLETELY SKIP auth state changes for reset-password page
         if (path === "/reset-password") {
-          console.log("[Auth Provider] On reset-password page - IGNORING ALL AUTH EVENTS");
+          console.log("[Auth Provider] On reset-password page - IGNORING AUTH STATE CHANGE");
           return;
         }
         
