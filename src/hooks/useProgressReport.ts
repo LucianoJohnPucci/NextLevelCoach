@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,11 +61,11 @@ export const useProgressReport = () => {
 
       if (dailyError) {
         console.error("Error fetching daily entries:", dailyError);
-        return { averageMood: 5 };
+        return { averageMood: 5, journalEntries: 0, meditationMinutes: 0 };
       }
 
-      const totalMood = dailyEntries.reduce((sum, entry) => sum + entry.mood, 0);
-      const averageMood = dailyEntries.length > 0 ? Math.round(totalMood / dailyEntries.length) : 5;
+      const totalMood = dailyEntries?.reduce((sum, entry) => sum + entry.mood, 0) || 0;
+      const averageMood = dailyEntries && dailyEntries.length > 0 ? Math.round(totalMood / dailyEntries.length) : 5;
 
       const { count: journalEntries, error: journalError } = await supabase
         .from('journal_entries')
@@ -98,8 +99,8 @@ export const useProgressReport = () => {
         return { averageEnergy: 5, workoutsCompleted: 0 };
       }
 
-      const totalEnergy = dailyEntries.reduce((sum, entry) => sum + entry.energy, 0);
-      const averageEnergy = dailyEntries.length > 0 ? Math.round(totalEnergy / dailyEntries.length) : 5;
+      const totalEnergy = dailyEntries?.reduce((sum, entry) => sum + entry.energy, 0) || 0;
+      const averageEnergy = dailyEntries && dailyEntries.length > 0 ? Math.round(totalEnergy / dailyEntries.length) : 5;
 
       // Mock workout data
       const workoutsCompleted = Math.floor(Math.random() * 7);
@@ -148,8 +149,8 @@ export const useProgressReport = () => {
         return { overallProgress: 50 };
       }
 
-      const totalProgress = goals.reduce((sum, goal) => sum + goal.progress, 0);
-      const overallProgress = goals.length > 0 ? Math.round(totalProgress / goals.length) : 50;
+      const totalProgress = goals?.reduce((sum, goal) => sum + (goal.progress || 0), 0) || 0;
+      const overallProgress = goals && goals.length > 0 ? Math.round(totalProgress / goals.length) : 50;
 
       return { overallProgress };
     };
@@ -198,16 +199,16 @@ export const useProgressReport = () => {
       }
 
       const emotionCounts: { [emotion: string]: number } = {};
-      data.forEach(entry => {
+      data?.forEach(entry => {
         if (entry.emotions && Array.isArray(entry.emotions)) {
-          entry.emotions.forEach(emotion => {
+          entry.emotions.forEach((emotion: string) => {
             emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
           });
         }
       });
 
       // Convert counts to percentages
-      const totalEntries = data.length;
+      const totalEntries = data?.length || 0;
       const emotionPercentages: { [emotion: string]: number } = {};
       for (const emotion in emotionCounts) {
         emotionPercentages[emotion] = totalEntries > 0 ? Math.round((emotionCounts[emotion] / totalEntries) * 100) : 0;

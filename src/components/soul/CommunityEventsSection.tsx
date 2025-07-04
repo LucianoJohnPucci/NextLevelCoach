@@ -30,6 +30,13 @@ const CommunityEventsSection = () => {
     searchEvents(location, date, priceFilter);
   };
 
+  const handleCreateEvent = async (data: any) => {
+    const success = await createEvent(data);
+    if (success) {
+      setIsCreateDialogOpen(false);
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -101,7 +108,7 @@ const CommunityEventsSection = () => {
             </DialogDescription>
           </DialogHeader>
           <EventForm 
-            onSubmit={createEvent}
+            onSubmit={handleCreateEvent}
             onCancel={() => setIsCreateDialogOpen(false)}
           />
         </DialogContent>

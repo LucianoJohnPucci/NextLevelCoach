@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +12,7 @@ export interface Task {
   due_date?: string;
   completed: boolean;
   user_id: string;
+  description?: string;
 }
 
 export const usePrioritizeTasks = () => {
@@ -44,7 +46,18 @@ export const usePrioritizeTasks = () => {
         }
 
         if (data) {
-          setTasks(data);
+          // Transform the data to match our Task interface
+          const transformedTasks: Task[] = data.map(task => ({
+            id: task.id,
+            title: task.title,
+            priority: task.priority as "high" | "medium" | "low",
+            importance: task.importance as "high" | "medium" | "low",
+            due_date: task.due_date || undefined,
+            completed: task.completed,
+            user_id: task.user_id,
+            description: task.description || undefined
+          }));
+          setTasks(transformedTasks);
         }
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -86,6 +99,7 @@ export const usePrioritizeTasks = () => {
             importance,
             due_date,
             user_id: user.id,
+            completed: false,
           },
         ])
         .select();
@@ -99,8 +113,18 @@ export const usePrioritizeTasks = () => {
         });
       }
 
-      if (data) {
-        setTasks([...tasks, data[0]]);
+      if (data && data[0]) {
+        const newTask: Task = {
+          id: data[0].id,
+          title: data[0].title,
+          priority: data[0].priority as "high" | "medium" | "low",
+          importance: data[0].importance as "high" | "medium" | "low",
+          due_date: data[0].due_date || undefined,
+          completed: data[0].completed,
+          user_id: data[0].user_id,
+          description: data[0].description || undefined
+        };
+        setTasks([...tasks, newTask]);
         toast({
           title: "Task added",
           description: `Task "${title}" added successfully.`,
@@ -142,11 +166,21 @@ export const usePrioritizeTasks = () => {
         });
       }
 
-      if (data) {
-        setTasks(tasks.map((task) => (task.id === id ? data[0] : task)));
+      if (data && data[0]) {
+        const updatedTask: Task = {
+          id: data[0].id,
+          title: data[0].title,
+          priority: data[0].priority as "high" | "medium" | "low",
+          importance: data[0].importance as "high" | "medium" | "low",
+          due_date: data[0].due_date || undefined,
+          completed: data[0].completed,
+          user_id: data[0].user_id,
+          description: data[0].description || undefined
+        };
+        setTasks(tasks.map((task) => (task.id === id ? updatedTask : task)));
         toast({
           title: "Task updated",
-          description: `Task "${data[0].title}" updated successfully.`,
+          description: `Task "${updatedTask.title}" updated successfully.`,
         });
       }
     } catch (error) {
