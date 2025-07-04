@@ -15,7 +15,6 @@ const PasswordResetPage = () => {
   const location = useLocation();
   const { toast } = useToast();
 
-  // Component state
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,34 +23,30 @@ const PasswordResetPage = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
-  // Process the reset token on component mount
   useEffect(() => {
     const processRecoveryToken = async () => {
       try {
-        console.log("[Password Reset] Page mounted, checking for recovery parameters");
+        console.log("[Password Reset] Processing recovery token");
         setIsProcessing(true);
 
-        // Check URL hash for recovery parameters
-        const { hash } = window.location;
-        const hashParams = new URLSearchParams(hash.substring(1));
+        // Get the URL fragments
+        const { hash, search } = window.location;
+        console.log("[Password Reset] Hash:", hash, "Search:", search);
         
-        // Also check URL search parameters as fallback
-        const searchParams = new URLSearchParams(location.search);
+        // Parse parameters from both hash and search
+        const hashParams = new URLSearchParams(hash.substring(1));
+        const searchParams = new URLSearchParams(search);
         
         const type = hashParams.get("type") || searchParams.get("type");
         const accessToken = hashParams.get("access_token") || searchParams.get("access_token");
         const refreshToken = hashParams.get("refresh_token") || searchParams.get("refresh_token");
         
-        console.log("[Password Reset] Parameters detected:", { 
-          type, 
-          hasAccessToken: !!accessToken,
-          hasRefreshToken: !!refreshToken,
-          hash,
-          url: window.location.href
-        });
+        console.log("[Password Reset] Parsed params:", { type, hasAccessToken: !!accessToken, hasRefreshToken: !!refreshToken });
         
         if (type === "recovery" && accessToken && refreshToken) {
-          // Set the session using the tokens from the URL
+          console.log("[Password Reset] Valid recovery tokens found, setting session");
+          
+          // Set the session with the recovery tokens
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken
@@ -61,26 +56,26 @@ const PasswordResetPage = () => {
             console.error("[Password Reset] Error setting session:", error);
             toast({
               title: "Invalid reset link",
-              description: "The password reset link is invalid or has expired.",
+              description: "The password reset link is invalid or has expired. Please request a new one.",
               variant: "destructive",
             });
             navigate("/auth");
             return;
           }
           
-          console.log("[Password Reset] Session set successfully, showing password reset dialog");
+          console.log("[Password Reset] Session set successfully");
           setIsResetDialogOpen(true);
         } else {
-          console.log("[Password Reset] No valid recovery parameters found, redirecting to auth page");
+          console.log("[Password Reset] No valid recovery parameters, redirecting to auth");
           toast({
-            title: "Invalid reset link",
-            description: "The password reset link is invalid or has expired.",
+            title: "Invalid reset link", 
+            description: "The password reset link is invalid or has expired. Please request a new one.",
             variant: "destructive",
           });
           navigate("/auth");
         }
       } catch (error) {
-        console.error("[Password Reset] Error processing recovery token:", error);
+        console.error("[Password Reset] Error processing recovery:", error);
         toast({
           title: "Error",
           description: "There was a problem processing your password reset link.",
@@ -95,18 +90,15 @@ const PasswordResetPage = () => {
     processRecoveryToken();
   }, [location, navigate, toast]);
 
-  // Handle password reset submission
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError("");
     
-    // Validate password
     if (!newPassword || newPassword.length < 8) {
       setPasswordError("Password must be at least 8 characters long");
       return;
     }
     
-    // Validate password confirmation match
     if (newPassword !== confirmPassword) {
       setPasswordError("Passwords do not match");
       return;
@@ -114,10 +106,8 @@ const PasswordResetPage = () => {
     
     try {
       setLoading(true);
-      
       console.log("[Password Reset] Updating password");
       
-      // Update password using the Supabase API
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -128,49 +118,37 @@ const PasswordResetPage = () => {
       }
       
       console.log("[Password Reset] Password updated successfully");
-      
-      // Close reset dialog and show success
       setIsResetDialogOpen(false);
       setShowSuccessDialog(true);
-      
-      // Clear the form
       setNewPassword("");
       setConfirmPassword("");
       
     } catch (error: any) {
-      console.error("[Password Reset] Error during password reset:", error);
+      console.error("[Password Reset] Error updating password:", error);
       setPasswordError(error.message || "An error occurred while resetting your password.");
     } finally {
       setLoading(false);
     }
   };
 
-  // After successful password reset
   const handleSuccessDialogClose = async () => {
     try {
-      console.log("[Password Reset] Reset completed, cleaning up");
-      
-      // Sign out to ensure clean state
+      console.log("[Password Reset] Completing reset process");
       await supabase.auth.signOut();
-      
-      // Clear URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
-      
       setShowSuccessDialog(false);
       
-      // Navigate to auth page with success message
       toast({
         title: "Password updated successfully",
         description: "Please sign in with your new password.",
       });
       navigate("/auth", { replace: true });
     } catch (error) {
-      console.error("[Password Reset] Final cleanup error:", error);
+      console.error("[Password Reset] Cleanup error:", error);
       navigate("/auth", { replace: true });
     }
   };
 
-  // Loading state
   if (isProcessing) {
     return (
       <div className="container flex h-screen items-center justify-center">
@@ -190,11 +168,7 @@ const PasswordResetPage = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        {/* Reset Password Dialog */}
-        <Dialog 
-          open={isResetDialogOpen} 
-          onOpenChange={() => {}} // Prevent manual closing
-        >
+        <Dialog open={isResetDialogOpen} onOpenChange={() => {}}>
           <DialogContent className="sm:max-w-md">
             <form onSubmit={handleResetPassword}>
               <DialogHeader>
@@ -248,7 +222,6 @@ const PasswordResetPage = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Success Dialog */}
         <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
