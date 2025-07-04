@@ -102,7 +102,7 @@ const ProgressReportDialog = () => {
           <!-- Left Column: 8 Key Metrics in 2x4 Grid -->
           <div>
             <!-- Metrics Grid (2 columns, 4 rows) -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
               <!-- Row 1 -->
               <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
                 <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${data.mindMetrics.averageMood}/10</div>
@@ -130,7 +130,7 @@ const ProgressReportDialog = () => {
               </div>
               <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 20px; text-align: center;">
                 <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px; color: white;">${highestEmotion}%</div>
-                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">💭 Highest Emotion</div>
+                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🧠 Highest Emotion</div>
               </div>
               
               <!-- Row 4 -->
