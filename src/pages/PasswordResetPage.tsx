@@ -23,8 +23,6 @@ const PasswordResetPage = () => {
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [passwordError, setPasswordError] = useState("");
-  const [recoveryToken, setRecoveryToken] = useState<string | null>(null);
-  const [recoveryType, setRecoveryType] = useState<string | null>(null);
 
   // Process the reset token on component mount
   useEffect(() => {
@@ -33,43 +31,47 @@ const PasswordResetPage = () => {
         console.log("[Password Reset] Page mounted, checking for recovery parameters");
         setIsProcessing(true);
 
-        // Force sign out first thing to ensure clean state
-        console.log("[Password Reset] Signing out all sessions");
-        await supabase.auth.signOut({ scope: 'global' });
-        
-        // Check all possible locations for the recovery token
-        // 1. Hash parameters (primary Supabase approach)
+        // Check URL hash for recovery parameters
         const { hash } = window.location;
-        const cleanHash = hash.startsWith('#') ? hash.substring(1) : hash;
-        const hashParams = new URLSearchParams(cleanHash);
+        const hashParams = new URLSearchParams(hash.substring(1));
         
-        // 2. URL search parameters (fallback)
+        // Also check URL search parameters as fallback
         const searchParams = new URLSearchParams(location.search);
         
-        // Get type and token from all possible sources
         const type = hashParams.get("type") || searchParams.get("type");
-        const token = hashParams.get("access_token") || searchParams.get("access_token");
+        const accessToken = hashParams.get("access_token") || searchParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token") || searchParams.get("refresh_token");
         
         console.log("[Password Reset] Parameters detected:", { 
           type, 
-          hasToken: !!token,
+          hasAccessToken: !!accessToken,
+          hasRefreshToken: !!refreshToken,
           hash,
           url: window.location.href
         });
         
-        // If we found recovery parameters, show the reset dialog
-        if (type === "recovery" && token) {
-          setRecoveryToken(token);
-          setRecoveryType(type);
-          setIsResetDialogOpen(true);
-          console.log("[Password Reset] Valid recovery flow detected, showing password reset dialog");
-        } else if (hash.includes("type=recovery") || hash.includes("access_token")) {
-          // Try to parse from raw hash if URLSearchParams failed
-          console.log("[Password Reset] Recovery parameters detected in hash but couldn't parse normally");
+        if (type === "recovery" && accessToken && refreshToken) {
+          // Set the session using the tokens from the URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          if (error) {
+            console.error("[Password Reset] Error setting session:", error);
+            toast({
+              title: "Invalid reset link",
+              description: "The password reset link is invalid or has expired.",
+              variant: "destructive",
+            });
+            navigate("/auth");
+            return;
+          }
+          
+          console.log("[Password Reset] Session set successfully, showing password reset dialog");
           setIsResetDialogOpen(true);
         } else {
-          // No recovery parameters found, redirect to auth page
-          console.log("[Password Reset] No recovery parameters found, redirecting to auth page");
+          console.log("[Password Reset] No valid recovery parameters found, redirecting to auth page");
           toast({
             title: "Invalid reset link",
             description: "The password reset link is invalid or has expired.",
@@ -84,6 +86,7 @@ const PasswordResetPage = () => {
           description: "There was a problem processing your password reset link.",
           variant: "destructive",
         });
+        navigate("/auth");
       } finally {
         setIsProcessing(false);
       }
@@ -147,30 +150,24 @@ const PasswordResetPage = () => {
     try {
       console.log("[Password Reset] Reset completed, cleaning up");
       
-      // Sign out again to ensure clean state
-      await supabase.auth.signOut({ scope: 'global' });
+      // Sign out to ensure clean state
+      await supabase.auth.signOut();
       
       // Clear URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
       
       setShowSuccessDialog(false);
       
-      // Navigate to auth page
+      // Navigate to auth page with success message
+      toast({
+        title: "Password updated successfully",
+        description: "Please sign in with your new password.",
+      });
       navigate("/auth", { replace: true });
     } catch (error) {
       console.error("[Password Reset] Final cleanup error:", error);
       navigate("/auth", { replace: true });
     }
-  };
-
-  // Prevent closing the reset dialog manually (must complete or navigate away)
-  const handleDialogChange = (open: boolean) => {
-    if (!open && isResetDialogOpen) {
-      // Don't allow closing the dialog manually during the reset process
-      // User must either complete the flow or refresh/navigate away
-      return;
-    }
-    setIsResetDialogOpen(open);
   };
 
   // Loading state
@@ -196,7 +193,7 @@ const PasswordResetPage = () => {
         {/* Reset Password Dialog */}
         <Dialog 
           open={isResetDialogOpen} 
-          onOpenChange={handleDialogChange}
+          onOpenChange={() => {}} // Prevent manual closing
         >
           <DialogContent className="sm:max-w-md">
             <form onSubmit={handleResetPassword}>
@@ -243,7 +240,7 @@ const PasswordResetPage = () => {
               </div>
               
               <DialogFooter>
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading} className="w-full">
                   {loading ? "Updating..." : "Update Password"}
                 </Button>
               </DialogFooter>

@@ -37,7 +37,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
     try {
       setLoading(true);
       
-      // Create a properly structured redirect URL with the dedicated reset-password route
+      // Create the redirect URL for password reset
       const origin = window.location.origin;
       const redirectUrl = `${origin}/reset-password`;
       
@@ -49,11 +49,10 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
       
       if (error) throw error;
       
-      // Always show success message regardless of whether email exists
-      // This prevents user enumeration attacks
+      // Show success message
       toast({
         title: "Password reset email sent",
-        description: "If an account exists with this email, you'll receive instructions to reset your password",
+        description: "Check your email for instructions to reset your password",
       });
       
       onOpenChange(false);
@@ -61,14 +60,11 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
     } catch (error: any) {
       console.error("[Password Recovery] Reset password error:", error);
       
-      // Still show the same message even on error
-      // to avoid revealing if an email exists in the system
       toast({
-        title: "Password reset email sent",
-        description: "If an account exists with this email, you'll receive instructions to reset your password",
+        title: "Error",
+        description: error.message || "Failed to send password reset email",
+        variant: "destructive",
       });
-      
-      onOpenChange(false);
     } finally {
       setLoading(false);
     }
