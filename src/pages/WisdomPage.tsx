@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import ChatBox from "@/components/wisdom/ChatBox";
 import DailyWisdom from "@/components/wisdom/DailyWisdom";
 import PrioritizeBox from "@/components/wisdom/PrioritizeBox";
+import CommandChatBox from "@/components/wisdom/CommandChatBox";
 
 const WisdomPage = () => {
   return (
@@ -15,9 +16,14 @@ const WisdomPage = () => {
       >
         <h1 className="text-3xl font-bold tracking-tight">Double Chat AI - Goals & Wisdom</h1>
         <p className="text-muted-foreground">
-          Seek guidance from stoic philosophy and break down your goals with AI assistance.
+          Seek guidance from stoic philosophy, break down your goals with AI assistance, and manage tasks with natural language commands.
         </p>
       </motion.div>
+      
+      {/* Task Command Interface */}
+      <div className="grid grid-cols-1 gap-6">
+        <CommandChatBox />
+      </div>
       
       {/* Prioritize Box Section */}
       <div className="grid grid-cols-1 gap-6">
