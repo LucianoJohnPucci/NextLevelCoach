@@ -35,25 +35,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       try {
         const path = window.location.pathname;
-        const hash = window.location.hash;
+        console.log("[Auth Provider] Current path:", path);
         
-        console.log("[Auth Provider] Current path:", path, "Hash:", hash);
-        
-        // Check if this is a password recovery flow
-        const isRecoveryFlow = 
-          hash.includes("type=recovery") || 
-          hash.includes("access_token") ||
-          path === "/reset-password";
-        
-        if (isRecoveryFlow) {
-          console.log("[Auth Provider] Recovery flow detected, allowing reset-password page to handle it");
+        // For password reset page, let it handle everything - don't interfere
+        if (path === "/reset-password") {
+          console.log("[Auth Provider] On reset-password page, letting page handle auth");
           setLoading(false);
           return;
         }
         
-        // For special routes, don't redirect
+        // For other special routes, don't redirect
         const isSpecialRoute = 
-          path.includes('/reset-password') ||
           path.includes('/confirm-account') ||
           path.includes('/onboarding') ||
           path.includes('/auth');
@@ -64,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
         
-        // Normal session check
+        // Normal session check for all other routes
         const { data } = await supabase.auth.getSession();
         setSession(data.session);
         
@@ -91,13 +83,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("[Auth Provider] Auth state change event:", event);
         
         const path = window.location.pathname;
+        
+        // Don't interfere with password reset page
+        if (path === "/reset-password") {
+          console.log("[Auth Provider] On reset-password page, ignoring auth state change");
+          return;
+        }
+        
         const isSpecialRoute = 
-          path.includes('/reset-password') ||
           path.includes('/confirm-account') ||
           path.includes('/onboarding') ||
           path.includes('/auth');
         
-        // Don't update session during password recovery or on special routes
+        // Don't update session during special flows
         if (event === 'PASSWORD_RECOVERY' || isSpecialRoute) {
           console.log("[Auth Provider] Skipping session update for special flow");
           return;

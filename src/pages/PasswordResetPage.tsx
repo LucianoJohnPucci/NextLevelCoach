@@ -29,7 +29,7 @@ const PasswordResetPage = () => {
         console.log("[Password Reset] Processing recovery token");
         setIsProcessing(true);
 
-        // Get the URL fragments
+        // Get the URL fragments - check both hash and search params
         const { hash, search } = window.location;
         console.log("[Password Reset] Hash:", hash, "Search:", search);
         
@@ -63,10 +63,14 @@ const PasswordResetPage = () => {
             return;
           }
           
-          console.log("[Password Reset] Session set successfully");
+          console.log("[Password Reset] Session set successfully, showing reset dialog");
+          
+          // Clear the URL parameters
+          window.history.replaceState({}, document.title, "/reset-password");
+          
           setIsResetDialogOpen(true);
         } else {
-          console.log("[Password Reset] No valid recovery parameters, redirecting to auth");
+          console.log("[Password Reset] No valid recovery parameters found");
           toast({
             title: "Invalid reset link", 
             description: "The password reset link is invalid or has expired. Please request a new one.",
@@ -135,7 +139,6 @@ const PasswordResetPage = () => {
     try {
       console.log("[Password Reset] Completing reset process");
       await supabase.auth.signOut();
-      window.history.replaceState({}, document.title, window.location.pathname);
       setShowSuccessDialog(false);
       
       toast({
