@@ -21,7 +21,7 @@ const ProgressReportDialog = () => {
 
   const generateWeeklyColumns = () => {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days.map(day => `<th style="background: #475569; color: #e2e8f0; padding: 12px 8px; text-align: center; font-size: 14px; font-weight: 600; border: 1px solid #64748b;">${day}</th>`).join('');
+    return days.map(day => `<th style="background: #1e293b; color: #94a3b8; padding: 16px 12px; text-align: center; font-size: 16px; font-weight: 600; border: 1px solid #334155; border-radius: 8px; margin: 2px;">${day}</th>`).join('');
   };
 
   const generateMonthlyColumns = () => {
@@ -38,7 +38,7 @@ const ProgressReportDialog = () => {
       const startStr = `${String(weekStart.getMonth() + 1).padStart(2, '0')}/${String(weekStart.getDate()).padStart(2, '0')}/${weekStart.getFullYear()}`;
       const endStr = `${String(weekEnd.getMonth() + 1).padStart(2, '0')}/${String(weekEnd.getDate()).padStart(2, '0')}/${weekEnd.getFullYear()}`;
       
-      weeks.push(`<th style="background: #475569; color: #e2e8f0; padding: 12px 8px; text-align: center; font-size: 12px; font-weight: 600; border: 1px solid #64748b;">${startStr}-${endStr}</th>`);
+      weeks.push(`<th style="background: #1e293b; color: #94a3b8; padding: 16px 12px; text-align: center; font-size: 14px; font-weight: 600; border: 1px solid #334155; border-radius: 8px; margin: 2px;">${startStr}-${endStr}</th>`);
     }
     
     return weeks.join('');
@@ -49,7 +49,7 @@ const ProgressReportDialog = () => {
     const dailyData = [];
     for (let i = 0; i < 7; i++) {
       const value = Math.max(0, currentValue + Math.floor(Math.random() * 6) - 3);
-      dailyData.push(`<td style="background: #0f172a; color: white; padding: 14px 8px; text-align: center; font-size: 16px; font-weight: 700; border: 1px solid #475569;">${value}</td>`);
+      dailyData.push(`<td style="background: #0f172a; color: white; padding: 18px 12px; text-align: center; font-size: 18px; font-weight: 700; border: 1px solid #334155; border-radius: 6px; margin: 2px;">${value}</td>`);
     }
     return dailyData.join('');
   };
@@ -59,7 +59,7 @@ const ProgressReportDialog = () => {
     const weeklyData = [];
     for (let i = 0; i < 4; i++) {
       const value = Math.max(0, Math.floor(currentValue * (0.7 + Math.random() * 0.6)));
-      weeklyData.push(`<td style="background: #0f172a; color: white; padding: 14px 8px; text-align: center; font-size: 16px; font-weight: 700; border: 1px solid #475569;">${value}</td>`);
+      weeklyData.push(`<td style="background: #0f172a; color: white; padding: 18px 12px; text-align: center; font-size: 18px; font-weight: 700; border: 1px solid #334155; border-radius: 6px; margin: 2px;">${value}</td>`);
     }
     return weeklyData.join('');
   };
@@ -81,66 +81,66 @@ const ProgressReportDialog = () => {
     ];
 
     return `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px; margin: 0 auto; background: #f1f5f9; padding: 24px; border-radius: 16px;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1200px; margin: 0 auto; background: #0f172a; padding: 32px; border-radius: 16px;">
         
         <!-- Header -->
-        <div style="background: #1e293b; padding: 20px 32px; text-align: center; border-radius: 12px; margin-bottom: 24px; border: 2px solid #334155;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: white;">🚀 Progress Scorecard</h1>
-          <p style="margin: 8px 0 0 0; font-size: 16px; color: #94a3b8; font-weight: 500;">${timeframeText} • ${new Date().toLocaleDateString()}</p>
+        <div style="background: #1e293b; padding: 24px 40px; text-align: center; border-radius: 12px; margin-bottom: 32px; border: 2px solid #334155;">
+          <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: white;">🚀 Progress Scorecard</h1>
+          <p style="margin: 12px 0 0 0; font-size: 18px; color: #94a3b8; font-weight: 500;">${timeframeText} • ${new Date().toLocaleDateString()}</p>
         </div>
 
         <!-- Main Dashboard Grid -->
-        <div style="display: grid; grid-template-columns: 2fr 3fr; gap: 24px; margin-bottom: 24px;">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 32px; margin-bottom: 32px;">
           
           <!-- Left Column: Key Metrics -->
           <div>
             <!-- Top Row Metrics -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
               <!-- Avg Mood -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 24px; text-align: center;">
-                <div style="font-size: 36px; font-weight: 800; margin-bottom: 8px; color: white;">${data.mindMetrics.averageMood}/10</div>
-                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">😊 Average Mood</div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px; text-align: center;">
+                <div style="font-size: 40px; font-weight: 800; margin-bottom: 12px; color: white;">${data.mindMetrics.averageMood}/10</div>
+                <div style="font-size: 16px; font-weight: 600; color: #94a3b8;">😊 Average Mood</div>
               </div>
               <!-- Avg Energy -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 24px; text-align: center;">
-                <div style="font-size: 36px; font-weight: 800; margin-bottom: 8px; color: white;">${data.bodyMetrics.averageEnergy}/10</div>
-                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">⚡ Average Energy</div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px; text-align: center;">
+                <div style="font-size: 40px; font-weight: 800; margin-bottom: 12px; color: white;">${data.bodyMetrics.averageEnergy}/10</div>
+                <div style="font-size: 16px; font-weight: 600; color: #94a3b8;">⚡ Average Energy</div>
               </div>
             </div>
             
             <!-- Bottom Row Metrics -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
               <!-- Tasks Done -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 24px; text-align: center;">
-                <div style="font-size: 36px; font-weight: 800; margin-bottom: 8px; color: white;">${data.taskMetrics.completionRate}%</div>
-                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">✅ Tasks Completed</div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px; text-align: center;">
+                <div style="font-size: 40px; font-weight: 800; margin-bottom: 12px; color: white;">${data.taskMetrics.completionRate}%</div>
+                <div style="font-size: 16px; font-weight: 600; color: #94a3b8;">✅ Tasks Completed</div>
               </div>
               <!-- Goals Hit -->
-              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 24px; text-align: center;">
-                <div style="font-size: 36px; font-weight: 800; margin-bottom: 8px; color: white;">${goalCompletionRate}%</div>
-                <div style="font-size: 14px; font-weight: 600; color: #94a3b8;">🎯 Goals Achieved</div>
+              <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px; text-align: center;">
+                <div style="font-size: 40px; font-weight: 800; margin-bottom: 12px; color: white;">${goalCompletionRate}%</div>
+                <div style="font-size: 16px; font-weight: 600; color: #94a3b8;">🎯 Goals Achieved</div>
               </div>
             </div>
           </div>
 
           <!-- Right Column: Activity Summary Table -->
-          <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 24px;">
-            <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 700; color: white; text-align: center;">📊 Activity Summary</h3>
+          <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px;">
+            <h3 style="margin: 0 0 24px 0; font-size: 20px; font-weight: 700; color: white; text-align: center;">📊 Activity Summary</h3>
             
             <!-- Activity Table -->
-            <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+            <table style="width: 100%; border-collapse: separate; border-spacing: 4px;">
               <!-- Headers -->
               <thead>
                 <tr>
-                  <th style="background: #334155; color: #94a3b8; padding: 12px 16px; text-align: left; font-size: 14px; font-weight: 600; border-radius: 8px 0 0 0; border: 1px solid #475569;">Activity</th>
+                  <th style="background: #334155; color: #94a3b8; padding: 16px 20px; text-align: left; font-size: 16px; font-weight: 600; border-radius: 8px; border: 1px solid #475569;">Activity</th>
                   ${isWeekly ? generateWeeklyColumns() : generateMonthlyColumns()}
                 </tr>
               </thead>
               <!-- Data Rows -->
               <tbody>
-                ${activityData.map((activity, index) => `
+                ${activityData.map(activity => `
                   <tr>
-                    <td style="background: #0f172a; color: white; padding: 14px 16px; font-size: 15px; font-weight: 500; border-left: 1px solid #475569; border-bottom: 1px solid #475569; ${index === activityData.length - 1 ? 'border-radius: 0 0 0 8px;' : ''}">${activity.name}</td>
+                    <td style="background: #0f172a; color: white; padding: 18px 20px; font-size: 16px; font-weight: 500; border: 1px solid #334155; border-radius: 8px;">${activity.name}</td>
                     ${isWeekly ? generateWeeklyData(activity.name, activity.value) : generateMonthlyData(activity.name, activity.value)}
                   </tr>
                 `).join('')}
@@ -150,13 +150,13 @@ const ProgressReportDialog = () => {
         </div>
 
         <!-- Overall Progress Section -->
-        <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px; text-align: center;">
-          <h3 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700; color: white;">⭐ Overall Progress</h3>
-          <div style="font-size: 52px; font-weight: 900; margin-bottom: 16px; color: white;">${data.goalsProgress.overallProgress}%</div>
-          <div style="background: #334155; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 20px; max-width: 400px; margin-left: auto; margin-right: auto;">
-            <div style="background: #3b82f6; height: 100%; width: ${data.goalsProgress.overallProgress}%; border-radius: 5px;"></div>
+        <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 32px; text-align: center;">
+          <h3 style="margin: 0 0 20px 0; font-size: 22px; font-weight: 700; color: white;">⭐ Overall Progress</h3>
+          <div style="font-size: 56px; font-weight: 900; margin-bottom: 20px; color: white;">${data.goalsProgress.overallProgress}%</div>
+          <div style="background: #334155; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
+            <div style="background: #3b82f6; height: 100%; width: ${data.goalsProgress.overallProgress}%; border-radius: 6px;"></div>
           </div>
-          <p style="margin: 0; font-size: 18px; font-weight: 600; color: #94a3b8;">
+          <p style="margin: 0; font-size: 20px; font-weight: 600; color: #94a3b8;">
             ${data.goalsProgress.overallProgress >= 70 ? 
               "Outstanding! You're crushing it! 💪" :
               data.goalsProgress.overallProgress >= 50 ?
@@ -167,8 +167,8 @@ const ProgressReportDialog = () => {
         </div>
 
         <!-- Footer -->
-        <div style="text-align: center; padding: 20px 0 12px 0;">
-          <p style="margin: 0; font-size: 13px; color: #64748b;">Generated by Next Level Coach • Keep leveling up! 🚀</p>
+        <div style="text-align: center; padding: 24px 0 16px 0;">
+          <p style="margin: 0; font-size: 14px; color: #64748b;">Generated by Next Level Coach • Keep leveling up! 🚀</p>
         </div>
 
       </div>
