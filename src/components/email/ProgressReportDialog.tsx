@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BarChart2, Clock, Loader2 } from "lucide-react";
 import { useEmail } from "@/hooks/useEmail";
 import { useProgressReport, ProgressReportData } from "@/hooks/useProgressReport";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const ProgressReportDialog = () => {

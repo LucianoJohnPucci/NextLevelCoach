@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import PracticeCard from "./PracticeCard";
 import { Clock, Users, Heart } from "lucide-react";
 import { useSoulMetrics } from "@/services/soulMetricsService";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 
 const PracticesSection = () => {

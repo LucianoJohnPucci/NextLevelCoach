@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Message } from "@/types/wisdom";
 import MessageItem from "./MessageItem";
 import { addWisdomToNotes } from "@/utils/wisdomUtils";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 import { usePrioritizeTasks } from "@/hooks/usePrioritizeTasks";
 import TaskQuickAdd from "./TaskQuickAdd";
 
@@ -119,22 +119,6 @@ const PrioritizeBox = () => {
       await addWisdomToNotes(message, user, toast);
     }
   };
-
-  const handleAddTask = async (task: { 
-    title: string; 
-    description?: string; 
-    due_date?: string; 
-    priority: "high" | "low" | "medium"; 
-    importance: "high" | "low" | "medium"; 
-  }) => {
-    try {
-      await addTask(task.title, task.priority, task.importance, task.due_date);
-      return true;
-    } catch (error) {
-      console.error('Error adding task:', error);
-      return false;
-    }
-  };
   
   return (
     <Card className="md:col-span-3">
@@ -162,7 +146,7 @@ const PrioritizeBox = () => {
         {showTaskForm && (
           <div className="mb-4">
             <TaskQuickAdd 
-              onTaskAdded={handleAddTask}
+              onTaskAdded={addTask}
               onClose={() => setShowTaskForm(false)}
             />
           </div>

@@ -1,11 +1,10 @@
-
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ReadingItem from "./ReadingItem";
 import { Book } from "lucide-react";
 import { useSoulMetrics } from "@/services/soulMetricsService";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 

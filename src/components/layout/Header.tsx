@@ -1,6 +1,6 @@
 
 import { useSidebar } from "./SidebarProvider";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 import { UserProfileButton } from "@/components/UserProfileButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";

@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Book, Plus, Star, Clock, User } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import ReflectionForm from "./reflection-form/ReflectionForm";

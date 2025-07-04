@@ -1,98 +1,195 @@
-
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/components/AuthProvider";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
+export interface SoulMetrics {
+  id: string;
+  user_id: string;
+  date: string;
+  reflection_minutes: number;
+  connections_attended: number;
+  gratitude_streak_days: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
+// Fetch soul metrics for the current day
+export const fetchTodaySoulMetrics = async (userId: string) => {
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  
+  const { data, error } = await supabase
+    .from("soul_metrics")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("date", today)
+    .order("created_at", { ascending: false });
+  
+  if (error) throw error;
+  
+  if (!data || data.length === 0) return null;
+  
+  // Aggregate values from all entries for today
+  const aggregated = data.reduce((acc, entry) => ({
+    id: entry.id, // Use the most recent entry's ID
+    user_id: entry.user_id,
+    date: entry.date,
+    reflection_minutes: acc.reflection_minutes + entry.reflection_minutes,
+    connections_attended: acc.connections_attended + entry.connections_attended,
+    gratitude_streak_days: Math.max(acc.gratitude_streak_days, entry.gratitude_streak_days), // Use max for streak
+    created_at: new Date(entry.created_at),
+    updated_at: new Date(entry.updated_at)
+  }), {
+    id: data[0].id,
+    user_id: data[0].user_id,
+    date: data[0].date,
+    reflection_minutes: 0,
+    connections_attended: 0,
+    gratitude_streak_days: 0,
+    created_at: new Date(data[0].created_at),
+    updated_at: new Date(data[0].updated_at)
+  });
+
+  return aggregated;
+};
+
+// Fetch soul metrics for the current week
+export const fetchWeeklySoulMetrics = async (userId: string) => {
+  // Get date from 7 days ago
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const startDate = sevenDaysAgo.toISOString().split('T')[0];
+  
+  const { data, error } = await supabase
+    .from("soul_metrics")
+    .select("*")
+    .eq("user_id", userId)
+    .gte("date", startDate)
+    .order("date", { ascending: false });
+  
+  if (error) throw error;
+  
+  return data ? data.map(item => ({
+    ...item,
+    created_at: new Date(item.created_at),
+    updated_at: new Date(item.updated_at)
+  })) : [];
+};
+
+// Update or create soul metrics
+export const updateSoulMetrics = async (
+  userId: string,
+  metrics: {
+    reflection_minutes?: number;
+    connections_attended?: number;
+    gratitude_streak_days?: number;
+  }
+) => {
+  const today = new Date().toISOString().split('T')[0];
+  
+  // First check if today's record exists
+  const { data: existingData } = await supabase
+    .from("soul_metrics")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("date", today)
+    .maybeSingle();
+  
+  if (existingData) {
+    // Update existing record
+    const { data, error } = await supabase
+      .from("soul_metrics")
+      .update({
+        ...metrics,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", existingData.id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  } else {
+    // Create new record
+    const { data, error } = await supabase
+      .from("soul_metrics")
+      .insert({
+        user_id: userId,
+        date: today,
+        ...metrics
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+};
+
+// React Query hook for soul metrics
 export const useSoulMetrics = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const today = new Date().toISOString().split("T")[0];
-
-  // Fetch today's metrics
-  const { data: todayMetrics, isLoading, isError } = useQuery({
-    queryKey: ["soul-metrics", user?.id, today],
-    queryFn: async () => {
-      if (!user) return null;
-
-      const { data, error } = await supabase
-        .from("soul_metrics")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("date", today)
-        .single();
-
-      if (error && error.code !== "PGRST116") {
-        throw error;
-      }
-
-      return data || {
-        reflection_minutes: 0,
-        connections_attended: 0,
-        gratitude_streak_days: 0,
-      };
-    },
+  
+  // Query for fetching today's metrics
+  const todayQuery = useQuery({
+    queryKey: ["soul-metrics", "today", user?.id],
+    queryFn: () => fetchTodaySoulMetrics(user?.id || ""),
     enabled: !!user,
   });
-
-  // Update metrics mutation
+  
+  // Query for fetching weekly metrics
+  const weeklyQuery = useQuery({
+    queryKey: ["soul-metrics", "weekly", user?.id],
+    queryFn: () => fetchWeeklySoulMetrics(user?.id || ""),
+    enabled: !!user,
+  });
+  
+  // Get current reflection minutes
+  const reflectionMinutes = useMemo(() => {
+    if (!todayQuery.data) return 0;
+    return todayQuery.data.reflection_minutes;
+  }, [todayQuery.data]);
+  
+  // Get connections attended
+  const connectionsAttended = useMemo(() => {
+    if (!todayQuery.data) return 0;
+    return todayQuery.data.connections_attended;
+  }, [todayQuery.data]);
+  
+  // Get gratitude streak
+  const gratitudeStreak = useMemo(() => {
+    if (!todayQuery.data) return 0;
+    return todayQuery.data.gratitude_streak_days;
+  }, [todayQuery.data]);
+  
+  // Mutation for updating metrics
   const updateMetricsMutation = useMutation({
-    mutationFn: async (updates: Partial<{
-      reflection_minutes: number;
-      connections_attended: number;
-      gratitude_streak_days: number;
-    }>) => {
-      if (!user) throw new Error("User not authenticated");
-
-      const currentMetrics = todayMetrics || {
-        reflection_minutes: 0,
-        connections_attended: 0,
-        gratitude_streak_days: 0,
-      };
-
-      const { error } = await supabase
-        .from("soul_metrics")
-        .upsert({
-          user_id: user.id,
-          date: today,
-          reflection_minutes: updates.reflection_minutes ?? currentMetrics.reflection_minutes,
-          connections_attended: updates.connections_attended ?? currentMetrics.connections_attended,
-          gratitude_streak_days: updates.gratitude_streak_days ?? currentMetrics.gratitude_streak_days,
-        });
-
-      if (error) throw error;
+    mutationFn: (metrics: {
+      reflection_minutes?: number;
+      connections_attended?: number;
+      gratitude_streak_days?: number;
+    }) => {
+      if (!user) throw new Error("User must be authenticated to update metrics");
+      return updateSoulMetrics(user.id, metrics);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["soul-metrics"] });
-    },
-    onError: (error) => {
-      console.error("Error updating soul metrics:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update soul metrics.",
-        variant: "destructive",
-      });
-    },
+      // Invalidate relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["soul-metrics", "today", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["soul-metrics", "weekly", user?.id] });
+    }
   });
-
-  const updateMetrics = (updates: Partial<{
-    reflection_minutes: number;
-    connections_attended: number;
-    gratitude_streak_days: number;
-  }>) => {
-    updateMetricsMutation.mutate(updates);
-  };
-
+  
   return {
-    todayMetrics,
-    isLoading,
-    isError,
-    updateMetrics,
-    reflectionMinutes: todayMetrics?.reflection_minutes || 0,
-    connectionsAttended: todayMetrics?.connections_attended || 0,
-    gratitudeStreak: todayMetrics?.gratitude_streak_days || 0,
+    reflectionMinutes,
+    connectionsAttended,
+    gratitudeStreak,
+    isLoading: todayQuery.isLoading || weeklyQuery.isLoading,
+    isError: todayQuery.isError || weeklyQuery.isError,
+    error: todayQuery.error || weeklyQuery.error,
+    updateMetrics: updateMetricsMutation.mutate,
+    isUpdating: updateMetricsMutation.isPending,
+    todayMetrics: todayQuery.data,
+    weeklyMetrics: weeklyQuery.data,
   };
 };

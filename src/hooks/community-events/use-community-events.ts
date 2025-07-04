@@ -1,98 +1,80 @@
 
-import { useState, useEffect } from "react";
-import { fetchAllEvents, searchEventsWithFilters, createNewEvent, joinEventById } from "./event-utils";
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import { Event, EventFormData } from "./types";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
+import { 
+  fetchAllEvents, 
+  searchEventsWithFilters, 
+  filterEventsByDate,
+  createNewEvent,
+  joinEventById
+} from "./event-utils";
 
-export const useCommunityEvents = () => {
+export function useCommunityEvents() {
   const [events, setEvents] = useState<Event[]>([]);
   const [eventDates, setEventDates] = useState<Date[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-
+  
   const fetchEvents = async () => {
-    setIsLoading(true);
     try {
+      setLoading(true);
       const { events: fetchedEvents, dates } = await fetchAllEvents();
       setEvents(fetchedEvents);
       setEventDates(dates);
-    } catch (error) {
-      console.error('Error fetching events:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const searchEvents = async (location: string, date: Date | undefined, priceFilter: string | null) => {
-    setIsLoading(true);
+  
+  const searchEvents = async (searchLocation: string, searchDate: Date | undefined, priceFilter: string | null) => {
     try {
-      const searchResults = await searchEventsWithFilters(location, date, priceFilter);
+      setLoading(true);
+      const searchResults = await searchEventsWithFilters(searchLocation, searchDate, priceFilter);
       setEvents(searchResults);
-    } catch (error) {
-      console.error('Error searching events:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
+
+  // Get events for a specific date
+  const getEventsForDate = useCallback((date: Date) => {
+    if (!date) return [];
+    return filterEventsByDate(events, date);
+  }, [events]);
 
   const createEvent = async (eventData: EventFormData) => {
     if (!user) {
-      toast.error('You must be logged in to create events');
-      return false;
+      throw new Error('User must be logged in to create an event');
     }
-
-    setIsLoading(true);
-    try {
-      await createNewEvent(user.id, eventData);
-      await fetchEvents(); // Refresh the events list
-      return true;
-    } catch (error) {
-      console.error('Error creating event:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
+    
+    await createNewEvent(user.id, eventData);
+    fetchEvents(); // Reload events after creation
   };
-
+  
   const joinEvent = async (eventId: string) => {
     if (!user) {
-      toast.error('You must be logged in to join events');
-      return false;
+      throw new Error('User must be logged in to join an event');
     }
-
-    try {
-      const success = await joinEventById(user.id, eventId);
-      if (success) {
-        await fetchEvents(); // Refresh the events list
-      }
-      return success;
-    } catch (error) {
-      console.error('Error joining event:', error);
-      return false;
+    
+    const success = await joinEventById(user.id, eventId);
+    if (success) {
+      fetchEvents(); // Reload events after joining
     }
   };
-
-  const getEventsForDate = (date: Date): Event[] => {
-    return events.filter(event => {
-      const eventDate = new Date(event.event_date);
-      return eventDate.toDateString() === date.toDateString();
-    });
-  };
-
+  
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+  
   return {
     events,
     eventDates,
-    loading: isLoading,
-    isLoading,
+    loading,
     fetchEvents,
     searchEvents,
     createEvent,
     joinEvent,
     getEventsForDate
   };
-};
+}

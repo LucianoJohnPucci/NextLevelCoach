@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Brain, Heart, Sparkles, Trash2, Eye } from "lucide-react";
 import { format } from "date-fns";
-import { Note } from "@/types/notes";
+import { Note } from "@/pages/NotesPage";
 
 interface NoteItemProps {
   note: Note;
@@ -41,7 +41,7 @@ const NoteItem = ({ note, onDelete, hideCategory = false }: NoteItemProps) => {
             </div>
           </TableCell>
         )}
-        <TableCell>{format(new Date(note.created_at), "MMM d, yyyy")}</TableCell>
+        <TableCell>{format(note.created_at, "MMM d, yyyy")}</TableCell>
         <TableCell>
           <div className="flex items-center space-x-2">
             <Button 
@@ -71,7 +71,7 @@ const NoteItem = ({ note, onDelete, hideCategory = false }: NoteItemProps) => {
               <DialogTitle>{note.title}</DialogTitle>
             </div>
             <DialogDescription>
-              {format(new Date(note.created_at), "MMMM d, yyyy")}
+              {format(note.created_at, "MMMM d, yyyy")}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 whitespace-pre-wrap">{note.content}</div>

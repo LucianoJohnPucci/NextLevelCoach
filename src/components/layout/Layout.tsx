@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar";
 import { useSidebar } from "./SidebarProvider";
 import Header from "./Header";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 
 const Layout = () => {
   const { isOpen } = useSidebar();
@@ -17,11 +17,9 @@ const Layout = () => {
     setMounted(true);
   }, []);
 
-  // Don't show the standard app layout for specific pages
+  // Don't show the standard app layout for non-authenticated users on the home page
   const isHomePage = location.pathname === "/";
-  const isPasswordResetPage = location.pathname === "/reset-password";
-  
-  if ((isHomePage && !user) || isPasswordResetPage) {
+  if (isHomePage && !user) {
     return <Outlet />;
   }
 

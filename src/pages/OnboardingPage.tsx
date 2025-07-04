@@ -1,197 +1,328 @@
+
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
-import { CheckCircle, ArrowRight, ArrowLeft } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
+import { Progress } from "@/components/ui/progress";
+import { ArrowLeft, ArrowRight, Loader2, Volume2, VolumeX } from "lucide-react";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { useAudio } from "@/hooks/useAudio";
+import welcomeAudio from "@/assets/audio/onboarding/welcome.mp3";
 
-interface OnboardingAnswer {
-  question: string;
-  answer: string;
-}
+type Question = {
+  id: string;
+  text: string;
+  placeholder: string;
+};
 
-const OnboardingPage = () => {
-  const [step, setStep] = useState(1);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [progress, setProgress] = useState(0);
-  const { user } = useAuth();
+const questions: Question[] = [
+  {
+    id: "focus",
+    text: "What is your primary focus for self-improvement right now (e.g., physical health, mental clarity, emotional balance, or spiritual growth)?",
+    placeholder: "Share your main focus area for self-improvement..."
+  },
+  {
+    id: "habit",
+    text: "What specific habit would you like to build or break in the next 60 days to improve your body, mind, or spirit?",
+    placeholder: "Describe a habit you want to develop or break..."
+  },
+  {
+    id: "measurable_goal",
+    text: "Describe one measurable goal you want to achieve in the next 1-2 years to enhance your overall well-being.",
+    placeholder: "Share a specific, measurable goal..."
+  },
+  {
+    id: "ideal_self",
+    text: "What does your ideal self look like in 5 years, considering your physical health, mental state, and spiritual fulfillment?",
+    placeholder: "Describe your vision of your ideal future self..."
+  },
+  {
+    id: "challenges",
+    text: "What challenges or obstacles have prevented you from achieving your self-improvement goals in the past?",
+    placeholder: "Share what has blocked your progress previously..."
+  },
+  {
+    id: "time_commitment",
+    text: "How much time can you realistically commit each day or week to working on your body, mind, or spirit goals?",
+    placeholder: "Describe your available time commitment..."
+  },
+  {
+    id: "motivation",
+    text: "What motivates you most to improve yourself (e.g., better health, personal growth, relationships, or inner peace)?",
+    placeholder: "Share what drives your desire for self-improvement..."
+  },
+  {
+    id: "practices",
+    text: "Are there specific practices (e.g., meditation, exercise, journaling) you already do or want to incorporate into your routine?",
+    placeholder: "List practices you currently do or want to start..."
+  },
+  {
+    id: "satisfaction",
+    text: "How would you rate your current satisfaction with your physical health, mental well-being, and spiritual life on a scale of 1-10?",
+    placeholder: "Share your ratings and brief explanation..."
+  },
+  {
+    id: "support",
+    text: "What kind of support do you hope to receive from the app's AI (e.g., daily reminders, personalized plans, progress tracking)",
+    placeholder: "Describe what support would be most helpful..."
+  }
+];
+
+const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
-  const [isSaving, setIsSaving] = useState(false);
+  const { user, isVerified, loading } = useAuth();
+  const { toast } = useToast();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isPlaying, toggle } = useAudio(welcomeAudio, { autoplay: true });
+  
+  const form = useForm<{answer: string}>();
 
+  // Redirect if user is not authenticated or email is not verified
   useEffect(() => {
-    if (user) {
-      checkIfOnboardingComplete();
-    }
-  }, [user]);
-
-  const checkIfOnboardingComplete = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("onboarding_answers")
-        .select("*")
-        .eq("user_id", user!.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error("Error fetching onboarding answers:", error);
+    if (!loading) {
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to access the onboarding process.",
+          variant: "destructive",
+        });
+        navigate("/auth");
+      } else if (!isVerified) {
+        toast({
+          title: "Email verification required",
+          description: "Please verify your email before continuing to onboarding.",
+          variant: "destructive",
+        });
+        navigate("/auth");
       }
-
-      if (data) {
-        navigate("/");
-      }
-    } catch (error) {
-      console.error("Error checking onboarding status:", error);
     }
-  };
+  }, [user, isVerified, loading, navigate, toast]);
 
-  const questions: OnboardingAnswer[] = [
-    {
-      question: "What is your primary goal for the next 5 years?",
-      answer: "answer_1",
-    },
-    {
-      question: "What is one habit you want to develop in the next 3 months?",
-      answer: "answer_2",
-    },
-    {
-      question: "What is your biggest challenge right now?",
-      answer: "answer_3",
-    },
-    {
-      question: "What is one thing you are grateful for today?",
-      answer: "answer_4",
-    },
-    {
-      question: "What area of your life do you want to improve the most?",
-      answer: "answer_5",
-    },
-    {
-      question: "What is one thing you can do today to move closer to your goals?",
-      answer: "answer_6",
-    },
-    {
-      question: "What is your favorite quote or mantra?",
-      answer: "answer_7",
-    },
-    {
-      question: "What is one thing you learned recently?",
-      answer: "answer_8",
-    },
-    {
-      question: "What is one thing you want to learn?",
-      answer: "answer_9",
-    },
-    {
-      question: "What does success look like to you?",
-      answer: "answer_10",
-    },
-  ];
-
+  // Show a welcome message with audio on first render
   useEffect(() => {
-    setProgress(Math.round(((step - 1) / questions.length) * 100));
-  }, [step, questions.length]);
+    if (user && isVerified) {
+      toast({
+        title: "Welcome to your transformation journey!",
+        description: "Audio is now playing to enhance your experience."
+      });
+    }
+  }, [toast, user, isVerified]);
 
-  const handleAnswerChange = (answerKey: string, value: string) => {
-    setAnswers((prev) => ({ ...prev, [answerKey]: value }));
-  };
+  // If still loading or not authenticated/verified, show loading state
+  if (loading || !user || !isVerified) {
+    return (
+      <div className="container flex h-screen items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+          <p className="mt-4 text-lg">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleNext = () => {
-    setStep((prev) => Math.min(prev + 1, questions.length + 1));
+    // Get the current answer
+    const currentAnswer = form.getValues().answer || "";
+    
+    // Save the answer
+    setAnswers({
+      ...answers,
+      [questions[currentStep].id]: currentAnswer
+    });
+    
+    // Move to next question or submit if last question
+    if (currentStep < questions.length - 1) {
+      setCurrentStep(currentStep + 1);
+      // Reset form value for next question
+      form.reset({ answer: "" });
+    } else {
+      handleSubmit();
+    }
   };
 
-  const handleBack = () => {
-    setStep((prev) => Math.max(prev - 1, 1));
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      // Get the current answer before moving back
+      const currentAnswer = form.getValues().answer || "";
+      
+      // Save the current answer
+      setAnswers({
+        ...answers,
+        [questions[currentStep].id]: currentAnswer
+      });
+      
+      // Move to previous question
+      setCurrentStep(currentStep - 1);
+      
+      // Set form value to the previous answer
+      form.setValue("answer", answers[questions[currentStep - 1].id] || "");
+    }
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to complete onboarding",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
 
-    setIsSaving(true);
+    setIsSubmitting(true);
 
     try {
+      // Prepare data for database insertion with questions as well
+      const questionAnswerPairs: Record<string, string> = {};
+      
+      questions.forEach((question, index) => {
+        const answerKey = question.id;
+        questionAnswerPairs[`question_${index + 1}`] = question.text;
+        questionAnswerPairs[`answer_${index + 1}`] = answers[answerKey] || "";
+      });
+
+      // Store answers in the onboarding_answers table
       const { error } = await supabase
         .from("onboarding_answers")
-        .insert([
-          {
-            user_id: user.id,
-            ...answers,
-            signup_date: new Date().toISOString(),
-          },
-        ]);
+        .insert({
+          user_id: user.id,
+          ...questionAnswerPairs,
+        });
 
-      if (error) {
-        console.error("Error submitting onboarding answers:", error);
-        return;
-      }
+      if (error) throw error;
 
+      toast({
+        title: "Onboarding Complete",
+        description: "Thank you for sharing your goals. Your journey begins now!",
+      });
+
+      // Redirect to dashboard or home page
       navigate("/");
-    } catch (error) {
-      console.error("Error submitting onboarding:", error);
+    } catch (error: any) {
+      console.error("Error saving onboarding answers:", error);
+      toast({
+        title: "Error",
+        description: error.message || "There was an error saving your answers",
+        variant: "destructive",
+      });
     } finally {
-      setIsSaving(false);
+      setIsSubmitting(false);
     }
   };
 
+  const currentQuestion = questions[currentStep];
+  const progress = ((currentStep + 1) / questions.length) * 100;
+
+  // If answer for current question exists in state, populate the form
+  React.useEffect(() => {
+    form.setValue("answer", answers[currentQuestion.id] || "");
+  }, [currentStep, currentQuestion.id]);
+
   return (
-    <div className="container h-screen flex items-center justify-center">
-      <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle>Onboarding</CardTitle>
-          <CardDescription>
-            Help us personalize your experience by answering a few questions.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Progress value={progress} className="h-2" />
-          {step <= questions.length ? (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="question">{questions[step - 1].question}</Label>
-                <Textarea
-                  id="question"
-                  placeholder="Type your answer here..."
-                  value={answers[questions[step - 1].answer] || ""}
-                  onChange={(e) =>
-                    handleAnswerChange(questions[step - 1].answer, e.target.value)
-                  }
-                />
-              </div>
-              <div className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={handleBack}
-                  disabled={step === 1}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back
-                </Button>
-                <Button onClick={handleNext}>
-                  Next
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </>
-          ) : (
-            <div className="text-center">
-              <CheckCircle className="mx-auto mb-4 h-12 w-12 text-green-500" />
-              <h2 className="text-2xl font-semibold">
-                All questions answered!
-              </h2>
-              <p className="text-muted-foreground">
-                Click submit to save your answers and start your journey.
-              </p>
-              <Button className="mt-4" onClick={handleSubmit} disabled={isSaving}>
-                {isSaving ? "Submitting..." : "Submit"}
+    <div className="container mx-auto py-16 px-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-3xl mx-auto"
+      >
+        <Card className="border shadow-lg">
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-2xl">Your 5-Year Transformation Journey</CardTitle>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggle} 
+                className="ml-auto"
+                title={isPlaying ? "Mute audio" : "Play audio"}
+              >
+                {isPlaying ? <Volume2 /> : <VolumeX />}
               </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <CardDescription>
+              Help us personalize your experience by answering a few questions
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-6 pt-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Question {currentStep + 1} of {questions.length}</span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+            
+            <Form {...form}>
+              <form className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="answer"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-lg font-medium">
+                        {currentQuestion.text}
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder={currentQuestion.placeholder}
+                          className="min-h-[150px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          </CardContent>
+          
+          <CardFooter className="flex justify-between pt-2">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStep === 0 || isSubmitting}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            
+            <Button
+              onClick={handleNext}
+              disabled={isSubmitting}
+              className="flex items-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : currentStep === questions.length - 1 ? (
+                <>
+                  Complete
+                </>
+              ) : (
+                <>
+                  Next
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      </motion.div>
     </div>
   );
 };

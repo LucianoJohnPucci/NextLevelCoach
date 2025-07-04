@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Brain, Heart, Sparkles, Target, BarChart2, Calendar, LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 import LandingPage from "@/components/landing/LandingPage";
 import { useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
@@ -117,6 +117,7 @@ const AuthenticatedHome = () => {
         </p>
       </motion.div>
 
+      {/* Buttons moved up directly under the title section */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -140,6 +141,7 @@ const AuthenticatedHome = () => {
         </CustomPlanDialog>
       </motion.div>
 
+      {/* Onboarding Goals Summary */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -148,6 +150,7 @@ const AuthenticatedHome = () => {
         <OnboardingGoalsSummary />
       </motion.div>
 
+      {/* Goals Progress Graph moved below OnboardingGoalsSummary */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -175,6 +178,7 @@ const AuthenticatedHome = () => {
         <p className="text-sm font-medium">— Marcus Aurelius</p>
       </motion.div>
       
+      {/* Onboarding Dialog */}
       <OnboardingDialog 
         open={showOnboarding} 
         onOpenChange={setShowOnboarding}

@@ -37,35 +37,32 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
     try {
       setLoading(true);
       
-      const redirectUrl = `${window.location.origin}/reset-password`;
+      // Create the redirect URL for password reset
+      const origin = window.location.origin;
+      const redirectUrl = `${origin}/reset-password`;
       
-      console.log("[Forgot Password] Sending reset email to:", email);
-      console.log("[Forgot Password] Redirect URL:", redirectUrl);
+      console.log("[Password Recovery] Using redirect URL:", redirectUrl);
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       });
       
-      if (error) {
-        console.error("[Forgot Password] Error:", error);
-        throw error;
-      }
+      if (error) throw error;
       
-      console.log("[Forgot Password] Reset email sent successfully");
-      
+      // Show success message
       toast({
-        title: "Reset link sent!",
-        description: "Check your email for a link to reset your password.",
+        title: "Password reset email sent",
+        description: "Check your email for instructions to reset your password. The link will take you to a secure page to set your new password.",
       });
       
       onOpenChange(false);
       
     } catch (error: any) {
-      console.error("[Forgot Password] Failed:", error);
+      console.error("[Password Recovery] Reset password error:", error);
       
       toast({
         title: "Error",
-        description: error.message || "Failed to send reset email. Please try again.",
+        description: error.message || "Failed to send password reset email",
         variant: "destructive",
       });
     } finally {
@@ -78,7 +75,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Reset Your Password</DialogTitle>
+            <DialogTitle>Reset password</DialogTitle>
             <DialogDescription>
               Enter your email address and we'll send you a link to reset your password.
             </DialogDescription>
@@ -86,7 +83,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="reset-email">Email Address</Label>
+              <Label htmlFor="reset-email">Email</Label>
               <Input
                 id="reset-email"
                 type="email"
@@ -104,7 +101,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Sending..." : "Send Reset Link"}
+              {loading ? "Sending..." : "Send reset link"}
             </Button>
           </DialogFooter>
         </form>

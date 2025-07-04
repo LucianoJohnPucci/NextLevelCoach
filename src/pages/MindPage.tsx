@@ -1,116 +1,484 @@
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, GraduationCap, PenTool, Smile, Frown, Meh } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Brain, Book, Target, Plus, MessageCircle, Lightbulb } from "lucide-react";
-import { Link } from "react-router-dom";
-import MeditationSection from "@/components/mind/MeditationSection";
-import JournalSection from "@/components/mind/JournalSection";
-import { useAuth } from "@/hooks/useAuth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
+import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Save } from "lucide-react";
+import { useMindMetrics } from "@/services/mindMetricsService"; // NEW import
+
+const EmotionButton = ({ 
+  icon: Icon, 
+  label, 
+  selected, 
+  onClick 
+}: { 
+  icon: React.ElementType;
+  label: string; 
+  selected: boolean; 
+  onClick: () => void; 
+}) => (
+  <Button 
+    type="button" 
+    variant={selected ? "default" : "outline"} 
+    className={`flex h-full min-h-[80px] w-full flex-col gap-2 transition-all ${selected ? 'scale-105' : ''}`}
+    onClick={onClick}
+  >
+    <Icon className={`h-6 w-6 ${selected ? 'animate-scale-in' : ''}`} />
+    <span className="text-sm">{label}</span>
+  </Button>
+);
 
 const MindPage = () => {
   const { user } = useAuth();
 
+  // Use the mind metrics service
+  const {
+    todayMetrics,
+    updateMetrics,
+    isLoading,
+    isUpdating,
+  } = useMindMetrics();
+
+  // Use local state for session counts, initialized with today's metrics or zero
+  const [readCount, setReadCount] = useState(0);
+  const [learnCount, setLearnCount] = useState(0);
+  const [journalCount, setJournalCount] = useState(0);
+  
+  // Mood and emotions state
+  const [mood, setMood] = useState<number[]>([5]);
+  const [energy, setEnergy] = useState<number[]>([5]);
+  const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  const emotions = [
+    { icon: Smile, label: "Happy" },
+    { icon: Meh, label: "Content" },
+    { icon: Frown, label: "Sad" },
+    { icon: Smile, label: "Excited" },
+    { icon: Meh, label: "Neutral" },
+    { icon: Frown, label: "Anxious" },
+  ];
+
+  useEffect(() => {
+    if (user) {
+      fetchTodayEntry();
+    }
+  }, [user]);
+
+  const fetchTodayEntry = async () => {
+    if (!user) return;
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { data, error } = await supabase
+        .from('daily_entries')
+        .select('mood, energy, emotions')
+        .eq('user_id', user.id)
+        .eq('date', today)
+        .maybeSingle();
+      
+      if (error) throw error;
+      
+      if (data) {
+        setMood([data.mood]);
+        setEnergy([data.energy]);
+        setSelectedEmotions(data.emotions || []);
+      }
+    } catch (error) {
+      console.error('Error fetching daily entry:', error);
+    }
+  };
+
+  const toggleEmotion = (emotion: string) => {
+    if (selectedEmotions.includes(emotion)) {
+      setSelectedEmotions(selectedEmotions.filter(e => e !== emotion));
+    } else {
+      setSelectedEmotions([...selectedEmotions, emotion]);
+    }
+  };
+
+  const handleSaveMoodData = async () => {
+    if (!user) {
+      toast.error('Authentication required', {
+        description: 'Please log in to save your mood data.'
+      });
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const entryData = {
+        user_id: user.id,
+        date: today,
+        mood: mood[0],
+        energy: energy[0],
+        emotions: selectedEmotions,
+        gratitude: '',
+        challenges: '',
+        updated_at: new Date().toISOString()
+      };
+      
+      // Use upsert to handle both insert and update cases
+      const { error } = await supabase
+        .from('daily_entries')
+        .upsert(entryData, {
+          onConflict: 'user_id,date'
+        });
+      
+      if (error) throw error;
+      
+      toast.success("Mood and energy saved successfully", {
+        description: "Your daily mood tracking has been recorded.",
+      });
+    } catch (error) {
+      console.error('Error saving mood data:', error);
+      toast.error('Failed to save mood data', {
+        description: 'There was a problem saving your mood and energy data.'
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Load counts from todayMetrics
+  useEffect(() => {
+    if (todayMetrics) {
+      setReadCount(todayMetrics.read_count || 0);
+      setLearnCount(todayMetrics.learn_count || 0);
+      setJournalCount(todayMetrics.journal_count || 0);
+    }
+  }, [todayMetrics]);
+
+  const handleSaveSessions = async () => {
+    if (!user) {
+      toast.error('Authentication required', {
+        description: 'Please log in to save your session counts.'
+      });
+      return;
+    }
+    try {
+      await updateMetrics({
+        read_count: readCount,
+        learn_count: learnCount,
+        journal_count: journalCount,
+      });
+      toast.success("Session counts saved!", {
+        description: "Your daily sessions are now saved."
+      });
+    } catch (error) {
+      toast.error("Failed to save sessions");
+    }
+  };
+  
+  // Button click handlers update only local state
+  const handleReadClick = () => {
+    setReadCount((prev) => prev + 1);
+    if (user) {
+      toast.success("Reading session recorded!");
+    } else {
+      toast.error("Please log in to save your progress");
+    }
+  };
+  
+  const handleLearnClick = () => {
+    setLearnCount((prev) => prev + 1);
+    if (user) {
+      toast.success("Learning session recorded!");
+    } else {
+      toast.error("Please log in to save your progress");
+    }
+  };
+  
+  const handleJournalClick = () => {
+    setJournalCount((prev) => prev + 1);
+    if (user) {
+      toast.success("Journal entry recorded!");
+    } else {
+      toast.error("Please log in to save your progress");
+    }
+  };
+  
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <motion.div 
-        className="space-y-4 text-center"
+        className="space-y-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-          Mind Development
-        </span>
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-          Strengthen your mental wellbeing
+        <h1 className="text-3xl font-bold tracking-tight flex items-center justify-between">
+          Mind
+          {/* New Save Sessions Button */}
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2 ml-2"
+            onClick={handleSaveSessions}
+            disabled={isUpdating || !user}
+          >
+            <Save className="h-4 w-4" />
+            {isUpdating ? "Saving..." : "Save Sessions"}
+          </Button>
         </h1>
-        <p className="mx-auto max-w-[700px] text-muted-foreground">
-          Develop mindfulness, practice meditation, and journal your thoughts to build mental resilience.
+        <p className="text-muted-foreground">
+          Daily check-ins for mental growth and learning.
         </p>
       </motion.div>
-
-      <div className="grid gap-8">
-        <MeditationSection />
-        <JournalSection />
+      
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3 max-w-4xl mx-auto">
+        {/* Each card uses the persistent (local) count */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleReadClick}>
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto mb-4 w-fit rounded-lg bg-blue-100 p-3 text-blue-600">
+                <BookOpen className="h-8 w-8" />
+              </div>
+              <CardTitle className="text-xl">Read</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="text-4xl font-bold text-blue-600 mb-2">
+                {readCount}
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Reading sessions today
+              </p>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleReadClick();
+                }}
+              >
+                + Add Reading
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
         
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Card className="transition-all duration-300 hover:shadow-md hover:ring-1 hover:ring-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Book className="h-5 w-5 text-primary" />
-                Reading List
-              </CardTitle>
-              <CardDescription>
-                Curated books for mental growth and mindfulness
-              </CardDescription>
+          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleLearnClick}>
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto mb-4 w-fit rounded-lg bg-green-100 p-3 text-green-600">
+                <GraduationCap className="h-8 w-8" />
+              </div>
+              <CardTitle className="text-xl">Learned</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Button asChild className="w-full">
-                <Link to="/wisdom">
-                  Explore Books
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="transition-all duration-300 hover:shadow-md hover:ring-1 hover:ring-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-primary" />
-                Mental Goals
-              </CardTitle>
-              <CardDescription>
-                Set and track your mental development goals
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild className="w-full">
-                <Link to="/goals">
-                  View Goals
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="transition-all duration-300 hover:shadow-md hover:ring-1 hover:ring-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-primary" />
-                AI Wisdom
-              </CardTitle>
-              <CardDescription>
-                Get personalized advice and insights
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild className="w-full">
-                <Link to="/wisdom">
-                  Chat with AI
-                </Link>
+            <CardContent className="text-center">
+              <div className="text-4xl font-bold text-green-600 mb-2">
+                {learnCount}
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Learning sessions today
+              </p>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLearnClick();
+                }}
+              >
+                + Add Learning
               </Button>
             </CardContent>
           </Card>
         </motion.div>
-
-        <motion.div 
-          className="mx-auto max-w-[800px] rounded-xl bg-primary/5 p-8 text-center"
+        
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <Lightbulb className="mx-auto mb-4 h-12 w-12 text-primary" />
-          <h2 className="mb-4 text-2xl font-medium">Daily Mental Practice</h2>
-          <p className="mb-4 text-lg text-muted-foreground">
-            "The mind is everything. What you think you become."
-          </p>
-          <p className="text-sm font-medium">— Buddha</p>
+          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={handleJournalClick}>
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto mb-4 w-fit rounded-lg bg-purple-100 p-3 text-purple-600">
+                <PenTool className="h-8 w-8" />
+              </div>
+              <CardTitle className="text-xl">Journal</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="text-4xl font-bold text-purple-600 mb-2">
+                {journalCount}
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Journal entries today
+              </p>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleJournalClick();
+                }}
+              >
+                + Add Entry
+              </Button>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
+      
+      <motion.div
+        className="max-w-2xl mx-auto text-center mt-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <div className="rounded-lg bg-primary/5 p-6">
+          <h3 className="text-lg font-semibold mb-2">Today's Mind Progress</h3>
+          <p className="text-muted-foreground">
+            Keep nurturing your mental growth through daily reading, learning, and journaling.
+          </p>
+        </div>
+      </motion.div>
+
+      {/* Mood & Energy Section */}
+      <motion.div
+        className="max-w-4xl mx-auto mt-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+      >
+        <div className="space-y-2 mb-6">
+          <h2 className="text-2xl font-bold tracking-tight">Daily Mood & Energy</h2>
+          <p className="text-muted-foreground">
+            Track your mental state and energy levels throughout the day.
+          </p>
+        </div>
+
+        <Tabs defaultValue="mood" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="mood" className="px-2 py-2 text-sm">Mood & Energy</TabsTrigger>
+            <TabsTrigger value="emotions" className="px-2 py-2 text-sm">Emotions</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="mood" className="mt-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }} 
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="grid gap-6 md:grid-cols-2"
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Mood</CardTitle>
+                  <CardDescription>
+                    How are you feeling today overall?
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <Slider
+                      value={mood}
+                      min={1}
+                      max={10}
+                      step={1}
+                      onValueChange={setMood}
+                      className="py-4"
+                    />
+                    <div className="flex justify-between text-sm">
+                      <span>Low</span>
+                      <span className="font-medium">{mood[0]}/10</span>
+                      <span>High</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Energy</CardTitle>
+                  <CardDescription>
+                    What's your energy level right now?
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <Slider
+                      value={energy}
+                      min={1}
+                      max={10}
+                      step={1}
+                      onValueChange={setEnergy}
+                      className="py-4"
+                    />
+                    <div className="flex justify-between text-sm">
+                      <span>Low</span>
+                      <span className="font-medium">{energy[0]}/10</span>
+                      <span>High</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </TabsContent>
+          
+          <TabsContent value="emotions" className="mt-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }} 
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Emotions</CardTitle>
+                  <CardDescription>
+                    Select the emotions you've experienced today.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
+                    {emotions.map((emotion, index) => (
+                      <EmotionButton 
+                        key={index}
+                        icon={emotion.icon} 
+                        label={emotion.label} 
+                        selected={selectedEmotions.includes(emotion.label)} 
+                        onClick={() => toggleEmotion(emotion.label)} 
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </TabsContent>
+        </Tabs>
+
+        <div className="flex justify-end mt-6">
+          <Button 
+            onClick={handleSaveMoodData} 
+            size="lg" 
+            className="gap-2"
+            disabled={isSaving || !user}
+          >
+            {isSaving ? (
+              <span>Saving...</span>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Save Mood Data
+              </>
+            )}
+          </Button>
+        </div>
+      </motion.div>
     </div>
   );
 };

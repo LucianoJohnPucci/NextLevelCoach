@@ -21,7 +21,7 @@ const AuthPage = () => {
         // Check if user has just verified their email
         const verified = searchParams.get("verified") === "true";
         if (verified) {
-          console.log("Email verification success detected");
+          console.log("[Auth] Email verification success detected");
           setEmailVerified(true);
           window.history.replaceState({}, document.title, window.location.pathname);
         }
@@ -30,14 +30,14 @@ const AuthPage = () => {
         const { data } = await supabase.auth.getSession();
         
         if (data.session) {
-          console.log("User is authenticated, redirecting to dashboard");
+          console.log("[Auth] User is authenticated, redirecting to dashboard");
           navigate("/dashboard");
         } else {
-          console.log("No active session, showing login");
+          console.log("[Auth] No active session, showing login");
           setIsProcessing(false);
         }
       } catch (error) {
-        console.error("Initialization error:", error);
+        console.error("[Auth] Initialization error:", error);
         setIsProcessing(false);
       }
     };
@@ -48,10 +48,10 @@ const AuthPage = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth Event:", event, session ? "User session exists" : "No session");
+        console.log("[Auth Event]", event, session ? "User session exists" : "No session");
         
         if (event === "SIGNED_IN" && session) {
-          console.log("User signed in, redirecting to dashboard");
+          console.log("[Auth] User signed in, redirecting to dashboard");
           navigate("/dashboard");
         }
       }

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,7 +7,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Save, Heart, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 
 const ReflectionsSection = () => {
   const { user } = useAuth();

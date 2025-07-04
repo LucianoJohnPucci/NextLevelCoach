@@ -1,9 +1,8 @@
 
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 export interface MeditationSession {
   id: string;
@@ -11,120 +10,145 @@ export interface MeditationSession {
   description: string;
   duration: string;
   benefits: string;
-  is_enabled?: boolean;
+  created_at: Date;
   improves_focus?: boolean;
   reduces_stress?: boolean;
   promotes_calm?: boolean;
   improves_sleep?: boolean;
   enhances_clarity?: boolean;
+  is_enabled?: boolean;
 }
 
+export interface UserMeditationPreference {
+  id: string;
+  user_id: string;
+  session_id: string;
+  is_enabled: boolean;
+}
+
+// Fetch all meditation sessions
+export const fetchMeditationSessions = async () => {
+  const { data, error } = await supabase
+    .from("meditation_sessions")
+    .select("*")
+    .order("title");
+  
+  if (error) throw error;
+  
+  return data.map(session => ({
+    ...session,
+    created_at: new Date(session.created_at)
+  }));
+};
+
+// Fetch user preferences for meditation sessions
+export const fetchUserMeditationPreferences = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("user_meditation_preferences")
+    .select("*")
+    .eq("user_id", userId);
+  
+  if (error) throw error;
+  
+  return data;
+};
+
+// Toggle meditation session enabled/disabled status
+export const toggleMeditationSessionStatus = async (
+  sessionId: string, 
+  userId: string, 
+  isEnabled: boolean
+) => {
+  // Check if preference already exists
+  const { data: existingPref, error: fetchError } = await supabase
+    .from("user_meditation_preferences")
+    .select("*")
+    .eq("session_id", sessionId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  
+  if (fetchError) throw fetchError;
+  
+  if (existingPref) {
+    // Update existing preference
+    const { error } = await supabase
+      .from("user_meditation_preferences")
+      .update({ is_enabled: isEnabled })
+      .eq("id", existingPref.id);
+    
+    if (error) throw error;
+    return { ...existingPref, is_enabled: isEnabled };
+  } else {
+    // Create new preference
+    const { data, error } = await supabase
+      .from("user_meditation_preferences")
+      .insert({
+        user_id: userId,
+        session_id: sessionId,
+        is_enabled: isEnabled
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+};
+
+// React Query hook for meditation sessions with user preferences
 export const useMeditationSessions = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isToggling, setIsToggling] = useState(false);
-
-  // Fetch all meditation sessions with user preferences
-  const { data: sessions = [], isLoading, isError } = useQuery({
-    queryKey: ["meditation-sessions", user?.id],
-    queryFn: async () => {
-      // First get all meditation sessions
-      const { data: allSessions, error: sessionsError } = await supabase
-        .from("meditation_sessions")
-        .select("*")
-        .order("title");
-
-      if (sessionsError) throw sessionsError;
-
-      if (!user) {
-        return allSessions?.map(session => ({
-          ...session,
-          is_enabled: false,
-          improves_focus: session.benefits.includes("focus"),
-          reduces_stress: session.benefits.includes("stress"),
-          promotes_calm: session.benefits.includes("calm"),
-          improves_sleep: session.benefits.includes("sleep"),
-          enhances_clarity: session.benefits.includes("clarity"),
-        })) || [];
-      }
-
-      // Then get user preferences
-      const { data: preferences, error: prefsError } = await supabase
-        .from("user_meditation_preferences")
-        .select("session_id, is_enabled")
-        .eq("user_id", user.id);
-
-      if (prefsError) throw prefsError;
-
-      // Merge sessions with user preferences
-      const prefsMap = new Map(preferences?.map(p => [p.session_id, p.is_enabled]) || []);
-
-      return allSessions?.map(session => ({
-        ...session,
-        is_enabled: prefsMap.get(session.id) || false,
-        improves_focus: session.benefits.includes("focus"),
-        reduces_stress: session.benefits.includes("stress"),
-        promotes_calm: session.benefits.includes("calm"),
-        improves_sleep: session.benefits.includes("sleep"),
-        enhances_clarity: session.benefits.includes("clarity"),
-      })) || [];
-    },
+  
+  // Query for fetching sessions
+  const sessionsQuery = useQuery({
+    queryKey: ["meditation-sessions"],
+    queryFn: fetchMeditationSessions,
+    enabled: true // Always fetch sessions, even for non-authenticated users
   });
-
-  // Toggle session preference
-  const toggleSessionPreference = useMutation({
-    mutationFn: async ({ sessionId, enabled }: { sessionId: string; enabled: boolean }) => {
-      if (!user) throw new Error("User must be authenticated");
-
-      const { error } = await supabase
-        .from("user_meditation_preferences")
-        .upsert({
-          user_id: user.id,
-          session_id: sessionId,
-          is_enabled: enabled,
-        });
-
-      if (error) throw error;
+  
+  // Query for fetching user preferences (only if user is authenticated)
+  const preferencesQuery = useQuery({
+    queryKey: ["meditation-preferences", user?.id],
+    queryFn: () => fetchUserMeditationPreferences(user?.id || ""),
+    enabled: !!user, // Only run if user is authenticated
+  });
+  
+  // Combine sessions with preferences
+  const combinedData = useMemo(() => {
+    if (!sessionsQuery.data) return [];
+    
+    return sessionsQuery.data.map(session => {
+      // Find user preference for this session
+      const preference = preferencesQuery.data?.find(
+        pref => pref.session_id === session.id
+      );
+      
+      return {
+        ...session,
+        is_enabled: preference?.is_enabled ?? true // Default to enabled
+      };
+    });
+  }, [sessionsQuery.data, preferencesQuery.data]);
+  
+  // Mutation for toggling session status
+  const toggleSessionMutation = useMutation({
+    mutationFn: ({sessionId, isEnabled}: {sessionId: string; isEnabled: boolean}) => {
+      if (!user) throw new Error("User must be authenticated to update preferences");
+      return toggleMeditationSessionStatus(sessionId, user.id, isEnabled);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["meditation-sessions"] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update meditation preference",
-        variant: "destructive",
-      });
-    },
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["meditation-preferences", user?.id] });
+    }
   });
-
-  const handleToggleSession = async (session: MeditationSession, enabled: boolean) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to save meditation preferences",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsToggling(true);
-    try {
-      await toggleSessionPreference.mutateAsync({
-        sessionId: session.id,
-        enabled,
-      });
-    } finally {
-      setIsToggling(false);
-    }
-  };
-
+  
   return {
-    sessions,
-    isLoading,
-    isError,
-    isToggling,
-    handleToggleSession,
+    sessions: combinedData,
+    isLoading: sessionsQuery.isLoading || (!!user && preferencesQuery.isLoading),
+    isError: sessionsQuery.isError || (!!user && preferencesQuery.isError),
+    error: sessionsQuery.error || (user ? preferencesQuery.error : null),
+    toggleSession: toggleSessionMutation.mutate,
+    isToggling: toggleSessionMutation.isPending
   };
 };

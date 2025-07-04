@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 import { Habit } from "../types/habitTypes";
 import { UseHabitsReturn } from "./types";
 import { 
