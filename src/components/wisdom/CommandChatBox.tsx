@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Terminal, Send, RefreshCw } from "lucide-react";
+import { Terminal, Send, RefreshCw, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { ChatCommandService } from "@/services/chatCommandService";
@@ -31,6 +31,29 @@ const CommandChatBox = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  const quickActions = [
+    {
+      label: "High Priority Tasks",
+      command: "Show me my high priority tasks",
+      icon: "⚡"
+    },
+    {
+      label: "Due This Week",
+      command: "What tasks are due this week?",
+      icon: "📅"
+    },
+    {
+      label: "Task Analysis",
+      command: "Analyze my task completion patterns",
+      icon: "📊"
+    },
+    {
+      label: "Create High Priority Task",
+      command: "Create a new task with high priority called ",
+      icon: "➕"
+    }
+  ];
   
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -40,6 +63,10 @@ const CommandChatBox = () => {
       }
     }
   }, [messages]);
+
+  const handleQuickAction = (command: string) => {
+    setInput(command);
+  };
   
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -110,6 +137,29 @@ const CommandChatBox = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Quick Action Buttons */}
+        <div className="mb-4 space-y-2">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Zap className="h-4 w-4" />
+            Quick Actions
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {quickActions.map((action, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                onClick={() => handleQuickAction(action.command)}
+                className="justify-start text-left h-auto py-2 px-3"
+                disabled={isLoading}
+              >
+                <span className="mr-2">{action.icon}</span>
+                <span className="text-xs">{action.label}</span>
+              </Button>
+            ))}
+          </div>
+        </div>
+
         <ScrollArea className="h-[400px] pr-4" ref={scrollAreaRef}>
           <div className="space-y-4">
             {messages.map((message) => (
