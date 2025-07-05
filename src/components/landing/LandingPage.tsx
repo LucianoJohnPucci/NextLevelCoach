@@ -1,8 +1,8 @@
 
 import React from "react";
 import Header from "./header/Header";
-import HeroSection from "./hero/HeroSection";
 import FeatureSection from "./features/FeatureSection";
+import DeviceMockups from "./hero/DeviceMockups";
 import MethodologySection from "./methodology/MethodologySection";
 import TestimonialsSection from "./testimonials/TestimonialsSection";
 import CtaSection from "./cta/CtaSection";
@@ -20,9 +20,9 @@ const LandingPage = () => {
       <Header />
 
       {/* Main content sections */}
-      <HeroSection />
       <FeatureSection />
       <MethodologySection />
+      <DeviceMockups />
       <TestimonialsSection />
       <CtaSection />
       <ContactSection />

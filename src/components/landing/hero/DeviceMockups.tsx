@@ -5,36 +5,38 @@ import { motion } from "framer-motion";
 const DeviceMockups = () => {
   return (
     <motion.div 
-      className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12"
+      className="flex flex-col lg:flex-row items-stretch justify-center gap-8 lg:gap-12 w-full max-w-7xl mx-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.3 }}
     >
       {/* Laptop Mockup - Enhanced 3D Effect */}
-      <div className="relative max-w-2xl transform perspective-1000 hover:rotate-y-1 transition-transform duration-300 ease-in-out">
-        <div className="relative mx-auto border-gray-800 dark:border-gray-800 bg-gray-800 border-[8px] rounded-t-xl h-[172px] max-w-[301px] md:h-[294px] md:max-w-[512px] shadow-xl transform rotate-x-2">
-          <div className="h-[156px] md:h-[278px] bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+      <div className="relative w-full max-w-none min-h-[500px] flex-1 flex flex-col">
+        <div className="relative mx-auto border-gray-800 dark:border-gray-800 bg-gray-800 border-[8px] rounded-t-xl w-full h-auto shadow-xl transform rotate-x-2">
+          <p className="text-center text-muted-foreground text-sm mb-2">Leverage AI chat to help you prioritize your goals and tasks, while a second agent offers insights on higher-level stoic philosophies.</p>
+            <div className="w-full h-auto bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
             <img
-              src="/lovable-uploads/d60e726c-3598-45a5-901e-3e2bee673684.png"
-              alt="CoreCultivate dashboard on laptop"
-              className="h-full w-full object-cover"
+              src="/screenshots/Ai chat.png"
+              alt="AI chat helping prioritize goals and stoic philosophy"
+              className="w-full h-auto object-contain"
             />
           </div>
         </div>
-        <div className="relative mx-auto bg-gray-900 dark:bg-gray-700 rounded-b-xl rounded-t-sm h-[17px] max-w-[351px] md:h-[21px] md:max-w-[597px] shadow-lg transform -rotate-x-1">
+        <div className="relative mx-auto bg-gray-900 dark:bg-gray-700 rounded-b-xl rounded-t-sm h-[17px] w-full max-w-4xl shadow-lg transform -rotate-x-1">
           <div className="absolute left-1/2 top-0 -translate-x-1/2 rounded-b-xl w-[56px] h-[5px] md:w-[96px] md:h-[8px] bg-gray-800"></div>
         </div>
       </div>
 
       {/* Landscape Tablet Mockup - Enhanced 3D with Edge-to-Edge Image */}
-      <div className="relative transform perspective-1000 hover:rotate-y-2 transition-transform duration-300 ease-in-out mt-12 lg:mt-0">
-        <div className="relative mx-auto border-gray-900 dark:border-gray-800 bg-gray-900 border-[14px] rounded-[2.5rem] w-[454px] h-[304px] shadow-xl transform rotate-y-3">
-          <div className="w-[426px] h-[276px] bg-white dark:bg-gray-800 rounded-[2rem] overflow-hidden">
-            <div className="h-full w-full relative">
+      <div className="relative w-full max-w-none min-h-[500px] flex-1 flex flex-col">
+        <div className="relative mx-auto border-gray-900 dark:border-gray-800 bg-gray-900 border-[14px] rounded-[2.5rem] w-full h-auto shadow-xl transform rotate-y-3">
+          <p className="text-center text-muted-foreground text-sm mb-2">Tracking your sleep is essential for optimizing your health, focus, and long-term progress.</p>
+            <div className="w-full min-h-[300px] flex items-center justify-center bg-white dark:bg-gray-800 rounded-[2rem] overflow-hidden">
+            <div className="w-full h-auto flex items-center justify-center">
               <img
-                src="/lovable-uploads/d60e726c-3598-45a5-901e-3e2bee673684.png"
-                alt="CoreCultivate features on tablet"
-                className="absolute inset-0 h-full w-full object-cover"
+                src="/screenshots/sleep.png"
+                alt="Sleep tracking screenshot"
+                className="w-full h-auto object-contain"
               />
               {/* Tablet Screen Glare Effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-white/20 pointer-events-none"></div>

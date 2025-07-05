@@ -40,9 +40,6 @@ const HeroSection = () => {
             </Button>
           </motion.div>
         </div>
-
-        {/* Device Mockups with the uploaded app screenshot */}
-        <DeviceMockups />
       </div>
     </section>
   );
