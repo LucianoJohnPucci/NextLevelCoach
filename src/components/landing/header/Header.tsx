@@ -182,7 +182,7 @@ const Header = () => {
             <Link to="/auth">Log In</Link>
           </Button>
           <Button asChild size="sm">
-            <Link to="/auth">Sign Up Free</Link>
+            <Link to="/signup">Sign Up Free</Link>
           </Button>
         </div>
       </div>

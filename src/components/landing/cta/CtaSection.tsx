@@ -18,9 +18,7 @@ const CtaSection = () => {
           </div>
           <div className="flex flex-wrap justify-center gap-4">
             <Button asChild size="lg" className="rounded-full bg-blue-500 hover:bg-blue-600 text-white">
-              <Link to="/auth">
-                Sign Up Free
-              </Link>
+              <Link to="/signup">Sign Up Free</Link>
             </Button>
           </div>
           <p className="text-sm text-muted-foreground">

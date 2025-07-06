@@ -92,7 +92,7 @@ const FeatureSection = () => {
             <span className="font-bold text-primary">The edge you need:</span> Our discipline toolkit provides the structure, accountability and encouragement to help you accomplish what matters most—even when life tries to derail your progress.
           </p>
           <Button size="lg" className="bg-primary hover:bg-primary/90">
-            Start Your Journey Today
+            <a href="/signup">Start Your Journey Today</a>
           </Button>
         </div>
       </div>

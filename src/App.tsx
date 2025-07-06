@@ -18,6 +18,7 @@ import WisdomPage from "@/pages/WisdomPage";
 import NotesPage from "@/pages/NotesPage";
 import AuthPage from "@/pages/AuthPage";
 import ConfirmAccountPage from "@/pages/ConfirmAccountPage";
+import SignUpPage from "@/pages/SignUp";
 import OnboardingPage from "@/pages/OnboardingPage";
 import ProfilePage from "@/pages/ProfilePage";
 import NotFound from "@/pages/NotFound";
@@ -43,6 +44,7 @@ const App = () => {
                     2. Prevent authenticated users from being redirected to home before password reset
                   */}
                   <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/signup" element={<SignUpPage />} />
                   <Route path="/reset-password" element={<PasswordResetPage />} />
                   <Route path="/confirm-account" element={<ConfirmAccountPage />} />
                   <Route path="/onboarding" element={<OnboardingPage />} />

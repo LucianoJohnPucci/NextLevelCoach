@@ -220,9 +220,7 @@ const MethodologySection = () => {
             Take the first step toward becoming the person you want to be five years from now. Our structured approach makes sustainable change possible.
           </p>
           <Button asChild size="lg" className="rounded-full">
-            <Link to="/auth">
-              Begin Your Transformation <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
+            <Link to="/signup">Try our FORGE <ArrowRight className="ml-2 h-4 w-4" /></Link>
           </Button>
         </motion.div>
       </div>
