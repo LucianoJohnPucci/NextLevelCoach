@@ -29,7 +29,16 @@ export default function ResetPasswordPage() {
   }, [searchParams]);
 
   if (status === "loading") return <div>Loading...</div>;
-  if (status === "invalid") return <div>{errorMsg}</div>;
+  if (status === "invalid") {
+    // If the token was already consumed in another tab the user may already
+    // be authenticated. Check for an existing session and redirect them.
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        window.location.replace("/profile"); // or /dashboard if preferred
+      }
+    });
+    return <div>{errorMsg}</div>;
+  }
 
   // Render your password reset form here
   const [password, setPassword] = useState("");
