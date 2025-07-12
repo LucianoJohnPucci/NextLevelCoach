@@ -10,6 +10,7 @@ import {
   Sparkles, 
   BarChart2, 
   Target, 
+  Zap, 
   MessageCircle,
   BookOpen,
   MessageSquare,
@@ -83,8 +84,11 @@ const Sidebar = () => {
           Goals & Tasks
         </NavItem>
         
-        <NavItem to="/notes" icon={BookOpen} onClick={() => close()}>
-          Notes & Sleep Tracker
+        <NavItem to="/habits" icon={Zap} onClick={() => close()}>
+          Habits & Time Blocking
+        </NavItem>
+        <NavItem to="/sleep" icon={BookOpen} onClick={() => close()}>
+          Sleep Tracker <span className="ml-1">🔒</span>
         </NavItem>
         
         <div className="mb-2 mt-6 px-4 text-xs font-semibold uppercase text-muted-foreground">
@@ -108,7 +112,7 @@ const Sidebar = () => {
         </div>
         
         <NavItem to="/wisdom" icon={MessageCircle} onClick={() => close()}>
-          Wisdom
+          Wisdom <span className="ml-1">🔒</span>
         </NavItem>
         
         <DiscordCommunityDialog>

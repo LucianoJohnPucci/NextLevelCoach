@@ -14,8 +14,9 @@ import BodyPage from "@/pages/BodyPage";
 import SoulPage from "@/pages/SoulPage";
 import DashboardPage from "@/pages/DashboardPage";
 import GoalsPage from "@/pages/GoalsPage";
+import HabitsPage from "@/pages/HabitsPage";
 import WisdomPage from "@/pages/WisdomPage";
-import NotesPage from "@/pages/NotesPage";
+import SleepTrackerPage from "@/pages/SleepTrackerPage";
 import AuthPage from "@/pages/AuthPage";
 import ConfirmAccountPage from "@/pages/ConfirmAccountPage";
 import SignUpPage from "@/pages/SignUp";
@@ -57,7 +58,8 @@ const App = () => {
                     <Route path="soul" element={<SoulPage />} />
                     <Route path="dashboard" element={<DashboardPage />} />
                     <Route path="goals" element={<GoalsPage />} />
-                    <Route path="notes" element={<NotesPage />} />
+                    <Route path="habits" element={<HabitsPage />} />
+                    <Route path="sleep" element={<SleepTrackerPage />} />
                     <Route path="wisdom" element={<WisdomPage />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="*" element={<NotFound />} />
