@@ -23,7 +23,7 @@ import SignUpPage from "@/pages/SignUp";
 import OnboardingPage from "@/pages/OnboardingPage";
 import ProfilePage from "@/pages/ProfilePage";
 import NotFound from "@/pages/NotFound";
-import PasswordResetPage from "@/pages/PasswordResetPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 
 const App = () => {
   // Create a new QueryClient instance inside the component
@@ -46,7 +46,7 @@ const App = () => {
                   */}
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/signup" element={<SignUpPage />} />
-                  <Route path="/reset-password" element={<PasswordResetPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/confirm-account" element={<ConfirmAccountPage />} />
                   <Route path="/onboarding" element={<OnboardingPage />} />
                   
