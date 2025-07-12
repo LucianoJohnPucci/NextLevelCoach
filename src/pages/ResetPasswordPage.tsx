@@ -5,21 +5,31 @@ import { supabase } from "../supabaseClient"; // adjust path as needed
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("loading");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
+    // Handle error in URL fragment from Supabase (e.g., expired or already used link)
+    if (typeof window !== "undefined" && window.location.hash) {
+      const hash = window.location.hash;
+      if (hash.includes("error=access_denied") || hash.includes("otp_expired")) {
+        setStatus("invalid");
+        setErrorMsg("Your password reset link is invalid or has expired. Please request a new password reset email.");
+        return;
+      }
+    }
     const accessToken = searchParams.get("access_token");
     const type = searchParams.get("type");
 
     if (type === "recovery" && accessToken) {
-      // Optionally, you can show a password reset form here
       setStatus("show-form");
     } else {
       setStatus("invalid");
+      setErrorMsg("Invalid or expired link.");
     }
   }, [searchParams]);
 
   if (status === "loading") return <div>Loading...</div>;
-  if (status === "invalid") return <div>Invalid or expired link.</div>;
+  if (status === "invalid") return <div>{errorMsg}</div>;
 
   // Render your password reset form here
   const [password, setPassword] = useState("");
