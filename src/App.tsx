@@ -10,11 +10,12 @@ import { AuthProvider } from "@/components/AuthProvider";
 import Layout from "@/components/layout/Layout";
 import Index from "@/pages/Index";
 import MindPage from "@/pages/MindPage";
+import HabitsPage from "@/pages/HabitsPage";
 import BodyPage from "@/pages/BodyPage";
 import SoulPage from "@/pages/SoulPage";
 import DashboardPage from "@/pages/DashboardPage";
 import GoalsPage from "@/pages/GoalsPage";
-import HabitsPage from "@/pages/HabitsPage";
+// HabitsPage removed
 import WisdomPage from "@/pages/WisdomPage";
 import SleepTrackerPage from "@/pages/SleepTrackerPage";
 import AuthPage from "@/pages/AuthPage";
@@ -54,11 +55,12 @@ const App = () => {
                   <Route path="/" element={<Layout />}>
                     <Route index element={<Index />} />
                     <Route path="mind" element={<MindPage />} />
+                    <Route path="habits" element={<HabitsPage />} />
                     <Route path="body" element={<BodyPage />} />
                     <Route path="soul" element={<SoulPage />} />
                     <Route path="dashboard" element={<DashboardPage />} />
                     <Route path="goals" element={<GoalsPage />} />
-                    <Route path="habits" element={<HabitsPage />} />
+
                     <Route path="sleep" element={<SleepTrackerPage />} />
                     <Route path="wisdom" element={<WisdomPage />} />
                     <Route path="profile" element={<ProfilePage />} />

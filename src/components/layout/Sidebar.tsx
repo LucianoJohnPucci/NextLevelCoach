@@ -54,7 +54,8 @@ const Sidebar = () => {
 
   return (
     <div className="relative flex h-full flex-col overflow-y-auto border-r bg-card px-3 py-4">
-      <div className="flex items-center justify-between px-2">
+
+<div className="flex items-center justify-between px-2">
         <Link to="/" className="flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-primary" />
           <span className="text-xl font-medium">Next Level Coach</span>
@@ -65,7 +66,8 @@ const Sidebar = () => {
           variant="ghost" 
           size="icon" 
           onClick={toggle} 
-          className="md:hidden"
+          className="md:hidden" 
+
         >
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
@@ -76,18 +78,19 @@ const Sidebar = () => {
           Navigation
         </div>
         
-        <NavItem to="/dashboard" icon={BarChart2} onClick={() => close()}>
+        <NavItem to="/dashboard" icon={BarChart2}>
           Dashboard
         </NavItem>
         
-        <NavItem to="/goals" icon={Target} onClick={() => close()}>
+        <NavItem to="/goals" icon={Target}>
           Goals & Tasks
         </NavItem>
         
-        <NavItem to="/habits" icon={Zap} onClick={() => close()}>
-          Habits & Time Blocking
+        <NavItem to="/habits" icon={Zap}>
+          Habits
         </NavItem>
-        <NavItem to="/sleep" icon={BookOpen} onClick={() => close()}>
+
+        <NavItem to="/sleep" icon={BookOpen}>
           Sleep Tracker <span className="ml-1">🔒</span>
         </NavItem>
         
@@ -95,15 +98,15 @@ const Sidebar = () => {
           Daily Vitals
         </div>
         
-        <NavItem to="/mind" icon={Brain} onClick={() => close()}>
+        <NavItem to="/mind" icon={Brain}>
           Mind Vitals
         </NavItem>
         
-        <NavItem to="/body" icon={Heart} onClick={() => close()}>
+        <NavItem to="/body" icon={Heart}>
           Body Vitals
         </NavItem>
         
-        <NavItem to="/soul" icon={Sparkles} onClick={() => close()}>
+        <NavItem to="/soul" icon={Sparkles}>
           Soul Vitals
         </NavItem>
         
@@ -111,13 +114,13 @@ const Sidebar = () => {
           Chat & Community
         </div>
         
-        <NavItem to="/wisdom" icon={MessageCircle} onClick={() => close()}>
+        <NavItem to="/wisdom" icon={MessageCircle}>
           Wisdom <span className="ml-1">🔒</span>
         </NavItem>
         
         <DiscordCommunityDialog>
           <button
-            onClick={() => close()}
+           
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200 hover:bg-accent text-foreground w-full text-left"
             )}

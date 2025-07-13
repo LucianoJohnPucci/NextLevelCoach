@@ -19,11 +19,12 @@ const Header = () => {
     <header className="flex h-14 items-center justify-between border-b bg-background px-4 lg:px-6">
       <div className="flex items-center gap-2">
         {/* Sidebar toggle button - always visible */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="outline"
+          size="icon"
+          style={{ borderColor: '#c084fc', backgroundColor: '#c084fc22', color: '#c084fc' }}
           onClick={toggle}
-          title={isOpen ? "Collapse sidebar" : "Expand sidebar"}
+          title={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
         >
           {isOpen ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeftOpen className="h-5 w-5" />}
         </Button>

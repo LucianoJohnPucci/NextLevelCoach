@@ -3,11 +3,13 @@ import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { useSidebar } from "./SidebarProvider";
 import Header from "./Header";
+import { Button } from "@/components/ui/button";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 
 const Layout = () => {
-  const { isOpen } = useSidebar();
+  const { isOpen, toggle } = useSidebar();
   const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
   const location = useLocation();
@@ -23,6 +25,8 @@ const Layout = () => {
     return <Outlet />;
   }
 
+  const buttonLeft = isOpen ? 304 : 24; // sidebar 280px + 16 margin when open
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       {/* Sidebar */}
@@ -34,6 +38,18 @@ const Layout = () => {
       >
         <Sidebar />
       </div>
+
+      {/* Floating toggle button */}
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={toggle}
+        className="fixed z-30 top-4 h-3 w-3 p-0 flex items-center justify-center border-2 rounded-md"
+        style={{ borderColor: '#3b82f6', backgroundColor: '#3b82f622', color: '#3b82f6', left: buttonLeft }}
+        title={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+      >
+        {isOpen ? <PanelLeftClose className="h-3 w-3" /> : <PanelLeftOpen className="h-3 w-3" />}
+      </Button>
 
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
